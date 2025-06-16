@@ -1,0 +1,163 @@
+
+<!-- templates/predictions/breast_cancer_form.html -->
+{% extends 'base.html' %}
+{% block title %}Breast Cancer Prediction - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card glass-card">
+                <div class="card-body">
+                    <h3 class="text-center text-gradient mb-4">
+                        Breast Cancer Prediction for {{ patient.first_name }} {{ patient.last_name }}
+                    </h3>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <!-- Mean Features -->
+                        <h5 class="text-white mb-3">Mean Features</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Radius</label>
+                                {{ form.mean_radius }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Texture</label>
+                                {{ form.mean_texture }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Perimeter</label>
+                                {{ form.mean_perimeter }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Area</label>
+                                {{ form.mean_area }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Smoothness</label>
+                                {{ form.mean_smoothness }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Compactness</label>
+                                {{ form.mean_compactness }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Concavity</label>
+                                {{ form.mean_concavity }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Concave Points</label>
+                                {{ form.mean_concave_points }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Symmetry</label>
+                                {{ form.mean_symmetry }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Mean Fractal Dimension</label>
+                                {{ form.mean_fractal_dimension }}
+                            </div>
+                        </div>
+                        
+                        <!-- Error Features -->
+                        <h5 class="text-white mb-3 mt-4">Error Features</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Radius Error</label>
+                                {{ form.radius_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Texture Error</label>
+                                {{ form.texture_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Perimeter Error</label>
+                                {{ form.perimeter_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Area Error</label>
+                                {{ form.area_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Smoothness Error</label>
+                                {{ form.smoothness_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Compactness Error</label>
+                                {{ form.compactness_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Concavity Error</label>
+                                {{ form.concavity_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Concave Points Error</label>
+                                {{ form.concave_points_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Symmetry Error</label>
+                                {{ form.symmetry_error }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fractal Dimension Error</label>
+                                {{ form.fractal_dimension_error }}
+                            </div>
+                        </div>
+                        
+                        <!-- Worst Features -->
+                        <h5 class="text-white mb-3 mt-4">Worst Features</h5>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Radius</label>
+                                {{ form.worst_radius }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Texture</label>
+                                {{ form.worst_texture }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Perimeter</label>
+                                {{ form.worst_perimeter }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Area</label>
+                                {{ form.worst_area }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Smoothness</label>
+                                {{ form.worst_smoothness }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Compactness</label>
+                                {{ form.worst_compactness }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Concavity</label>
+                                {{ form.worst_concavity }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Concave Points</label>
+                                {{ form.worst_concave_points }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Symmetry</label>
+                                {{ form.worst_symmetry }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Worst Fractal Dimension</label>
+                                {{ form.worst_fractal_dimension }}
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Make Prediction</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

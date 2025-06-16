@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Email - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Email Verification</h4>
+                </div>
+                <div class="card-body text-center">
+                    <i class="fas fa-envelope-open-text fa-4x text-primary mb-4"></i>
+                    <h5 class="card-title">Check Your Email</h5>
+                    <p class="card-text">
+                        We've sent a verification email to <strong>{{ user.email }}</strong>.<br>
+                        Please check your inbox and click the verification link to activate your account.
+                    </p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        If you don't see the email, please check your spam folder.
+                    </div>
+                    <p class="text-muted">
+                        Didn't receive the email? 
+                        <a href="{% url 'accounts:resend_verification' %}" class="text-primary">Click here to resend</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

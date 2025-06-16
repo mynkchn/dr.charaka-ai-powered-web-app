@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-lg border-0 rounded-lg fade-in">
+                <div class="card-header bg-gradient text-white text-center py-4">
+                    <h2 class="mb-0">Contact Us</h2>
+                </div>
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
+                        <h3>Get in Touch</h3>
+                        <p class="text-muted">We're here to help and answer any questions you might have.</p>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="contact-info">
+                                <i class="fas fa-phone-alt feature-icon"></i>
+                                <h5>Phone</h5>
+                                <p>+1 (555) 123-4567</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="contact-info">
+                                <i class="fas fa-envelope feature-icon"></i>
+                                <h5>Email</h5>
+                                <p>support@drcharaka.com</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <div class="contact-info">
+                                <i class="fas fa-map-marker-alt feature-icon"></i>
+                                <h5>Location</h5>
+                                <p>123 Medical Center Dr.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form class="contact-form" method="post" action="{% url 'core:contact' %}">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="name" placeholder="Your Name" name="name">
+                                    <label for="name">Your Name</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="form-floating">
+                                    <input type="email" class="form-control" id="email" placeholder="Your Email" name="email">
+                                    <label for="email">Your Email</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="form-control" id="subject" placeholder="Subject" name="subject">
+                                <label for="subject">Subject</label>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                <textarea class="form-control" id="message" style="height: 150px" placeholder="Your Message" name="message"></textarea>
+                                <label for="message">Your Message</label>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Send Message
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .contact-info {
+        padding: 1.5rem;
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .contact-info:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: var(--secondary-color);
+    }
+
+    .contact-form .form-control {
+        border: 2px solid #e9ecef;
+        padding: 1rem;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: var(--secondary-color);
+        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    }
+</style>
+{% endblock %} 

@@ -1,0 +1,11 @@
+from django.urls import path, include
+from . import views
+
+app_name = 'core'
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('home/', views.home_after_login, name='home_after_login'),
+    path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
+] 

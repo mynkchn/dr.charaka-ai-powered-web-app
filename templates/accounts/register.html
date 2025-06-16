@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+
+{% block title %}Sign Up - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4 fade-in">
+                <div class="text-center mb-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-plus fa-3x text-gradient"></i>
+                    </div>
+                    <h2 class="text-white mb-2">Create Your Account</h2>
+                    <p class="text-white-50">Join Dr. Charaka's AI-powered healthcare platform</p>
+                </div>
+                <form method="post" novalidate class="signup-form">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="row">
+                        <div class="col-md-6">
+                             <div class="mb-3">
+                                <label class="form-label text-white">{{ form.first_name.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {{ form.first_name }}
+                                </div>
+                                {{ form.first_name.errors }}
+                            </div>
+                             <div class="mb-3">
+                                <label class="form-label text-white">{{ form.last_name.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {{ form.last_name }}
+                                </div>
+                                {{ form.last_name.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.username.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-user"></i>
+                                    </span>
+                                    {{ form.username }}
+                                </div>
+                                {{ form.username.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.email.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-envelope"></i>
+                                    </span>
+                                    {{ form.email }}
+                                </div>
+                                {{ form.email.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.password1.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    {{ form.password1 }}
+                                </div>
+                                {{ form.password1.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.password2.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-lock"></i>
+                                    </span>
+                                    {{ form.password2 }}
+                                </div>
+                                {{ form.password2.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    {{ form.is_doctor }}
+                                    <label class="form-check-label text-white" for="{{ form.is_doctor.id_for_label }}">
+                                        I am a healthcare professional
+                                    </label>
+                                </div>
+                                {{ form.is_doctor.errors }}
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="doctor-fields" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.specialization.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-stethoscope"></i>
+                                    </span>
+                                    {{ form.specialization }}
+                                </div>
+                                {{ form.specialization.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.license_number.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-id-card"></i>
+                                    </span>
+                                    {{ form.license_number }}
+                                </div>
+                                {{ form.license_number.errors }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white">{{ form.years_of_experience.label }}</label>
+                                <div class="input-group">
+                                    <span class="input-group-text glass-input">
+                                        <i class="fas fa-clock"></i>
+                                    </span>
+                                    {{ form.years_of_experience }}
+                                </div>
+                                {{ form.years_of_experience.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn-gradient btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Create Account
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="text-white-50 mb-0">
+                        Already have an account? 
+                        <a href="{% url 'accounts:login' %}" class="text-white text-decoration-none fw-bold">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.glass-card {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.feature-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.text-gradient {
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.glass-input {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+}
+
+.glass-input:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
+    color: white;
+}
+
+.btn-gradient {
+    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+    border: none;
+    color: white;
+    padding: 12px 24px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+    color: white;
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+}
+
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: #8b5cf6;
+    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
+    color: white;
+}
+
+.form-control::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.input-group-text {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.form-check-input {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.form-check-input:checked {
+    background-color: #8b5cf6;
+    border-color: #8b5cf6;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var isDoctor = document.getElementById('id_is_doctor');
+    var doctorFields = document.getElementById('doctor-fields');
+    
+    function toggleDoctorFields() {
+        if (isDoctor && isDoctor.checked) {
+            doctorFields.style.display = 'block';
+            doctorFields.classList.add('fade-in');
+        } else {
+            doctorFields.style.display = 'none';
+        }
+    }
+    
+    if (isDoctor) {
+        isDoctor.addEventListener('change', toggleDoctorFields);
+        toggleDoctorFields();
+    }
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,40 @@
+<!-- SIGNUP TEMPLATE -->
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4 fade-in">
+                <div class="text-center mb-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h2 class="text-white mb-2">Create Your Account</h2>
+                    <p class="text-white-50">Join Dr. Charaka's AI-powered healthcare platform</p>
+                </div>
+                <form method="post" class="signup-form">
+                    {% csrf_token %}
+                    {{ form|crispy }}
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn-gradient btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>Register
+                        </button>
+                    </div>
+                </form>
+                <div class="text-center mt-4">
+                    <p class="text-white-50 mb-0">
+                        Already have an account? 
+                        <a href="{% url 'accounts:login' %}" class="text-white text-decoration-none fw-bold">
+                            <i class="fas fa-sign-in-alt me-1"></i>Login
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

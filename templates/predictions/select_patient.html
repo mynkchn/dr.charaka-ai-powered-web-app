@@ -1,0 +1,25 @@
+<!-- templates/predictions/select_patient.html -->
+{% extends 'base.html' %}
+{% block title %}Select Patient - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card glass-card">
+                <div class="card-body">
+                    <h3 class="text-center text-gradient mb-4">Select Patient</h3>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label">Patient</label>
+                            {{ form.patient }}
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Continue</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

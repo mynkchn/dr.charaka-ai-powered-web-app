@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+{% block title %}Home - Dr. Charaka{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <div class="text-center mb-5 fade-in">
+        <h1 class="display-4 fw-bold text-white mb-3">
+            Welcome, <span class="text-gradient">{{ user.get_full_name }}!</span>
+        </h1>
+        <p class="lead text-white-50">Your AI-powered healthcare dashboard</p>
+    </div>
+    
+    <div class="row g-4">
+        <div class="col-md-4 mb-4">
+            <div class="glass-card p-4 h-100 text-center fade-in">
+                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #06b6d4, #10b981);">
+                    <i class="fas fa-search-plus"></i>
+                </div>
+                <h5 class="text-white mb-3">Disease Predictor</h5>
+                <p class="text-white-50 mb-4">Use our AI-powered disease predictor to get instant insights about your symptoms.</p>
+                <a href="{% url "predictor:prediction" %}" class="btn-gradient">
+                    <i class="fas fa-play"></i>
+                    Let's Predict
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.2s;">
+                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h5 class="text-white mb-3">Patient Data</h5>
+                <p class="text-white-50 mb-4">View and manage your patient data and medical history.</p>
+                <a href="{% url 'accounts:dashboard' %}" class="btn-gradient">
+                    <i class="fas fa-eye"></i>
+                    View Patients
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.4s;">
+                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                    <i class="fas fa-file-medical-alt"></i>
+                </div>
+                <h5 class="text-white mb-3">Dr. Charaka AI Reports</h5>
+                <p class="text-white-50 mb-4">View your personalized health reports and recommendations.</p>
+                <a href="#" class="btn-gradient">
+                    <i class="fas fa-chart-line"></i>
+                    View Reports
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-4">
+            <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.6s;">
+                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h5 class="text-white mb-3">AI Health Assistant</h5>
+                <p class="text-white-50 mb-4">Chat with Dr. Charaka AI for instant health advice and information.</p>
+                <a href="{% url 'chatbot:chatbot_page' %}" class="btn-gradient">
+                    <i class="fas fa-comments"></i>
+                    Start Chat
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-input {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .glass-input:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        color: white;
+    }
+
+    .glass-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        padding: 8px 0;
+        transition: all 0.3s ease;
+    }
+
+    .feature-item:hover {
+        transform: translateX(5px);
+    }
+
+    .text-gradient {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Crispy forms styling */
+    .crispy-form .form-control,
+    .signup-form .form-control {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .crispy-form .form-control:focus,
+    .signup-form .form-control:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        color: white;
+    }
+
+    .crispy-form .form-control::placeholder,
+    .signup-form .form-control::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .crispy-form label,
+    .signup-form label {
+        color: white !important;
+        font-weight: 500;
+    }
+
+    .crispy-form .form-text,
+    .signup-form .form-text {
+        color: rgba(255, 255, 255, 0.7) !important;
+    }
+
+    .crispy-form select,
+    .signup-form select {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        color: white;
+        backdrop-filter: blur(10px);
+    }
+
+    .crispy-form select option,
+    .signup-form select option {
+        background: var(--dark-bg);
+        color: white;
+    }
+</style>
+{% endblock %}

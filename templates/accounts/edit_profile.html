@@ -1,0 +1,62 @@
+!-- EDIT PROFILE TEMPLATE -->
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="glass-card p-4 fade-in">
+                <div class="text-center mb-4">
+                    <div class="feature-icon mb-3">
+                        <i class="fas fa-user-edit"></i>
+                    </div>
+                    <h3 class="text-white mb-2">Edit Profile</h3>
+                    <p class="text-white-50">Update your account information</p>
+                </div>
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+                    <div class="mb-3">
+                        <label class="form-label text-white">{{ form.username.label }}</label>
+                        <input type="text" name="username" class="form-control glass-input" 
+                               value="{{ form.username.value|default:'' }}">
+                        {{ form.username.errors }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white">{{ form.email.label }}</label>
+                        <input type="email" name="email" class="form-control glass-input" 
+                               value="{{ form.email.value|default:'' }}">
+                        {{ form.email.errors }}
+                    </div>
+                    {% if user.is_doctor %}
+                        <div class="mb-3">
+                            <label class="form-label text-white">{{ form.specialization.label }}</label>
+                            <input type="text" name="specialization" class="form-control glass-input" 
+                                   value="{{ form.specialization.value|default:'' }}">
+                            {{ form.specialization.errors }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">{{ form.license_number.label }}</label>
+                            <input type="text" name="license_number" class="form-control glass-input" 
+                                   value="{{ form.license_number.value|default:'' }}">
+                            {{ form.license_number.errors }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-white">{{ form.years_of_experience.label }}</label>
+                            <input type="number" name="years_of_experience" class="form-control glass-input" 
+                                   value="{{ form.years_of_experience.value|default:'' }}">
+                            {{ form.years_of_experience.errors }}
+                        </div>
+                    {% endif %}
+                    <button type="submit" class="btn-gradient w-100 mt-3">
+                        <i class="fas fa-save me-2"></i>
+                        Update Profile
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,843 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Dr. Charaka{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --info-gradient: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --card-hover-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        --border-radius: 16px;
+        --sidebar-bg: #f8fafc;
+    }
+
+    body {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+    }
+
+    /* Sidebar Styles */
+    .sidebar-card {
+        {% comment %} background: var(--sidebar-bg); {% endcomment %}
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: sticky;
+        top: 20px;
+    }
+
+    .sidebar-header {
+        background: var(--primary-gradient);
+        border-radius: var(--border-radius) var(--border-radius) 0 0;
+        padding: 2rem 1.5rem;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .sidebar-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="10" cy="10" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23dots)"/></svg>');
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        backdrop-filter: blur(10px);
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        position: relative;
+        z-index: 1;
+    }
+
+    .sidebar-nav {
+        padding: 0;
+        margin: 0;
+    }
+
+    .nav-item {
+        border: none;
+        background: transparent;
+        margin: 0.5rem 1.5rem;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .nav-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        transform: translateX(5px);
+    } 
+
+    .nav-link {
+        color: #64748b;
+        padding: 1rem 1.5rem;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        font-weight: 500;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+
+    .nav-link:hover {
+        color: #667eea;
+    }
+
+    .nav-link.logout-link {
+        color: #ef4444;
+    }
+
+    .nav-link.logout-link:hover {
+        color: #dc2626;
+        background: rgba(239, 68, 68, 0.1);
+    }
+
+    .nav-link i {
+        width: 20px;
+        margin-right: 12px;
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .stats-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--card-hover-shadow);
+    }
+
+    .stats-card .card-body {
+        padding: 2rem;
+        position: relative;
+        z-index: 2;
+    }
+
+    .stats-card.primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+    }
+
+    .stats-card.success::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--success-gradient);
+    }
+
+    .stats-card.info::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--info-gradient);
+    }
+
+    .stats-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .stats-icon.primary {
+        background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+        color: #667eea;
+    }
+
+    .stats-icon.success {
+        background: linear-gradient(135deg, rgba(17, 153, 142, 0.2) 0%, rgba(56, 239, 125, 0.2) 100%);
+        color: #11998e;
+    }
+
+    .stats-icon.info {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(29, 78, 216, 0.2) 100%);
+        color: #3b82f6;
+    }
+
+    .stats-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0;
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .stats-title {
+        color: #64748b;
+        font-size: 0.9rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin: 0;
+    }
+
+    /* Main Content Cards */
+    .content-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .content-card:hover {
+        box-shadow: var(--card-hover-shadow);
+    }
+
+    .card-header-custom {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 1.5rem 2rem;
+        border: none;
+        position: relative;
+    }
+
+    .card-header-custom::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .card-header-custom h5 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Form Styles */
+    .form-label {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .form-control, .form-select {
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        padding: 12px 16px;
+        transition: all 0.3s ease;
+        background: #f9fafb;
+        font-size: 0.95rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        background: white;
+    }
+
+    .form-control::placeholder {
+        color: #9ca3af;
+    }
+
+    textarea.form-control {
+        resize: vertical;
+        min-height: 100px;
+    }
+
+    /* Button Styles */
+    .btn-primary {
+        background: var(--primary-gradient);
+        border: none;
+        border-radius: 12px;
+        padding: 12px 24px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        text-transform: none;
+        letter-spacing: 0.3px;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-sm {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+        border-radius: 8px;
+    }
+
+    .btn-info {
+        background: var(--info-gradient);
+        border: none;
+    }
+
+    .btn-warning {
+        background: var(--warning-gradient);
+        border: none;
+    }
+
+    /* Table Styles */
+    .table-modern {
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .table-modern thead th {
+        background: #f8fafc;
+        border: none;
+        font-weight: 600;
+        color: #374151;
+        padding: 1rem 1.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .table-modern thead th:first-child {
+        border-radius: 12px 0 0 0;
+    }
+
+    .table-modern thead th:last-child {
+        border-radius: 0 12px 0 0;
+    }
+
+    .table-modern tbody td {
+        padding: 1rem 1.5rem;
+        border: none;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+    }
+
+    .table-modern tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .table-modern tbody tr:last-child td {
+        border-bottom: none;
+    }
+
+    .table-modern tbody tr:last-child td:first-child {
+        border-radius: 0 0 0 12px;
+    }
+
+    .table-modern tbody tr:last-child td:last-child {
+        border-radius: 0 0 12px 0;
+    }
+
+    /* Patient Dashboard Cards */
+    .feature-card {
+        background: white;
+        border-radius: var(--border-radius);
+        box-shadow: var(--card-shadow);
+        border: none;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        position: relative;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--card-hover-shadow);
+    }
+
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--primary-gradient);
+    }
+    
+    li.no-marker {
+     list-style: none;     /* Remove bullet or number */
+     padding-left: 0;      /* Remove default left padding */
+     margin-left: 0;       /* Optional: remove margin */
+   }
+ 
+    .feature-icon {
+        width: 70px;
+        height: 70px;
+        background: var(--primary-gradient);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        color: white;
+        font-size: 1.8rem;
+    }
+
+    /* Error States */
+    .form-control.is-invalid {
+        border-color: #ef4444;
+        animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+
+    .invalid-feedback {
+        color: #ef4444;
+        font-size: 0.85rem;
+        margin-top: 0.5rem;
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 3rem 2rem;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        color: #d1d5db;
+        margin-bottom: 1rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .sidebar-card {
+            position: relative;
+            top: 0;
+            margin-bottom: 2rem;
+        }
+
+        .stats-card {
+            margin-bottom: 1rem;
+        }
+
+        .content-card {
+            margin-bottom: 2rem;
+        }
+
+        .card-header-custom {
+            padding: 1rem 1.5rem;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+        }
+
+        .table-responsive {
+            border-radius: 12px;
+        }
+    }
+
+    /* Loading Animation */
+    .loading-shimmer {
+        background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+    }
+
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 py-4">
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            <div class="sidebar-card">
+                <div class="sidebar-header">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-md fa-2x text-white"></i>
+                    </div>
+                    <h4 class="mb-1 text-white">Welcome Back</h4>
+                    <p class="mb-0 text-white-50">{{ user.get_full_name }}</p>
+                </div>
+                <div class="card-body p-0">
+                    <nav class="sidebar-nav py-3">
+                        <li class="nav-item no-marker">
+                            <a href="{% url 'accounts:change_password' %}" class="nav-link">
+                                <i class="fas fa-key"></i>Change Password
+                            </a>
+                        </li>
+                        <li class="nav-item no-marker">
+                            <a href="{% url 'accounts:edit_profile' %}" class="nav-link">
+                                <i class="fas fa-user-edit"></i>Edit Profile
+                            </a>
+                        </li>
+                        <li class="nav-item no-marker">
+                            <a href="{% url 'accounts:logout' %}" class="nav-link logout-link">
+                                <i class="fas fa-sign-out-alt"></i>Logout
+                            </a>
+                        </li>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            {% if user.is_doctor %}
+                <!-- Quick Stats -->
+                <div class="row g-4 mb-4">
+                    <div class="col-md-4">
+                        <div class="stats-card primary">
+                            <div class="card-body text-center">
+                                <div class="stats-icon primary">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <h3 class="stats-number">{{ patients.count }}</h3>
+                                <p class="stats-title">Total Patients</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card success">
+                            <div class="card-body text-center">
+                                <div class="stats-icon success">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <h3 class="stats-number">0</h3>
+                                <p class="stats-title">Today's Appointments</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-card info">
+                            <div class="card-body text-center">
+                                <div class="stats-icon info">
+                                    <i class="fas fa-file-medical"></i>
+                                </div>
+                                <h3 class="stats-number">0</h3>
+                                <p class="stats-title">Pending Reports</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Patient Form -->
+                <div class="content-card mb-4">
+                    <div class="card-header-custom">
+                        <h5><i class="fas fa-user-plus me-2"></i>Add New Patient</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    {{ form.first_name.label_tag }}
+                                    {{ form.first_name }}
+                                    {% if form.first_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.last_name.label_tag }}
+                                    {{ form.last_name }}
+                                    {% if form.last_name.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.date_of_birth.label_tag }}
+                                    {{ form.date_of_birth }}
+                                    {% if form.date_of_birth.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.date_of_birth.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.gender.label_tag }}
+                                    {{ form.gender }}
+                                    {% if form.gender.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.gender.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.contact_number.label_tag }}
+                                    {{ form.contact_number }}
+                                    {% if form.contact_number.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.contact_number.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-md-6">
+                                    {{ form.email.label_tag }}
+                                    {{ form.email }}
+                                    {% if form.email.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12">
+                                    {{ form.address.label_tag }}
+                                    {{ form.address }}
+                                    {% if form.address.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.address.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12">
+                                    {{ form.medical_history.label_tag }}
+                                    {{ form.medical_history }}
+                                    {% if form.medical_history.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.medical_history.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12">
+                                    {{ form.allergies.label_tag }}
+                                    {{ form.allergies }}
+                                    {% if form.allergies.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {% for error in form.allergies.errors %}{{ error }}{% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <div class="col-12">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-plus me-2"></i>Add Patient
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Patient List -->
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h5><i class="fas fa-list me-2"></i>Patient List</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-modern mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Patient Name</th>
+                                        <th>Age</th>
+                                        <th>Contact</th>
+                                        <th>Last Visit</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for patient in patients %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <div class="avatar-sm bg-light rounded-circle me-3 d-flex align-items-center justify-content-center">
+                                                    <i class="fas fa-user text-muted"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-semibold">{{ patient.first_name }} {{ patient.last_name }}</div>
+                                                    <small class="text-muted">{{ patient.gender }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ patient.date_of_birth|timesince }}</td>
+                                        <td>{{ patient.contact_number }}</td>
+                                        <td>{{ patient.updated_at|date:"M d, Y" }}</td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                <a href="#" class="btn btn-info">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                                <a href="#" class="btn btn-warning">
+                                                    <i class="fas fa-edit me-1"></i>Edit
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5">
+                                            <div class="empty-state">
+                                                <i class="fas fa-users"></i>
+                                                <h5 class="mt-3">No Patients Found</h5>
+                                                <p class="text-muted">Start by adding your first patient using the form above.</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Patient Dashboard -->
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon">
+                                    <i class="fas fa-brain"></i>
+                                </div>
+                                <h5 class="card-title fw-semibold mb-3">Disease Predictor</h5>
+                                <p class="card-text text-muted mb-4">Use our AI-powered disease predictor to get instant insights about your symptoms and receive personalized health recommendations.</p>
+                                <a href="#" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Start Prediction
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon">
+                                    <i class="fas fa-file-medical-alt"></i>
+                                </div>
+                                <h5 class="card-title fw-semibold mb-3">Dr. Charaka AI Reports</h5>
+                                <p class="card-text text-muted mb-4">View your personalized health reports, track your progress, and get AI-powered health insights tailored just for you.</p>
+                                <a href="#" class="btn btn-primary">
+                                    <i class="fas fa-chart-line me-2"></i>View Reports
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add form validation classes
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        const inputs = form.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('invalid', function() {
+                this.classList.add('is-invalid');
+            });
+            
+            input.addEventListener('input', function() {
+                if (this.validity.valid) {
+                    this.classList.remove('is-invalid');
+                }
+            });
+        });
+    });
+
+    // FIXED: Better loading state for buttons - only change if form is actually valid
+    const submitButtons = document.querySelectorAll('button[type="submit"]');
+    submitButtons.forEach(button => {
+        const form = button.closest('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Only show loading if form validation passes
+                let isValid = true;
+                const requiredFields = form.querySelectorAll('[required]');
+                
+                requiredFields.forEach(field => {
+                    if (!field.value.trim()) {
+                        isValid = false;
+                    }
+                });
+                
+                if (isValid) {
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Processing...';
+                    button.disabled = true;
+                    
+                    // Re-enable button after 10 seconds as failsafe
+                    setTimeout(() => {
+                        button.innerHTML = '<i class="fas fa-plus me-2"></i>Add Patient';
+                        button.disabled = false;
+                    }, 10000);
+                }
+            });
+        }
+    });
+
+    // Smooth scroll for navigation
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const href = this.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            }
+        });
+    });
+    
+    // Auto-hide success messages after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.opacity = '0';
+            setTimeout(() => {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}

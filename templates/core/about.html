@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}About - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+                <div class="card-body p-4">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-heartbeat fa-3x text-primary mb-3"></i>
+                        <h3>Revolutionizing Healthcare with AI</h3>
+                    </div>
+                    
+                    <div class="about-content">
+                        <p class="lead">Dr. Charaka is an innovative AI-powered healthcare platform designed to assist medical professionals in providing better patient care.</p>
+                        
+                        <div class="row mt-5">
+                            <div class="col-md-6 mb-4">
+                                <div class="feature-card h-100">
+                                    <i class="fas fa-brain feature-icon"></i>
+                                    <h4>AI-Powered Diagnosis</h4>
+                                    <p>Advanced machine learning algorithms to assist in accurate diagnosis and treatment planning.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="feature-card h-100">
+                                    <i class="fas fa-user-md feature-icon"></i>
+                                    <h4>Doctor-Focused</h4>
+                                    <p>Built by doctors, for doctors. Streamline your workflow and enhance patient care.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="feature-card h-100">
+                                    <i class="fas fa-shield-alt feature-icon"></i>
+                                    <h4>Secure & Private</h4>
+                                    <p>Enterprise-grade security to protect patient data and maintain confidentiality.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="feature-card h-100">
+                                    <i class="fas fa-chart-line feature-icon"></i>
+                                    <h4>Data Analytics</h4>
+                                    <p>Comprehensive analytics to track patient outcomes and improve care quality.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </>
+        </div>
+    </div>
+</div>
+
+<style>
+    .feature-card {
+        padding: 2rem;
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--secondary-color);
+    }
+
+    .about-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+    }
+</style>
+{% endblock %} 
