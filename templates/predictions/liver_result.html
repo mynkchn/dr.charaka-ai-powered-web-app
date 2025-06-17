@@ -1,0 +1,175 @@
+{% extends 'base.html' %}
+{% block title %}Liver Disease Result - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-600 mb-2">Liver Disease Analysis Result</h1>
+                <p class="text-gray-600">AI-Powered Liver Health Assessment</p>
+            </div>
+            
+            <!-- Patient Information -->
+            <div class="bg-blue-50 rounded-lg p-6 mb-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-800 mb-2">Patient Information</h3>
+                        <p class="text-blue-700">
+                            <strong>Name:</strong> {{ prediction.patient.first_name }} {{ prediction.patient.last_name }}
+                        </p>
+                        <p class="text-blue-700">
+                            <strong>Analysis Date:</strong> {{ prediction.created_at|date:"F d, Y" }}
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-blue-800 mb-2">Test Details</h3>
+                        <p class="text-blue-700">
+                            <strong>Age:</strong> {{ prediction.age }} years
+                        </p>
+                        <p class="text-blue-700">
+                            <strong>Gender:</strong> {{ prediction.gender }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Display -->
+            <div class="{% if prediction.prediction == 'No Disease' %}bg-green-50 border-l-4 border-green-500{% else %}bg-red-50 border-l-4 border-red-500{% endif %} p-6 mb-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold {% if prediction.prediction == 'No Disease' %}text-green-800{% else %}text-red-800{% endif %} mb-2">
+                            {% if prediction.prediction == 'No Disease' %}
+                                ✅ Normal Liver Function
+                            {% else %}
+                                ⚠️ Liver Disease Detected
+                            {% endif %}
+                        </h3>
+                        <p class="{% if prediction.prediction == 'No Disease' %}text-green-700{% else %}text-red-700{% endif %} text-lg">
+                            <strong>Result:</strong> {{ prediction.prediction }}
+                        </p>
+                        <p class="{% if prediction.prediction == 'No Disease' %}text-green-700{% else %}text-red-700{% endif %} text-lg">
+                            <strong>Confidence:</strong> {{ prediction.confidence|floatformat:2 }}%
+                        </p>
+                    </div>
+                    <div class="text-6xl">
+                        {% if prediction.prediction == 'No Disease' %}
+                            🟢
+                        {% else %}
+                            🔴
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Laboratory Values Summary -->
+            <div class="bg-gray-50 rounded-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Laboratory Values Summary</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">Total Bilirubin</p>
+                        <p class="text-lg font-semibold">{{ prediction.total_bilirubin }} mg/dL</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">Direct Bilirubin</p>
+                        <p class="text-lg font-semibold">{{ prediction.direct_bilirubin }} mg/dL</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">Alkaline Phosphatase</p>
+                        <p class="text-lg font-semibold">{{ prediction.alkaline_phosphotase }} IU/L</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">ALT/SGPT</p>
+                        <p class="text-lg font-semibold">{{ prediction.alamine_aminotransferase }} IU/L</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">AST/SGOT</p>
+                        <p class="text-lg font-semibold">{{ prediction.aspartate_aminotransferase }} IU/L</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">Total Proteins</p>
+                        <p class="text-lg font-semibold">{{ prediction.total_protiens }} g/dL</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">Albumin</p>
+                        <p class="text-lg font-semibold">{{ prediction.albumin }} g/dL</p>
+                    </div>
+                    <div class="bg-white p-3 rounded border">
+                        <p class="text-sm text-gray-600">A/G Ratio</p>
+                        <p class="text-lg font-semibold">{{ prediction.albumin_and_globulin_ratio }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clinical Interpretation -->
+            <div class="bg-blue-50 rounded-lg p-6 mb-8">
+                <h3 class="text-lg font-semibold text-blue-800 mb-3">Clinical Interpretation</h3>
+                {% if prediction.prediction == 'No Disease' %}
+                    <p class="text-blue-700">
+                        The analysis indicates <strong>normal liver function</strong> with {{ prediction.confidence|floatformat:1 }}% confidence. 
+                        The laboratory parameters are within expected ranges, suggesting healthy liver metabolism and function.
+                    </p>
+                    <div class="mt-4 p-4 bg-green-100 rounded border border-green-300">
+                        <h4 class="font-semibold text-green-800 mb-2">Recommendations:</h4>
+                        <ul class="text-green-700 space-y-1">
+                            <li>• Continue maintaining a healthy lifestyle</li>
+                            <li>• Regular follow-up as recommended by your physician</li>
+                            <li>• Maintain balanced diet and regular exercise</li>
+                            <li>• Avoid excessive alcohol consumption</li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <p class="text-red-700">
+                        The analysis suggests <strong>potential liver disease</strong> with {{ prediction.confidence|floatformat:1 }}% confidence. 
+                        The laboratory parameters show patterns that may indicate liver dysfunction or disease.
+                    </p>
+                    <div class="mt-4 p-4 bg-red-100 rounded border border-red-300">
+                        <h4 class="font-semibold text-red-800 mb-2">Urgent Recommendations:</h4>
+                        <ul class="text-red-700 space-y-1">
+                            <li>• <strong>Immediate consultation with a hepatologist</strong></li>
+                            <li>• Additional imaging studies may be required</li>
+                            <li>• Further blood tests for comprehensive evaluation</li>
+                            <li>• Avoid alcohol and hepatotoxic medications</li>
+                            <li>• Follow strict dietary guidelines as advised</li>
+                        </ul>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                <a href="{% url 'predictor:generate_liver_pdf_and_email' prediction.id %}" 
+                   class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 text-center transform hover:scale-105">
+                    📄 Generate PDF & Email Report
+                </a>
+                <a href="{% url 'predictor:select_patient' %}" 
+                   class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 text-center transform hover:scale-105">
+                    🔬 New Prediction
+                </a>
+                <a href="{% url 'predictor:reports_view' %}" 
+                   class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 text-center">
+                    📊 View All Reports
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.transform {
+    transition: transform 0.2s;
+}
+
+.hover\:scale-105:hover {
+    transform: scale(1.05);
+}
+
+@media (max-width: 640px) {
+    .container {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
+</style>
+{% endblock %}

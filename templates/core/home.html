@@ -1,402 +1,825 @@
 {% extends 'base.html' %}
 {% load static %}
-    {% block extra_css %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #6366f1;
-            --secondary: #8b5cf6;
-            --accent: #06b6d4;
-            --success: #10b981;
-            --glass: rgba(255, 255, 255, 0.1);
-            --glass-border: rgba(255, 255, 255, 0.2);
-            --dark-bg: #0f172a;
-            --darker-bg: #020617;
-        }
 
-        body {
-            background: linear-gradient(135deg, var(--dark-bg) 0%, var(--darker-bg) 100%);
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
+{% block extra_css %}
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, var(--white) 0%, var(--gray-50) 100%);
+        padding: 6rem 0 4rem;
+        position: relative;
+        overflow: hidden;
+    }
 
-        .glass-card {
-            background: var(--glass);
-            backdrop-filter: blur(10px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23007AFF' fill-opacity='0.03'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+        z-index: 1;
+    }
 
-        .btn-gradient {
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border: none;
-            padding: 12px 30px;
-            border-radius: 50px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
-        }
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
 
-        .btn-gradient:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(99, 102, 241, 0.6);
-            color: white;
-            text-decoration: none;
-        }
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        line-height: 1.2;
+        margin-bottom: 1.5rem;
+    }
 
-        .btn-glass {
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            padding: 12px 30px;
-            border-radius: 50px;
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: var(--gray-600);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+        max-width: 600px;
+    }
 
-        .btn-glass:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-            color: white;
-            text-decoration: none;
-        }
+    .hero-visual {
+        position: relative;
+        width: 400px;
+        height: 400px;
+        margin: 0 auto;
+    }
 
-        .fade-in {
-            animation: fadeInUp 1s ease-out;
-        }
+    .floating-card {
+        position: absolute;
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        padding: 1.5rem;
+        border: 1px solid var(--gray-200);
+        animation: float 6s ease-in-out infinite;
+    }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    .floating-card:nth-child(1) {
+        top: 20px;
+        left: 20px;
+        animation-delay: 0s;
+    }
 
-        .float-animation {
-            animation: float 6s ease-in-out infinite;
-        }
+    .floating-card:nth-child(2) {
+        top: 40px;
+        right: 20px;
+        animation-delay: -2s;
+    }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-        }
+    .floating-card:nth-child(3) {
+        bottom: 40px;
+        left: 40px;
+        animation-delay: -4s;
+    }
 
-        .text-gradient {
-            background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .floating-card:nth-child(4) {
+        bottom: 20px;
+        right: 40px;
+        animation-delay: -1s;
+    }
 
-        .hero-section {
-            padding: 5rem 0;
-        }
+    .central-ai-hub {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 3rem;
+        box-shadow: var(--shadow-xl);
+        animation: pulse 3s ease-in-out infinite;
+    }
 
-        .min-vh-75 {
-            min-height: 75vh;
-        }
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+    }
 
+    @keyframes pulse {
+        0%, 100% { box-shadow: var(--shadow-xl); }
+        50% { box-shadow: 0 0 40px rgba(0, 122, 255, 0.4); }
+    }
+
+    /* Dashboard Features Section for Logged In Users */
+    .dashboard-features {
+        padding: 5rem 0;
+        background: var(--gray-50);
+    }
+
+    .dashboard-welcome {
+        text-align: center;
+        margin-bottom: 4rem;
+    }
+
+    .dashboard-welcome h2 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+    }
+
+    .user-name {
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .dashboard-welcome p {
+        font-size: 1.2rem;
+        color: var(--gray-600);
+    }
+
+    .dashboard-card {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+
+    .dashboard-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .dashboard-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary);
+    }
+
+    .dashboard-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 2.2rem;
+        margin: 0 auto 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dashboard-icon::before {
+        content: '';
+        position: absolute;
+        top: -2px;
+        left: -2px;
+        right: -2px;
+        bottom: -2px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--radius-full);
+        z-index: -1;
+        opacity: 0.1;
+        transition: opacity 0.3s ease;
+    }
+
+    .dashboard-card:hover .dashboard-icon::before {
+        opacity: 0.2;
+    }
+
+    .dashboard-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+    }
+
+    .dashboard-description {
+        color: var(--gray-600);
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+
+    .dashboard-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: var(--white);
+        text-decoration: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: none;
+    }
+
+    .dashboard-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 122, 255, 0.3);
+        color: var(--white);
+        text-decoration: none;
+    }
+
+    /* Features Section */
+    .features-section {
+        padding: 5rem 0;
+        background: var(--white);
+    }
+
+    .feature-card {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 2.5rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary);
+    }
+
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 2rem;
+        margin: 0 auto 1.5rem;
+    }
+
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+    }
+
+    .feature-description {
+        color: var(--gray-600);
+        line-height: 1.6;
+    }
+
+    /* How It Works Section */
+    .how-it-works {
+        padding: 5rem 0;
+        background: var(--gray-50);
+    }
+
+    .step-card {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+        border: 1px solid var(--gray-200);
+        position: relative;
+        transition: all 0.3s ease;
+    }
+
+    .step-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .step-number {
+        width: 60px;
+        height: 60px;
+        background: var(--primary);
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin: 0 auto 1.5rem;
+    }
+
+    .step-arrow {
+        position: absolute;
+        top: 50%;
+        right: -20px;
+        transform: translateY(-50%);
+        color: var(--primary);
+        font-size: 2rem;
+        z-index: 2;
+    }
+
+    .step-card:last-child .step-arrow {
+        display: none;
+    }
+
+    /* Capabilities Section */
+    .capabilities-section {
+        padding: 5rem 0;
+        background: var(--white);
+    }
+
+    .capability-item {
+        display: flex;
+        align-items: center;
+        padding: 1.5rem;
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .capability-item:hover {
+        background: var(--white);
+        box-shadow: var(--shadow-md);
+        transform: translateX(10px);
+    }
+
+    .capability-icon {
+        width: 50px;
+        height: 50px;
+        background: var(--primary);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--white);
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+
+    .stat-card {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .stat-label {
+        font-size: 1rem;
+        color: var(--gray-600);
+        font-weight: 500;
+    }
+
+    /* CTA Section */
+    .cta-section {
+        padding: 5rem 0;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        color: var(--white);
+        text-align: center;
+    }
+
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+    }
+
+    .cta-description {
+        font-size: 1.2rem;
+        margin-bottom: 2.5rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
         .hero-visual {
-            position: relative;
             width: 300px;
             height: 300px;
-            margin: 0 auto;
         }
-
-        .medical-icon-float {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #06b6d4;
-            font-size: 1.5rem;
-            animation: orbit 10s linear infinite;
-            backdrop-filter: blur(10px);
-        }
-
-        .medical-icon-float:nth-child(1) {
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .medical-icon-float:nth-child(2) {
-            top: 50%;
-            right: 0;
-            transform: translateY(-50%);
-        }
-
-        .medical-icon-float:nth-child(3) {
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .central-logo {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100px;
-            height: 100px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2.5rem;
-            box-shadow: 0 20px 40px rgba(99, 102, 241, 0.3);
-        }
-
-        @keyframes orbit {
-            0% { transform: rotate(0deg) translateX(120px) rotate(0deg); }
-            100% { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
-        }
-
-        .feature-icon {
+        
+        .central-ai-hub {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
             font-size: 2rem;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.3);
         }
-
-        .step-number {
-            width: 60px;
-            height: 60px;
-            background: linear-gradient(135deg, var(--accent), var(--success));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 auto;
-            box-shadow: 0 10px 30px rgba(6, 182, 212, 0.3);
-        }
-
-        .stat-item {
-            position: relative;
-        }
-
-        .stat-item::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 50%;
-            width: 40px;
-            height: 3px;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            transform: translateX(-50%);
-            border-radius: 2px;
-        }
-
-        .text-white {
-            color: #ffffff !important;
-        }
-
-        .text-white-50 {
-            color: rgba(255, 255, 255, 0.7) !important;
-        }
-
-        @media (max-width: 768px) {
-            .hero-visual {
-                width: 250px;
-                height: 250px;
-            }
-            
-            .central-logo {
-                width: 80px;
-                height: 80px;
-                font-size: 2rem;
-            }
-            
-            .medical-icon-float {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
-            
-            @keyframes orbit {
-                0% { transform: rotate(0deg) translateX(100px) rotate(0deg); }
-                100% { transform: rotate(360deg) translateX(100px) rotate(-360deg); }
-            }
-        }
-    </style>
-    {% endblock %}
-    {% block content %}
-    <!-- Hero Section -->
-    <section class="hero-section py-5">
-        <div class="container">
-            <div class="row align-items-center min-vh-75">
-                <div class="col-lg-6 mb-5 mb-lg-0">
-                    <div class="fade-in">
-                        <h1 class="display-3 fw-bold text-white mb-4">
-                            Welcome to 
-                            <span class="text-gradient">Dr. Charaka</span>
-                        </h1>
-                        <p class="lead text-white-50 mb-4 fs-5">
-                            Your AI-powered healthcare assistant, providing accurate diagnoses and personalized care recommendations with cutting-edge machine learning technology.
-                        </p>
-                        <div class="d-flex flex-wrap gap-3">
-                            <a href="{% url 'accounts:signup' %}" class="btn-gradient">
-                                <i class="fas fa-user-plus"></i>
-                                Get Started
-                            </a>
-                            <a href="{% url 'core:about' %}" class="btn-glass">
-                                <i class="fas fa-info-circle"></i>
-                                Learn More
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="hero-image-container float-animation">
-                        <div class="hero-visual">
-                            <div class="medical-icon-float">
-                                <i class="fas fa-heartbeat"></i>
-                            </div>
-                            <div class="medical-icon-float" style="animation-delay: -2s;">
-                                <i class="fas fa-brain"></i>
-                            </div>
-                            <div class="medical-icon-float" style="animation-delay: -4s;">
-                                <i class="fas fa-user-md"></i>
-                            </div>
-                            <div class="central-logo">
-                                <i class="fas fa-robot"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="features-section py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold text-white mb-3">Why Choose Dr. Charaka?</h2>
-                <p class="lead text-white-50">Advanced AI technology meets compassionate healthcare</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-4 col-md-6">
-                    <div class="glass-card p-4 h-100 text-center fade-in">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-brain"></i>
-                        </div>
-                        <h3 class="h4 text-white mb-3">AI-Powered Diagnosis</h3>
-                        <p class="text-white-50">Advanced machine learning algorithms provide accurate and quick diagnoses using the latest medical research.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.2s;">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-user-md"></i>
-                        </div>
-                        <h3 class="h4 text-white mb-3">Expert Doctors</h3>
-                        <p class="text-white-50">Verified medical professionals review and validate AI recommendations for optimal patient care.</p>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6">
-                    <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.4s;">
-                        <div class="feature-icon mb-3">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <h3 class="h4 text-white mb-3">Secure & Private</h3>
-                        <p class="text-white-50">Your health data is encrypted and protected with enterprise-grade security standards.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- How It Works Section -->
-    <section class="how-it-works-section py-5">
-        <div class="container">
-            <div class="text-center mb-5">
-                <h2 class="display-5 fw-bold text-white mb-3">How It Works</h2>
-                <p class="lead text-white-50">Simple steps to revolutionize your healthcare practice</p>
-            </div>
-            <div class="row g-4">
-                <div class="col-lg-3 col-md-6">
-                    <div class="glass-card p-4 text-center h-100 fade-in">
-                        <div class="step-number mb-3">1</div>
-                        <h4 class="text-white mb-3">Register</h4>
-                        <p class="text-white-50">Create your account as a healthcare professional</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="glass-card p-4 text-center h-100 fade-in" style="animation-delay: 0.2s;">
-                        <div class="step-number mb-3">2</div>
-                        <h4 class="text-white mb-3">Input Symptoms</h4>
-                        <p class="text-white-50">Enter patient symptoms and medical history</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="glass-card p-4 text-center h-100 fade-in" style="animation-delay: 0.4s;">
-                        <div class="step-number mb-3">3</div>
-                        <h4 class="text-white mb-3">AI Analysis</h4>
-                        <p class="text-white-50">Our AI analyzes data and provides intelligent insights</p>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-md-6">
-                    <div class="glass-card p-4 text-center h-100 fade-in" style="animation-delay: 0.6s;">
-                        <div class="step-number mb-3">4</div>
-                        <h4 class="text-white mb-3">Get Results</h4>
-                        <p class="text-white-50">Receive detailed diagnosis and treatment recommendations</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
         
+        .floating-card {
+            padding: 1rem;
+            font-size: 0.8rem;
+        }
+        
+        .step-arrow {
+            display: none;
+        }
 
-    <!-- CTA Section -->
-    <section class="cta-section py-5">
-        <div class="container text-center">
-            <div class="glass-card p-5">
-                <h2 class="display-5 fw-bold text-white mb-4">Ready to Transform Your Healthcare Practice?</h2>
-                <p class="lead text-white-50 mb-4">Join thousands of doctors who trust Dr. Charaka for accurate diagnoses and better patient care.</p>
-                <a href="{% url 'accounts:signup' %}" class="btn-gradient btn-lg">
-                    <i class="fas fa-user-plus"></i>
-                    Register Now
-                </a>
+        .dashboard-features {
+            padding: 3rem 0;
+        }
+
+        .dashboard-welcome h2 {
+            font-size: 2rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6 hero-content">
+                <h1 class="hero-title">
+                    AI-Powered Healthcare
+                    <span style="color: var(--primary);">Intelligence</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Dr. Charaka combines advanced machine learning models with medical expertise to provide accurate diagnoses, intelligent analysis, and comprehensive patient care solutions for healthcare professionals.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'accounts:dashboard' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Go to Dashboard
+                        </a>
+                    {% else %}
+                        <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-user-plus me-2"></i>
+                            Get Started
+                        </a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>
+                            Login
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-visual">
+                    <div class="floating-card">
+                        <i class="fas fa-heartbeat text-danger mb-2"></i>
+                        <div style="font-size: 0.85rem; font-weight: 600;">Heart Analysis</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-600);">95% Accuracy</div>
+                    </div>
+                    <div class="floating-card">
+                        <i class="fas fa-brain text-info mb-2"></i>
+                        <div style="font-size: 0.85rem; font-weight: 600;">Neural Diagnosis</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-600);">AI Powered</div>
+                    </div>
+                    <div class="floating-card">
+                        <i class="fas fa-file-medical text-success mb-2"></i>
+                        <div style="font-size: 0.85rem; font-weight: 600;">Smart Reports</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-600);">Instant Generation</div>
+                    </div>
+                    <div class="floating-card">
+                        <i class="fas fa-chart-line text-warning mb-2"></i>
+                        <div style="font-size: 0.85rem; font-weight: 600;">ML Prediction</div>
+                        <div style="font-size: 0.75rem; color: var(--gray-600);">99% Precision</div>
+                    </div>
+                    <div class="central-ai-hub">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                </div>
             </div>
         </div>
-    </section>
-    {% endblock %}
+    </div>
+</section>
 
-    {% block extra_js %}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    {% endblock %}
+<!-- Dashboard Features Section (Only for logged-in users) -->
+{% if user.is_authenticated %}
+<section class="dashboard-features">
+    <div class="container">
+        <div class="dashboard-welcome">
+            <h2>Welcome, <span class="user-name">{{ user.get_full_name }}!</span></h2>
+            <p>Your AI-powered healthcare dashboard</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="dashboard-card">
+                    <div class="dashboard-icon" style="background: linear-gradient(135deg, #06b6d4, #10b981);">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                    <h5 class="dashboard-title">Disease Predictor</h5>
+                    <p class="dashboard-description">Use our AI-powered disease predictor to get instant insights about your symptoms.</p>
+                    <a href="{% url "predictor:prediction" %}" class="dashboard-btn">
+                        <i class="fas fa-play"></i>
+                        Let's Predict
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="dashboard-card">
+                    <div class="dashboard-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <h5 class="dashboard-title">Patient Data</h5>
+                    <p class="dashboard-description">View and manage your patient data and medical history.</p>
+                    <a href="{% url 'accounts:dashboard' %}" class="dashboard-btn">
+                        <i class="fas fa-eye"></i>
+                        View Patients
+                    </a>
+                </div>
+            </div>
+            
+            <div class="col-lg-3 col-md-6">
+                <div class="dashboard-card">
+                    <div class="dashboard-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <h5 class="dashboard-title">Dr. Charaka AI Reports</h5>
+                    <p class="dashboard-description">View your personalized health reports and recommendations.</p>
+                    <a href="{% url "predictor:reports_view" %}" class="dashboard-btn">
+                        <i class="fas fa-chart-line"></i>
+                        View Reports
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-md-6">
+                <div class="dashboard-card">
+                    <div class="dashboard-icon" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h5 class="dashboard-title">AI Health Assistant</h5>
+                    <p class="dashboard-description">Chat with Dr. Charaka AI for instant health advice and information.</p>
+                    <a href="{% url 'chatbot:chatbot_page' %}" class="dashboard-btn">
+                        <i class="fas fa-comments"></i>
+                        Start Chat
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">Comprehensive AI Medical Suite</h2>
+            <p class="lead text-muted">Advanced tools designed for modern healthcare professionals</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <h3 class="feature-title">LLM Medical Assistant</h3>
+                    <p class="feature-description">
+                        Advanced language model trained on medical literature provides intelligent responses to complex medical queries and patient consultations.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <h3 class="feature-title">ML Disease Prediction</h3>
+                    <p class="feature-description">
+                        Multiple classical machine learning models analyze symptoms and patient data to predict diseases with high accuracy and confidence scores.
+                    </p>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <h3 class="feature-title">Smart Report Generation</h3>
+                    <p class="feature-description">
+                        Automatically generate comprehensive medical reports and send them directly to patients with detailed analysis and recommendations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold mb-3">How Dr. Charaka Works</h2>
+            <p class="lead text-muted">Simple workflow for powerful medical insights</p>
+        </div>
+        <div class="row g-4 position-relative">
+            <div class="col-lg-3 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4 class="mb-3">Patient Input</h4>
+                    <p class="text-muted">Enter patient symptoms, medical history, and relevant clinical data into the system.</p>
+                    <div class="step-arrow d-none d-lg-block">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4 class="mb-3">AI Analysis</h4>
+                    <p class="text-muted">Our LLM and ML models process the data using advanced algorithms and medical knowledge.</p>
+                    <div class="step-arrow d-none d-lg-block">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4 class="mb-3">Smart Predictions</h4>
+                    <p class="text-muted">Get accurate disease predictions with confidence scores and differential diagnoses.</p>
+                    <div class="step-arrow d-none d-lg-block">
+                        <i class="fas fa-arrow-right"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h4 class="mb-3">Report & Share</h4>
+                    <p class="text-muted">Generate comprehensive reports and send them directly to patients for better care.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Capabilities Section -->
+<section class="capabilities-section">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-6">
+                <h2 class="display-6 fw-bold mb-4">Advanced Medical Capabilities</h2>
+                <p class="lead text-muted mb-4">
+                    Dr. Charaka leverages cutting-edge AI technology to provide comprehensive medical analysis and support.
+                </p>
+                <div class="capability-item">
+                    <div class="capability-icon">
+                        <i class="fas fa-microscope"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Disease Pattern Recognition</h5>
+                        <p class="text-muted mb-0">Advanced pattern matching for complex medical conditions</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon">
+                        <i class="fas fa-pills"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Drug Interaction Analysis</h5>
+                        <p class="text-muted mb-0">Comprehensive medication safety and interaction checking</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Patient Risk Assessment</h5>
+                        <p class="text-muted mb-0">Intelligent risk stratification and preventive care recommendations</p>
+                    </div>
+                </div>
+                <div class="capability-item">
+                    <div class="capability-icon">
+                        <i class="fas fa-mobile-alt"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-1">Mobile-First Design</h5>
+                        <p class="text-muted mb-0">Access powerful AI tools from any device, anywhere</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">95%</div>
+                            <div class="stat-label">Diagnosis Accuracy</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">50+</div>
+                            <div class="stat-label">ML Models</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">24/7</div>
+                            <div class="stat-label">AI Availability</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-card">
+                            <div class="stat-number">1000+</div>
+                            <div class="stat-label">Conditions Covered</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="cta-title">Ready to Transform Your Medical Practice?</h2>
+        <p class="cta-description">
+            Join thousands of healthcare professionals who trust Dr. Charaka for accurate diagnoses, intelligent analysis, and better patient outcomes.
+        </p>
+        {% if user.is_authenticated %}
+            <a href="{% url 'accounts:dashboard' %}" class="btn btn-lg" style="background: var(--white); color: var(--primary); font-weight: 600;">
+                <i class="fas fa-tachometer-alt me-2"></i>
+                Access Dashboard
+            </a>
+        {% else %}
+            <a href="{% url 'accounts:signup' %}" class="btn btn-lg" style="background: var(--white); color: var(--primary); font-weight: 600;">
+                <i class="fas fa-user-plus me-2"></i>
+                Start Free Trial
+            </a>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add smooth scrolling for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            document.querySelector(this.getAttribute('href')).scrollIntoView({
+                behavior: 'smooth'
+            });
+        });
+    });
+
+    // Add animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe elements for animation
+    document.querySelectorAll('.feature-card, .step-card, .capability-item, .dashboard-card').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'all 0.6s ease';
+        observer.observe(el);
+    });
+</script>
+{% endblock %}

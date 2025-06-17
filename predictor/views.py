@@ -1,11 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.db.models import Q
+from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.cache import cache
+import json
 import pickle
 import numpy as np
 import os
@@ -22,6 +26,10 @@ from .models import BreastCancerPrediction, PredictionReport
 from .forms import PatientSelectionForm, BreastCancerPredictionForm
 from datetime import datetime
 import logging
+from django.core.files.base import ContentFile
+from django.core.files.storage import default_storage
+from .models import LiverDiseasePrediction
+from .forms import LiverDiseasePredictionForm
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +57,7 @@ def select_patient(request):
         form = PatientSelectionForm(doctor=request.user, data=request.POST)
         if form.is_valid():
             patient_id = form.cleaned_data['patient'].id
-            return redirect('predictor:breast_cancer_prediction', patient_id=patient_id)
+            return redirect('predictor:liver_prediction_form', patient_id=patient_id)
     else:
         form = PatientSelectionForm(doctor=request.user)
     return render(request, 'predictions/select_patient.html', {'form': form})
@@ -106,6 +114,16 @@ def breast_cancer_prediction(request, patient_id):
         'form': form,
         'patient': patient
     })
+
+
+
+def save_pdf_to_media(buffer, filename, subfolder='reports'):
+    """
+    Save PDF buffer into MEDIA_ROOT/subfolder and return the relative file path.
+    """
+    file_path = os.path.join(subfolder, filename)
+    default_storage.save(file_path, ContentFile(buffer.read()))
+    return file_path
 
 @login_required
 def prediction_result(request, prediction_id):
@@ -425,6 +443,17 @@ def generate_pdf_and_email(request, prediction_id):
         else:
             messages.warning(request, 'Report generated but patient email not available for delivery.')
         
+        # Save PDF to media storage
+        buffer.seek(0)
+        filename = f'DrCharaka_Report_{prediction.patient.last_name}_{prediction.id}.pdf'
+        saved_file_path = save_pdf_to_media(buffer, filename)
+
+        # Update PredictionReport with saved PDF path
+        report = PredictionReport.objects.filter(prediction_data__prediction_id=prediction.id).first()
+        if report:
+         report.pdf_file.name = saved_file_path
+         report.save()
+       
         # Return PDF for download
         buffer.seek(0)
         response = HttpResponse(buffer.read(), content_type='application/pdf')
@@ -435,3 +464,537 @@ def generate_pdf_and_email(request, prediction_id):
         logger.error(f"PDF generation failed for prediction {prediction_id}: {str(e)}")
         messages.error(request, 'Report generation failed. Please try again.')
         return redirect('predictor:prediction_result', prediction_id=prediction_id)
+    
+
+
+@login_required
+def reports_view(request):
+    """
+    Display all prediction reports with filtering capabilities
+    """
+    # Get all reports for the current doctor
+    reports = PredictionReport.objects.filter(doctor=request.user).order_by('-created_at')
+    
+    # Get all patients for filter dropdown
+    patients = Patient.objects.filter(
+        Q(prediction_reports__doctor=request.user) |
+        Q(breast_cancer_predictions__doctor=request.user)
+    ).distinct().order_by('first_name', 'last_name')
+    
+    # Apply filters
+    patient_filter = request.GET.get('patient')
+    prediction_type_filter = request.GET.get('prediction_type')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+    
+    if patient_filter:
+        reports = reports.filter(patient_id=patient_filter)
+    
+    if prediction_type_filter:
+        reports = reports.filter(prediction_type=prediction_type_filter)
+    
+    if date_from:
+        reports = reports.filter(created_at__date__gte=date_from)
+    
+    if date_to:
+        reports = reports.filter(created_at__date__lte=date_to)
+    
+    # Search functionality
+    search_query = request.GET.get('search')
+    if search_query:
+        reports = reports.filter(
+            Q(patient__first_name__icontains=search_query) |
+            Q(patient__last_name__icontains=search_query) |
+            Q(patient__email__icontains=search_query) |
+            Q(prediction_type__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(reports, 10)  # Show 10 reports per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    # Get prediction types for filter
+    prediction_types = PredictionReport.PREDICTION_TYPES
+    
+    # Statistics
+    total_reports = reports.count()
+    total_patients = patients.count()
+    
+    # Reports by type count
+    reports_by_type = {}
+    for pred_type, display_name in prediction_types:
+        count = reports.filter(prediction_type=pred_type).count()
+        if count > 0:
+            reports_by_type[display_name] = count
+    
+    context = {
+        'reports': page_obj,
+        'patients': patients,
+        'prediction_types': prediction_types,
+        'total_reports': total_reports,
+        'total_patients': total_patients,
+        'reports_by_type': reports_by_type,
+        'current_filters': {
+            'patient': patient_filter,
+            'prediction_type': prediction_type_filter,
+            'date_from': date_from,
+            'date_to': date_to,
+            'search': search_query,
+        }
+    }
+    
+    return render(request, 'predictions/reports.html', context)
+
+@login_required
+def get_report_details(request, report_id):
+    """
+    AJAX endpoint to get detailed report information
+    """
+    try:
+        report = get_object_or_404(PredictionReport, id=report_id, doctor=request.user)
+        
+        # Parse prediction data
+        prediction_data = report.prediction_data
+        
+        response_data = {
+            'success': True,
+            'report': {
+                'id': report.id,
+                'patient_name': f"{report.patient.first_name} {report.patient.last_name}",
+                'patient_email': report.patient.email,
+                'prediction_type': report.get_prediction_type_display(),
+                'prediction_data': prediction_data,
+                'created_at': report.created_at.strftime('%B %d, %Y at %I:%M %p'),
+                'pdf_generated': report.pdf_generated,
+                'email_sent': report.email_sent,
+                'pdf_url': report.pdf_file.url if report.pdf_file else None
+            }
+        }
+        
+        return JsonResponse(response_data)
+    
+    except Exception as e:
+        return JsonResponse({
+            'success': False,
+            'error': str(e)
+        })
+ # Add these functions to your views.py - they integrate with your existing code
+
+def get_cached_liver_model():
+    """Load and cache the liver disease ML model for better performance"""
+    model = cache.get('liver_disease_model')
+    if model is None:
+        try:
+            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_prediction_xgb_model.pkl')
+            with open(model_path, 'rb') as f:
+                model = pickle.load(f)
+            cache.set('liver_disease_model', model, 3600)  # Cache for 1 hour
+        except Exception as e:
+            logger.error(f"Liver model loading failed: {str(e)}")
+            raise
+    return model
+
+@login_required
+def liver_disease_prediction(request, patient_id):
+    patient = get_object_or_404(Patient, id=patient_id, doctor=request.user)
+
+    if request.method == 'POST':
+        form = LiverDiseasePredictionForm(request.POST)
+        if form.is_valid():
+            prediction_obj = form.save(commit=False)
+            prediction_obj.patient = patient
+            prediction_obj.doctor = request.user
+
+            try:
+                # Use cached model for faster prediction
+                model = get_cached_liver_model()
+
+                # Prepare features efficiently
+                features = np.array(list(prediction_obj.get_features_dict().values()), dtype=np.float32).reshape(1, -1)
+
+                # Make prediction
+                pred = model.predict(features)[0]
+                prob = model.predict_proba(features)[0]
+
+                prediction_obj.prediction = 'No Disease' if pred == 0 else 'Disease'
+                prediction_obj.confidence = round(max(prob) * 100, 2)
+                prediction_obj.save()
+
+                # Create report entry
+                PredictionReport.objects.create(
+                    patient=patient,
+                    doctor=request.user,
+                    prediction_type='liver_disease',
+                    prediction_data={
+                        'prediction': str(prediction_obj.prediction),
+                        'confidence': float(prediction_obj.confidence),
+                        'prediction_id': prediction_obj.id,
+                        'features': prediction_obj.get_features_dict()
+                    }
+                )
+
+                return redirect('predictor:liver_prediction_result', prediction_id=prediction_obj.id)
+
+            except Exception as e:
+                logger.error(f"Liver prediction failed for patient {patient_id}: {str(e)}")
+                messages.error(request, f'Liver analysis failed. Please try again.')
+
+    else:
+        form = LiverDiseasePredictionForm()
+
+    return render(request, 'predictions/liver_form.html', {
+        'form': form,
+        'patient': patient
+    })
+
+@login_required
+def liver_prediction_result(request, prediction_id):
+    prediction = get_object_or_404(LiverDiseasePrediction, id=prediction_id, doctor=request.user)
+    return render(request, 'predictions/liver_result.html', {'prediction': prediction})
+
+def generate_liver_pdf(prediction, doctor_name):
+    """Generate comprehensive Dr. Charaka themed liver disease report"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4169E1')
+    )
+    
+    header_style = ParagraphStyle(
+        'CustomHeader',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=colors.HexColor('#1E3A8A')
+    )
+    
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=11,
+        spaceAfter=6,
+        alignment=TA_JUSTIFY
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Header with Dr. Charaka branding
+    story.append(Paragraph("🏥 DR. CHARAKA LIVER HEALTH ASSESSMENT", title_style))
+    story.append(Paragraph("<i>Advanced AI Diagnostics • Liver Function Analysis • Comprehensive Care</i>", 
+                          ParagraphStyle('subtitle', parent=styles['Normal'], fontSize=12, 
+                                       alignment=TA_CENTER, textColor=colors.grey, spaceAfter=20)))
+    
+    # Patient Information
+    story.append(Paragraph("PATIENT INFORMATION", header_style))
+    patient_data = [
+        ['Patient Name:', f"{prediction.patient.first_name} {prediction.patient.last_name}"],
+        ['Patient ID:', f"DC-{prediction.patient.id:06d}"],
+        ['Date of Analysis:', prediction.created_at.strftime('%B %d, %Y at %I:%M %p')],
+        ['Attending Physician:', f"Dr. {doctor_name}"],
+        ['Test Type:', 'Liver Disease Risk Assessment'],
+        ['Report ID:', f"LD-{prediction.id:08d}"],
+        ['Age:', f"{prediction.age} years"],
+        ['Gender:', prediction.gender]
+    ]
+    
+    patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
+    patient_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F2FF')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#D0E7FF')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(patient_table)
+    story.append(Spacer(1, 20))
+    
+    # About Liver Disease
+    story.append(Paragraph("UNDERSTANDING LIVER DISEASE", header_style))
+    story.append(Paragraph(
+        "Liver disease encompasses various conditions affecting liver function, including hepatitis, "
+        "cirrhosis, fatty liver disease, and other hepatic disorders. Early detection through "
+        "comprehensive laboratory analysis is crucial for effective treatment and management. "
+        "Our Dr. Charaka AI system analyzes multiple liver function parameters to assess disease risk.",
+        normal_style
+    ))
+    story.append(Spacer(1, 15))
+    
+    # Laboratory Parameters
+    story.append(Paragraph("LABORATORY PARAMETERS ANALYZED", header_style))
+    features_dict = prediction.get_features_dict()
+    
+    # Group parameters logically
+    param_groups = {
+        'Bilirubin Levels': ['total_bilirubin', 'direct_bilirubin'],
+        'Liver Enzymes': ['alkaline_phosphotase', 'alamine_aminotransferase', 'aspartate_aminotransferase'],
+        'Protein Markers': ['total_protiens', 'albumin', 'albumin_and_globulin_ratio'],
+        'Demographics': ['age', 'gender']
+    }
+    
+    for group_name, params in param_groups.items():
+        if params:
+            story.append(Paragraph(f"<b>{group_name}:</b>", 
+                                 ParagraphStyle('subheader', parent=normal_style, fontSize=12, 
+                                              textColor=colors.HexColor('#4169E1'), spaceAfter=8)))
+            
+            group_data = []
+            for param in params:
+                if param in features_dict:
+                    param_display = param.replace('_', ' ').title()
+                    value = features_dict[param]
+                    if param == 'gender':
+                        group_data.append([param_display, str(value)])
+                    else:
+                        group_data.append([param_display, f"{value:.2f}"])
+            
+            if group_data:
+                param_table = Table(group_data, colWidths=[3*inch, 1.5*inch])
+                param_table.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F8FF')),
+                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+                    ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+                    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 0), (-1, -1), 9),
+                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
+                ]))
+                story.append(param_table)
+                story.append(Spacer(1, 10))
+    
+    # Analysis Results
+    story.append(Paragraph("ANALYSIS RESULTS", header_style))
+    
+    result_color = colors.HexColor('#228B22') if prediction.prediction == 'No Disease' else colors.HexColor('#DC143C')
+    result_bg = colors.HexColor('#F0FFF0') if prediction.prediction == 'No Disease' else colors.HexColor('#FFF0F0')
+    
+    result_data = [
+        ['Assessment Result:', prediction.prediction],
+        ['Confidence Level:', f"{prediction.confidence:.1f}%"],
+        ['Risk Category:', 'Normal Liver Function' if prediction.prediction == 'No Disease' else 'Abnormal - Requires Medical Attention']
+    ]
+    
+    result_table = Table(result_data, colWidths=[2.5*inch, 3.5*inch])
+    result_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), result_bg),
+        ('TEXTCOLOR', (1, 0), (1, 0), result_color),
+        ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (1, 0), (1, 0), 12),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#D0D0D0')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(result_table)
+    story.append(Spacer(1, 20))
+    
+    # Clinical Interpretation
+    story.append(Paragraph("CLINICAL INTERPRETATION", header_style))
+    
+    if prediction.prediction == 'No Disease':
+        interpretation = (
+            f"Based on the comprehensive analysis of liver function parameters, the results indicate "
+            f"<b>normal liver function</b> with {prediction.confidence:.1f}% confidence. The analyzed "
+            f"laboratory values including bilirubin levels, liver enzymes, and protein markers are "
+            f"within expected ranges, suggesting healthy liver function."
+        )
+    else:
+        interpretation = (
+            f"The analysis reveals <b>abnormal liver function patterns</b> with {prediction.confidence:.1f}% confidence. "
+            f"The laboratory parameters show deviations from normal ranges that may indicate liver disease "
+            f"or dysfunction. <b>Immediate medical consultation is strongly recommended for further "
+            f"evaluation, additional testing, and appropriate treatment planning.</b>"
+        )
+    
+    story.append(Paragraph(interpretation, normal_style))
+    story.append(Spacer(1, 15))
+    
+    # Recommendations
+    story.append(Paragraph("RECOMMENDATIONS", header_style))
+    if prediction.prediction == 'No Disease':
+        recommendations = [
+            "Continue maintaining healthy lifestyle with balanced diet",
+            "Regular monitoring of liver function as per physician's advice",
+            "Avoid excessive alcohol consumption and hepatotoxic substances",
+            "Maintain healthy weight and regular exercise routine",
+            "Follow up with routine liver function tests as recommended"
+        ]
+    else:
+        recommendations = [
+            "URGENT: Schedule immediate consultation with hepatologist/gastroenterologist",
+            "Additional liver function tests and imaging studies may be required",
+            "Avoid alcohol and hepatotoxic medications until further evaluation",
+            "Consider dietary modifications and lifestyle changes",
+            "Monitor for symptoms like jaundice, abdominal pain, or fatigue",
+            "Family history and genetic counseling may be beneficial"
+        ]
+    
+    for i, rec in enumerate(recommendations, 1):
+        story.append(Paragraph(f"{i}. {rec}", normal_style))
+    
+    story.append(Spacer(1, 30))
+    
+    # Footer
+    footer_style = ParagraphStyle(
+        'footer',
+        parent=styles['Normal'],
+        fontSize=9,
+        alignment=TA_CENTER,
+        textColor=colors.grey
+    )
+    
+    story.append(Paragraph("=" * 80, footer_style))
+    story.append(Paragraph(
+        f"Report generated by Dr. Charaka AI System • {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} • "
+        f"This report should be interpreted by qualified medical professionals only",
+        footer_style
+    ))
+    
+    # Build PDF
+    doc.build(story)
+    return buffer
+
+@login_required
+def generate_liver_pdf_and_email(request, prediction_id):
+    prediction = get_object_or_404(LiverDiseasePrediction, id=prediction_id, doctor=request.user)
+    doctor_name = f"{request.user.first_name} {request.user.last_name}"
+    
+    try:
+        # Generate comprehensive PDF
+        buffer = generate_liver_pdf(prediction, doctor_name)
+        
+        # Send email if patient email exists
+        if prediction.patient.email:
+            try:
+                # Create beautiful HTML email
+                email_context = {
+                    'patient_name': prediction.patient.first_name,
+                    'doctor_name': doctor_name,
+                    'result': prediction.prediction,
+                    'confidence': prediction.confidence,
+                    'date': prediction.created_at.strftime('%B %d, %Y'),
+                    'is_normal': prediction.prediction == 'No Disease'
+                }
+                
+                html_content = f"""
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <meta charset="utf-8">
+                    <style>
+                        body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; }}
+                        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                        .header {{ background: linear-gradient(135deg, #4169E1, #1E90FF); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                        .content {{ background: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px; }}
+                        .result-box {{ background: {'#e8f5e8' if prediction.prediction == 'No Disease' else '#ffe8e8'}; 
+                                      border-left: 5px solid {'#228B22' if prediction.prediction == 'No Disease' else '#DC143C'}; 
+                                      padding: 20px; margin: 20px 0; }}
+                        .footer {{ text-align: center; color: #666; font-size: 12px; margin-top: 30px; }}
+                        .logo {{ font-size: 24px; font-weight: bold; }}
+                        .highlight {{ color: {'#228B22' if prediction.prediction == 'No Disease' else '#DC143C'}; font-weight: bold; }}
+                    </style>
+                </head>
+                <body>
+                    <div class="container">
+                        <div class="header">
+                            <div class="logo">🏥 DR. CHARAKA</div>
+                            <p>Medical AI Diagnostics - Liver Health Assessment</p>
+                        </div>
+                        <div class="content">
+                            <h2>Dear {prediction.patient.first_name},</h2>
+                            <p>Your liver function screening analysis has been completed by our advanced AI diagnostic system.</p>
+                            
+                            <div class="result-box">
+                                <h3>Analysis Results</h3>
+                                <p><strong>Result:</strong> <span class="highlight">{prediction.prediction}</span></p>
+                                <p><strong>Confidence:</strong> {prediction.confidence:.1f}%</p>
+                                <p><strong>Analysis Date:</strong> {prediction.created_at.strftime('%B %d, %Y')}</p>
+                                <p><strong>Attending Physician:</strong> Dr. {doctor_name}</p>
+                            </div>
+                            
+                            <p>Please find your detailed liver function report attached to this email. The report contains comprehensive analysis of all laboratory parameters and clinical recommendations.</p>
+                            
+                            <p>{'Your liver function appears to be normal based on the analyzed parameters.' if prediction.prediction == 'No Disease' else 'The analysis indicates abnormal liver function patterns that require immediate medical attention. Please contact your physician urgently.'}</p>
+                            
+                            <p><strong>Important:</strong> This analysis should be reviewed with your healthcare provider for proper medical interpretation and follow-up care.</p>
+                            
+                            <p>If you have any questions, please don't hesitate to contact our clinic.</p>
+                            
+                            <p>Best regards,<br>
+                            <strong>Dr. {doctor_name}</strong><br>
+                            Dr. Charaka Medical AI Diagnostics</p>
+                        </div>
+                        <div class="footer">
+                            <p>This is an automated message from Dr. Charaka AI System.<br>
+                            Please do not reply to this email. Contact your healthcare provider for medical questions.</p>
+                        </div>
+                    </div>
+                </body>
+                </html>
+                """
+                
+                email = EmailMessage(
+                    subject=f'Dr. Charaka - Liver Function Analysis Report for {prediction.patient.first_name}',
+                    body=html_content,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    to=[prediction.patient.email]
+                )
+                email.content_subtype = "html"
+                
+                buffer.seek(0)
+                email.attach(f'DrCharaka_LiverReport_{prediction.patient.last_name}_{prediction.id}.pdf', 
+                           buffer.read(), 'application/pdf')
+                email.send()
+                
+                # Update report status
+                report = PredictionReport.objects.filter(
+                    prediction_data__prediction_id=prediction.id,
+                    prediction_type='liver_disease'
+                ).first()
+                if report:
+                    report.pdf_generated = True
+                    report.email_sent = True
+                    report.save()
+                
+                messages.success(request, 'Professional liver function report generated and emailed successfully!')
+                
+            except Exception as e:
+                logger.error(f"Email failed for liver prediction {prediction_id}: {str(e)}")
+                messages.error(request, 'Report generated but email delivery failed. Please check patient email.')
+        else:
+            messages.warning(request, 'Report generated but patient email not available for delivery.')
+        
+        # Save PDF to media storage
+        buffer.seek(0)
+        filename = f'DrCharaka_LiverReport_{prediction.patient.last_name}_{prediction.id}.pdf'
+        saved_file_path = save_pdf_to_media(buffer, filename, subfolder='liver_reports')
+
+        # Update PredictionReport with saved PDF path
+        report = PredictionReport.objects.filter(
+            prediction_data__prediction_id=prediction.id,
+            prediction_type='liver_disease'
+        ).first()
+        if report:
+            report.pdf_file.name = saved_file_path
+            report.save()
+       
+        # Return PDF for download
+        buffer.seek(0)
+        response = HttpResponse(buffer.read(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="DrCharaka_LiverReport_{prediction.patient.last_name}_{prediction.id}.pdf"'
+        return response
+        
+    except Exception as e:
+        logger.error(f"Liver PDF generation failed for prediction {prediction_id}: {str(e)}")
+        messages.error(request, 'Report generation failed. Please try again.')
+        return redirect('predictor:liver_prediction_result', prediction_id=prediction_id)

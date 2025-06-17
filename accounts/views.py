@@ -142,7 +142,7 @@ def verify_otp_view(request):
                 # Log user in
                 login(request, user)
                 messages.success(request, 'Registration completed successfully! Welcome to Dr. Charaka.')
-                return redirect('core:home_after_login')
+                return redirect('core:home')
                 
             except Exception as e:
                 messages.error(request, 'Error creating account. Please try again.')
@@ -174,7 +174,7 @@ def login_view(request):
             user = form.get_user()
             if user.email_verified:
                 login(request, user)
-                return redirect('core:home_after_login')
+                return redirect('core:home')
             else:
                 messages.error(request, 'Please complete your registration by verifying your email address.')
                 return redirect('accounts:signup')

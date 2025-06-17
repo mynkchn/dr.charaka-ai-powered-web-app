@@ -157,7 +157,7 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 # Authentication settings
 AUTH_USER_MODEL = 'accounts.User'
 LOGIN_REDIRECT_URL = 'accounts:dashboard'
-LOGOUT_REDIRECT_URL = 'core:home_after_login'
+LOGOUT_REDIRECT_URL = 'core:home'
 LOGIN_URL = 'accounts:login'
 
 # Email settings

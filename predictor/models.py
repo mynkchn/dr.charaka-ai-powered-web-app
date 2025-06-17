@@ -3,6 +3,7 @@ from django.db import models
 from django.conf import settings
 import json
 from accounts.models import Patient
+import os
 
 class BreastCancerPrediction(models.Model):
     patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='breast_cancer_predictions')
@@ -87,6 +88,50 @@ class BreastCancerPrediction(models.Model):
             'worst_symmetry': self.worst_symmetry,
             'worst_fractal_dimension': self.worst_fractal_dimension,
         }
+    
+
+class LiverDiseasePrediction(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='liver_disease_predictions')
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    # Liver disease features
+    age = models.IntegerField()
+    gender = models.CharField(max_length=10)  # 'Male' or 'Female'
+    total_bilirubin = models.FloatField()
+    direct_bilirubin = models.FloatField()
+    alkaline_phosphotase = models.FloatField()
+    alamine_aminotransferase = models.FloatField()
+    aspartate_aminotransferase = models.FloatField()
+    total_protiens = models.FloatField()
+    albumin = models.FloatField()
+    albumin_and_globulin_ratio = models.FloatField()
+    
+    # Prediction results
+    prediction = models.CharField(max_length=20)  # 'No Disease' or 'Disease'
+    confidence = models.FloatField()
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.patient.first_name} {self.patient.last_name} - {self.prediction}"
+    
+    def get_features_dict(self):
+        """Return all features as a dictionary for ML model"""
+        return {
+            'Age': self.age,
+            'Gender': 1 if self.gender == 'Male' else 0,  # Convert to numeric
+            'Total_Bilirubin': self.total_bilirubin,
+            'Direct_Bilirubin': self.direct_bilirubin,
+            'Alkaline_Phosphotase': self.alkaline_phosphotase,
+            'Alamine_Aminotransferase': self.alamine_aminotransferase,
+            'Aspartate_Aminotransferase': self.aspartate_aminotransferase,
+            'Total_Protiens': self.total_protiens,
+            'Albumin': self.albumin,
+            'Albumin_and_Globulin_Ratio': self.albumin_and_globulin_ratio,
+        }
+
+
+
 
 # Generic prediction model for extensibility
 class PredictionReport(models.Model):
@@ -104,6 +149,7 @@ class PredictionReport(models.Model):
     pdf_generated = models.BooleanField(default=False)
     email_sent = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
+    pdf_file=models.FileField(upload_to='reports/',blank=True,null=True)
     
     def __str__(self):
         return f"{self.patient} - {self.prediction_type} - {self.created_at.date()}"

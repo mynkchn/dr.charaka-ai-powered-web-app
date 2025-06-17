@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Liver Disease Prediction - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-4xl mx-auto">
+        <div class="bg-white rounded-lg shadow-lg p-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-blue-600 mb-2">Liver Disease Prediction</h1>
+                <p class="text-gray-600">Advanced AI Analysis for Liver Health Assessment</p>
+            </div>
+            
+            <!-- Patient Info -->
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <h3 class="text-lg font-semibold text-blue-800 mb-2">Patient Information</h3>
+                <p class="text-blue-700">
+                    <strong>Name:</strong> {{ patient.first_name }} {{ patient.last_name }} |
+                    <strong>Email:</strong> {{ patient.email|default:"Not provided" }}
+                </p>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <!-- Basic Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">Basic Information</h4>
+                        
+                        <div>
+                            <label for="{{ form.age.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Age (years)
+                            </label>
+                            {{ form.age }}
+                            {% if form.age.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.age.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.gender.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Gender
+                            </label>
+                            {{ form.gender }}
+                            {% if form.gender.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.gender.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Laboratory Values -->
+                <div class="space-y-4">
+                    <h4 class="text-lg font-semibold text-gray-800 border-b pb-2">Laboratory Values</h4>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div>
+                            <label for="{{ form.total_bilirubin.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Total Bilirubin (mg/dL)
+                            </label>
+                            {{ form.total_bilirubin }}
+                            {% if form.total_bilirubin.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.total_bilirubin.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.direct_bilirubin.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Direct Bilirubin (mg/dL)
+                            </label>
+                            {{ form.direct_bilirubin }}
+                            {% if form.direct_bilirubin.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.direct_bilirubin.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.alkaline_phosphotase.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Alkaline Phosphatase (IU/L)
+                            </label>
+                            {{ form.alkaline_phosphotase }}
+                            {% if form.alkaline_phosphotase.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.alkaline_phosphotase.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.alamine_aminotransferase.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                ALT/SGPT (IU/L)
+                            </label>
+                            {{ form.alamine_aminotransferase }}
+                            {% if form.alamine_aminotransferase.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.alamine_aminotransferase.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.aspartate_aminotransferase.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                AST/SGOT (IU/L)
+                            </label>
+                            {{ form.aspartate_aminotransferase }}
+                            {% if form.aspartate_aminotransferase.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.aspartate_aminotransferase.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.total_protiens.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Total Proteins (g/dL)
+                            </label>
+                            {{ form.total_protiens }}
+                            {% if form.total_protiens.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.total_protiens.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.albumin.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                Albumin (g/dL)
+                            </label>
+                            {{ form.albumin }}
+                            {% if form.albumin.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.albumin.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+
+                        <div>
+                            <label for="{{ form.albumin_and_globulin_ratio.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">
+                                A/G Ratio
+                            </label>
+                            {{ form.albumin_and_globulin_ratio }}
+                            {% if form.albumin_and_globulin_ratio.errors %}
+                                <p class="text-red-500 text-sm mt-1">{{ form.albumin_and_globulin_ratio.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="flex justify-center space-x-4 pt-6">
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200 transform hover:scale-105">
+                        🔬 Analyze Liver Function
+                    </button>
+                    <a href="{% url 'predictor:select_patient' %}" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                        ← Back to Patient Selection
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Custom form styling */
+input[type="number"], input[type="text"], select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+input[type="number"]:focus, input[type="text"]:focus, select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+select {
+    background-color: white;
+    cursor: pointer;
+}
+
+.form-field {
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %}
