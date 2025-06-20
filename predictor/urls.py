@@ -17,7 +17,7 @@ urlpatterns = [
     # Liver Disease Prediction
 
     # Form for liver disease prediction
-    path('liver-predict/<int:patient_id>/', views.liver_disease_prediction, name='liver_prediction_form'),
+    path('liver-predict/<int:patient_id>/', views.liver_disease_prediction, name='liver_prediction'),
 
     # Result view for liver disease prediction
     path('liver-result/<int:prediction_id>/', views.liver_prediction_result, name='liver_prediction_result'),

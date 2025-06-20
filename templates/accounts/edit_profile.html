@@ -1,62 +1,213 @@
-!-- EDIT PROFILE TEMPLATE -->
 {% extends 'base.html' %}
 
 {% block title %}Edit Profile - Dr. Charaka{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="glass-card p-4 fade-in">
-                <div class="text-center mb-4">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-user-edit"></i>
-                    </div>
-                    <h3 class="text-white mb-2">Edit Profile</h3>
-                    <p class="text-white-50">Update your account information</p>
-                </div>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
-                    <div class="mb-3">
-                        <label class="form-label text-white">{{ form.username.label }}</label>
-                        <input type="text" name="username" class="form-control glass-input" 
-                               value="{{ form.username.value|default:'' }}">
-                        {{ form.username.errors }}
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label text-white">{{ form.email.label }}</label>
-                        <input type="email" name="email" class="form-control glass-input" 
-                               value="{{ form.email.value|default:'' }}">
-                        {{ form.email.errors }}
-                    </div>
-                    {% if user.is_doctor %}
-                        <div class="mb-3">
-                            <label class="form-label text-white">{{ form.specialization.label }}</label>
-                            <input type="text" name="specialization" class="form-control glass-input" 
-                                   value="{{ form.specialization.value|default:'' }}">
-                            {{ form.specialization.errors }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-white">{{ form.license_number.label }}</label>
-                            <input type="text" name="license_number" class="form-control glass-input" 
-                                   value="{{ form.license_number.value|default:'' }}">
-                            {{ form.license_number.errors }}
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label text-white">{{ form.years_of_experience.label }}</label>
-                            <input type="number" name="years_of_experience" class="form-control glass-input" 
-                                   value="{{ form.years_of_experience.value|default:'' }}">
-                            {{ form.years_of_experience.errors }}
-                        </div>
-                    {% endif %}
-                    <button type="submit" class="btn-gradient w-100 mt-3">
-                        <i class="fas fa-save me-2"></i>
-                        Update Profile
-                    </button>
-                </form>
-            </div>
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="glass-card p-4 fade-in">
+        <div class="text-center mb-5">
+          <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #06b6d4, #8b5cf6);">
+            <i class="fas fa-user-edit"></i>
+          </div>
+          <h3 class="text-white mb-2">Edit <span class="text-gradient">Profile</span></h3>
+          <p class="text-white-50">Update your account information</p>
         </div>
+
+        <form method="post" novalidate>
+          {% csrf_token %}
+          {{ form.non_field_errors }}
+
+          <div class="mb-3">
+            <label class="form-label text-white">{{ form.username.label }}</label>
+            <input type="text" name="username" class="glass-input form-control"
+                   value="{{ form.username.value|default:'' }}"
+                   placeholder="Enter your username">
+            {{ form.username.errors }}
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label text-white">{{ form.email.label }}</label>
+            <input type="email" name="email" class="glass-input form-control"
+                   value="{{ form.email.value|default:'' }}"
+                   placeholder="Enter your email">
+            {{ form.email.errors }}
+          </div>
+
+          {% if user.is_doctor %}
+            <div class="mb-3">
+              <label class="form-label text-white">{{ form.specialization.label }}</label>
+              <input type="text" name="specialization" class="glass-input form-control"
+                     value="{{ form.specialization.value|default:'' }}"
+                     placeholder="Enter your specialization">
+              {{ form.specialization.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-white">{{ form.license_number.label }}</label>
+              <input type="text" name="license_number" class="glass-input form-control"
+                     value="{{ form.license_number.value|default:'' }}"
+                     placeholder="Enter your license number">
+              {{ form.license_number.errors }}
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label text-white">{{ form.years_of_experience.label }}</label>
+              <input type="number" name="years_of_experience" class="glass-input form-control"
+                     value="{{ form.years_of_experience.value|default:'' }}"
+                     placeholder="Enter years of experience">
+              {{ form.years_of_experience.errors }}
+            </div>
+          {% endif %}
+
+          <button type="submit" class="btn-gradient w-100 mt-3">
+            <i class="fas fa-save me-2"></i> Update Profile
+          </button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dark theme background */
+    body {
+        background: linear-gradient(135deg, #0f172a, #1e293b, #334155);
+        min-height: 100vh;
+    }
+
+    .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    .glass-input {
+        background: rgba(15, 23, 42, 0.4);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: white;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .glass-input:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        color: white;
+    }
+
+    .glass-input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .text-gradient {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .btn-gradient {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 1rem;
+    }
+
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+    }
+
+    .glass-card {
+        background: rgba(15, 23, 42, 0.3);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+    }
+
+    /* Error styling */
+    .errorlist {
+        color: #ff6b6b;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        list-style: none;
+        padding: 0;
+    }
+
+    .errorlist li {
+        margin-bottom: 0.25rem;
+    }
+
+    /* Non-field errors */
+    .alert {
+        background: rgba(255, 107, 107, 0.15);
+        border: 1px solid rgba(255, 107, 107, 0.3);
+        color: #ff6b6b;
+        border-radius: 10px;
+        backdrop-filter: blur(10px);
+    }
+
+    /* Additional dark theme elements */
+    .container::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 25% 25%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+        z-index: -1;
+    }
+</style>
 {% endblock %}

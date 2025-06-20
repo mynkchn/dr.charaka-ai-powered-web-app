@@ -356,9 +356,9 @@
             transform: translateY(-1px);
         }
 
-        /* Chat Interface */
+        {% comment %} /* Chat Interface */
         .chat-container {
-            background: var(--white);
+            background: var(--white); 
             border: 1px solid var(--gray-200);
             border-radius: var(--radius-md);
             height: 500px;
@@ -387,7 +387,7 @@
             color: var(--gray-900);
             margin-right: auto;
             border-bottom-left-radius: var(--radius-sm);
-        }
+        } {% endcomment %}
 
         /* Feature Cards */
         .feature-card {
@@ -587,7 +587,7 @@
 
     <!-- Main Content -->
     <main class="main-content">
-        {% if messages %}
+        {% comment %} {% if messages %}
             <div class="container mt-4">
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -596,7 +596,7 @@
                     </div>
                 {% endfor %}
             </div>
-        {% endif %}
+        {% endif %} {% endcomment %}
 
         {% block content %}{% endblock %}
     </main>
@@ -635,13 +635,15 @@
     </footer>
 
     <!-- Bootstrap JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script>
+    {% comment %} <script>
         // Utility Functions
         function showAlert(message, type = 'info') {
             const alertDiv = document.createElement('div');
-            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.className = alert alert-${type} alert-dismissible fade show;
             alertDiv.innerHTML = `
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -715,7 +717,7 @@
                 });
             });
         });
-    </script>
+    </script> {% endcomment %}
     
     {% block extra_js %}{% endblock %}
 </body>

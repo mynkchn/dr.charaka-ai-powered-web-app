@@ -5,6 +5,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Div, HTML
 from crispy_forms.bootstrap import FormActions
 from .models import User, Patient
+from .models import Profile
 
 User = get_user_model()
 
@@ -21,8 +22,8 @@ class UserRegistrationForm(UserCreationForm):
         model = User
         fields = ('email', 'first_name', 'last_name', 'password1', 'password2', 'is_doctor', 'specialization', 'license_number', 'years_of_experience')
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'email',
@@ -94,8 +95,8 @@ class UserRegistrationForm(UserCreationForm):
 class UserLoginForm(AuthenticationForm):
     username = forms.EmailField(label='Email')
     
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'username',
@@ -104,8 +105,8 @@ class UserLoginForm(AuthenticationForm):
         )
 
 class CustomPasswordResetForm(PasswordResetForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'email',
@@ -113,8 +114,8 @@ class CustomPasswordResetForm(PasswordResetForm):
         )
 
 class CustomSetPasswordForm(SetPasswordForm):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
         self.helper = FormHelper()
         self.helper.layout = Layout(
             'new_password1',
@@ -180,8 +181,13 @@ class PatientForm(forms.ModelForm):
             'address': forms.Textarea(attrs={'rows': 2, 'class': 'form-control'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def _init_(self, *args, **kwargs):
+        super()._init_(*args, **kwargs)
         for field in self.fields:
             if field not in ['medical_history', 'allergies', 'address']:
                 self.fields[field].widget.attrs.update({'class': 'form-control'}) 
+
+class EditProfileForm(forms.ModelForm):
+    class Meta:
+        model = Profile
+        fields = ['image', 'phone', 'gender', 'date_of_birth', 'specialization', 'license_number', 'years_of_experience']

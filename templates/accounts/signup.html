@@ -1,20 +1,32 @@
-<!-- SIGNUP TEMPLATE -->
 {% extends 'base.html' %}
 {% load crispy_forms_tags %}
 
 {% block title %}Register - Dr. Charaka{% endblock %}
 
 {% block content %}
+<style>
+    /* Add or modify these styles to ensure text within the card is black */
+    .glass-card h2,
+    .glass-card p,
+    .glass-card a,
+    .glass-card label { /* Also targeting labels for form fields */
+        color: black !important; /* Use !important to override existing styles if necessary */
+    }
+    /* If you have specific styles for crispy forms labels/inputs,
+       you might need to adjust them here as well.
+       Crispy Forms usually generates labels, so targeting 'label' is often enough. */
+</style>
+
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
             <div class="glass-card p-4 fade-in">
                 <div class="text-center mb-4">
                     <div class="feature-icon mb-3">
-                        <i class="fas fa-user-plus"></i>
+                        <i class="fas fa-user-plus" style="color: black;"></i> {# Added inline style for icon #}
                     </div>
-                    <h2 class="text-white mb-2">Create Your Account</h2>
-                    <p class="text-white-50">Join Dr. Charaka's AI-powered healthcare platform</p>
+                    <h2 class="mb-2">Create Your Account</h2> {# No need for text-white if general style applies #}
+                    <p class="mb-0">Join Dr. Charaka's AI-powered healthcare platform</p> {# No need for text-white-50 #}
                 </div>
                 <form method="post" class="signup-form">
                     {% csrf_token %}
@@ -26,9 +38,9 @@
                     </div>
                 </form>
                 <div class="text-center mt-4">
-                    <p class="text-white-50 mb-0">
+                    <p class="mb-0">
                         Already have an account? 
-                        <a href="{% url 'accounts:login' %}" class="text-white text-decoration-none fw-bold">
+                        <a href="{% url 'accounts:login' %}" class="text-decoration-none fw-bold">
                             <i class="fas fa-sign-in-alt me-1"></i>Login
                         </a>
                     </p>

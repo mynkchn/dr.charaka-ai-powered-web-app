@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     'predictor.apps.PredictorConfig',
     'core.apps.CoreConfig',
     'rest_framework',
+    'llm.apps.LlmConfig',
+    'convo.apps.ConvoConfig',
 ]
 
 MIDDLEWARE = [
@@ -122,6 +124,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -169,16 +172,13 @@ EMAIL_HOST_USER = 'data.whisper.1@gmail.com'
 EMAIL_HOST_PASSWORD = 'wgsb jeur xemh ddmu'
 DEFAULT_FROM_EMAIL = 'Dr. Charaka <data.whisper.1@gmail.com>'
 
-# OpenAI settings
-OPENAI_API_KEY = config('OPENAI_API_KEY', default='')
-
 # Gemini settings
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='AIzaSyDBniUa6ja9-EG6hCWvdkVAYtmEPVCSqfA')
 
-# Twilio settings
-TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
-TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
-TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='')
+# # Twilio settings
+# TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
+# TWILIO_AUTH_TOKEN = config('TWILIO_AUTH_TOKEN', default='')
+# TWILIO_PHONE_NUMBER = config('TWILIO_PHONE_NUMBER', default='')
 
 # Site URL for email verification
 SITE_URL = 'http://127.0.0.1:8000'
@@ -203,3 +203,16 @@ CACHES = {
 }
 
 SITE_ID = 1
+
+# settings.py
+AUTHENTICATION_BACKENDS = [
+    # 'accounts.backends.EmailBackend', # Your custom email backend
+    'django.contrib.auth.backends.ModelBackend', # Keep the default for admin, etc.
+]
+
+
+
+# File upload settings
+FILE_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024  # 10MB
+GROQ_API_KEY = os.environ.get('GROQ_API_KEY', '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')

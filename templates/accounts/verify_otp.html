@@ -3,33 +3,86 @@
 {% block title %}Verify OTP - Dr. Charaka{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow-lg border-0">
-                <div class="card-header bg-primary text-white text-center py-3">
-                    <h3 class="mb-0">Verify OTP</h3>
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-sm border-0 rounded-4">
+                <div class="card-header bg-white text-center rounded-top-4 py-4 border-bottom">
+                    <div class="mb-3">
+                        <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                    </div>
+                    <h2 class="mb-1 fw-semibold" style="color: #222;">Verify OTP</h2>
+                    <small class="text-muted">Enter the OTP sent to your email</small>
                 </div>
                 <div class="card-body p-4">
+{% comment %} 
                     {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3" role="alert">
                                 {{ message }}
                                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         {% endfor %}
-                    {% endif %}
+                    {% endif %} {% endcomment %}
+
                     <form method="post" novalidate>
                         {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="otp" class="form-label">Enter OTP</label>
-                            <input type="text" class="form-control" id="otp" name="otp" required>
+                        <div class="mb-4">
+                            <label for="otp" class="form-label fw-semibold">One-Time Password (OTP)</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg rounded-3" 
+                                   id="otp" 
+                                   name="otp" 
+                                   placeholder="Enter OTP" 
+                                   required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100 mt-3">Verify OTP</button>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg rounded-3">
+                                Verify OTP
+                            </button>
+                        </div>
                     </form>
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'accounts:resend_otp' %}" class="text-decoration-none text-muted fw-semibold">
+                            Didn't receive OTP? Resend
+                        </a>
+                    </div>
+
                 </div>
             </div>
         </div>
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background: #f8f9fa;
+    }
+    .card {
+        background: #ffffff;
+    }
+    .form-control {
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        font-size: 1rem;
+    }
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13,110,253,.1);
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #084298;
+    }
+    .card-header {
+        border-bottom: 1px solid #eee;
+    }
+</style>
+{% endblock %}

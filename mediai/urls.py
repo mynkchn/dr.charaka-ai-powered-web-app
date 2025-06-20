@@ -23,8 +23,10 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('core.urls')),
     path('accounts/', include('accounts.urls')),
-    path('chatbot/', include('chatbot.urls', namespace='chatbot')),
+    # path('chatbot/', include('chatbot.urls', namespace='chatbot')),
     path('predictor/',include('predictor.urls')),
+    path('llm/', include('llm.urls', namespace='llm')),
+
     
 ]
 

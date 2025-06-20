@@ -57,7 +57,7 @@ def select_patient(request):
         form = PatientSelectionForm(doctor=request.user, data=request.POST)
         if form.is_valid():
             patient_id = form.cleaned_data['patient'].id
-            return redirect('predictor:liver_prediction_form', patient_id=patient_id)
+            return redirect('predictor:liver_prediction', patient_id=patient_id)
     else:
         form = PatientSelectionForm(doctor=request.user)
     return render(request, 'predictions/select_patient.html', {'form': form})
@@ -595,32 +595,113 @@ def get_cached_liver_model():
             raise
     return model
 
+# Try these fixes one by one:
+
+# FIX 1: Check if your model expects different feature scaling
+def get_cached_liver_model_with_scaler():
+    """Load model and scaler if available"""
+    model = cache.get('liver_disease_model')
+    scaler = cache.get('liver_disease_scaler')
+    
+    if model is None:
+        try:
+            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_prediction_xgb_model.pkl')
+            scaler_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_scaler.pkl')
+            
+            with open(model_path, 'rb') as f:
+                model = pickle.load(f)
+            
+            # Try to load scaler if it exists
+            if os.path.exists(scaler_path):
+                with open(scaler_path, 'rb') as f:
+                    scaler = pickle.load(f)
+                cache.set('liver_disease_scaler', scaler, 3600)
+            
+            cache.set('liver_disease_model', model, 3600)
+        except Exception as e:
+            logger.error(f"Model loading failed: {str(e)}")
+            raise
+    
+    return model, scaler
+
+# FIX 2: Updated prediction view with multiple attempts
 @login_required
 def liver_disease_prediction(request, patient_id):
     patient = get_object_or_404(Patient, id=patient_id, doctor=request.user)
-
+    
     if request.method == 'POST':
         form = LiverDiseasePredictionForm(request.POST)
         if form.is_valid():
             prediction_obj = form.save(commit=False)
             prediction_obj.patient = patient
             prediction_obj.doctor = request.user
-
+            
             try:
-                # Use cached model for faster prediction
-                model = get_cached_liver_model()
-
-                # Prepare features efficiently
-                features = np.array(list(prediction_obj.get_features_dict().values()), dtype=np.float32).reshape(1, -1)
-
-                # Make prediction
+                model, scaler = get_cached_liver_model_with_scaler()
+                
+                # TRY DIFFERENT FEATURE ORDERS AND SCALING
+                
+                # Original order you were using
+                features_v1 = np.array([
+                    float(prediction_obj.age),
+                    1.0 if prediction_obj.gender == 'Male' else 0.0,
+                    float(prediction_obj.total_bilirubin),
+                    float(prediction_obj.direct_bilirubin),
+                    float(prediction_obj.alkaline_phosphotase),
+                    float(prediction_obj.alamine_aminotransferase),
+                    float(prediction_obj.aspartate_aminotransferase),
+                    float(prediction_obj.total_protiens),
+                    float(prediction_obj.albumin),
+                    float(prediction_obj.albumin_and_globulin_ratio)
+                ], dtype=np.float32).reshape(1, -1)
+                
+                # Alternative order (Gender first, then Age)
+                features_v2 = np.array([
+                    1.0 if prediction_obj.gender == 'Male' else 0.0,
+                    float(prediction_obj.age),
+                    float(prediction_obj.total_bilirubin),
+                    float(prediction_obj.direct_bilirubin),
+                    float(prediction_obj.alkaline_phosphotase),
+                    float(prediction_obj.alamine_aminotransferase),
+                    float(prediction_obj.aspartate_aminotransferase),
+                    float(prediction_obj.total_protiens),
+                    float(prediction_obj.albumin),
+                    float(prediction_obj.albumin_and_globulin_ratio)
+                ], dtype=np.float32).reshape(1, -1)
+                
+                # Test different versions
+                test_features = [
+                    ("Version 1 (Age first)", features_v1),
+                    ("Version 2 (Gender first)", features_v2),
+                ]
+                
+                if scaler:
+                    test_features.extend([
+                        ("Version 1 Scaled", scaler.transform(features_v1)),
+                        ("Version 2 Scaled", scaler.transform(features_v2)),
+                    ])
+                
+                print("=== TESTING DIFFERENT FEATURE CONFIGURATIONS ===")
+                for name, features in test_features:
+                    try:
+                        pred = model.predict(features)[0]
+                        prob = model.predict_proba(features)[0]
+                        print(f"{name}: Prediction={pred}, Probabilities={prob}")
+                    except Exception as e:
+                        print(f"{name}: ERROR - {e}")
+                
+                # Use the first working version for actual prediction
+                features = features_v1
+                if scaler:
+                    features = scaler.transform(features)
+                
                 pred = model.predict(features)[0]
                 prob = model.predict_proba(features)[0]
-
+                
                 prediction_obj.prediction = 'No Disease' if pred == 0 else 'Disease'
                 prediction_obj.confidence = round(max(prob) * 100, 2)
                 prediction_obj.save()
-
+                
                 # Create report entry
                 PredictionReport.objects.create(
                     patient=patient,
@@ -630,24 +711,59 @@ def liver_disease_prediction(request, patient_id):
                         'prediction': str(prediction_obj.prediction),
                         'confidence': float(prediction_obj.confidence),
                         'prediction_id': prediction_obj.id,
-                        'features': prediction_obj.get_features_dict()
+                        'features': dict(zip([
+                            'age', 'gender', 'total_bilirubin', 'direct_bilirubin',
+                            'alkaline_phosphotase', 'alamine_aminotransferase',
+                            'aspartate_aminotransferase', 'total_protiens',
+                            'albumin', 'albumin_and_globulin_ratio'
+                        ], features.flatten().tolist()))
                     }
                 )
-
+                
                 return redirect('predictor:liver_prediction_result', prediction_id=prediction_obj.id)
-
+                
             except Exception as e:
                 logger.error(f"Liver prediction failed for patient {patient_id}: {str(e)}")
+                print(f"Error details: {str(e)}")
                 messages.error(request, f'Liver analysis failed. Please try again.')
-
+    
     else:
         form = LiverDiseasePredictionForm()
-
+    
     return render(request, 'predictions/liver_form.html', {
         'form': form,
         'patient': patient
     })
 
+# FIX 3: If you need to retrain or check your model, use this simple test
+def test_liver_model_with_known_healthy_data():
+    """Test with obviously healthy values"""
+    model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_prediction_xgb_model.pkl')
+    
+    with open(model_path, 'rb') as f:
+        model = pickle.load(f)
+    
+    # Obviously healthy values
+    healthy_data = np.array([[
+        25,    # Young age
+        1,     # Male
+        0.8,   # Normal total bilirubin
+        0.2,   # Normal direct bilirubin
+        80,    # Normal alkaline phosphatase
+        25,    # Normal ALT
+        30,    # Normal AST
+        7.0,   # Normal total proteins
+        4.2,   # Normal albumin
+        1.5    # Normal A/G ratio
+    ]], dtype=np.float32)
+    
+    pred = model.predict(healthy_data)[0]
+    prob = model.predict_proba(healthy_data)[0]
+    
+    print(f"Healthy test data prediction: {pred}")
+    print(f"Healthy test data probabilities: {prob}")
+    
+    return pred, prob
 @login_required
 def liver_prediction_result(request, prediction_id):
     prediction = get_object_or_404(LiverDiseasePrediction, id=prediction_id, doctor=request.user)

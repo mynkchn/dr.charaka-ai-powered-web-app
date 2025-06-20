@@ -2,265 +2,528 @@
 
 {% block title %}Sign Up - Dr. Charaka{% endblock %}
 
+{% block extra_css %}
+<style>
+    .signup-container {
+        min-height: calc(100vh - 160px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem 0;
+    }
+
+    .signup-card {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+        padding: 3rem;
+        width: 100%;
+        max-width: 900px;
+    }
+
+    .signup-header {
+        text-align: center;
+        margin-bottom: 2.5rem;
+    }
+
+    .signup-icon {
+        width: 64px;
+        height: 64px;
+        background: var(--gray-100);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem auto;
+    }
+
+    .signup-icon i {
+        font-size: 1.75rem;
+        color: var(--gray-600);
+    }
+
+    .signup-title {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+
+    .signup-subtitle {
+        font-size: 1rem;
+        color: var(--gray-500);
+        font-weight: 400;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-control {
+        height: 48px;
+        padding: 0 1rem;
+        font-size: 1rem;
+        background: var(--white);
+        border: 1px solid var(--gray-300);
+        border-radius: var(--radius);
+        transition: all 0.15s ease;
+    }
+
+    .form-control:focus {
+        border-color: var(--gray-900);
+        box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.1);
+        outline: none;
+    }
+
+    .form-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--gray-700);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .signup-btn {
+        width: 100%;
+        height: 48px;
+        background: var(--gray-900);
+        color: var(--white);
+        border: none;
+        border-radius: var(--radius);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        margin-bottom: 1.5rem;
+    }
+
+    .signup-btn:hover {
+        background: var(--gray-800);
+        transform: translateY(-1px);
+    }
+
+    .signup-btn:focus {
+        outline: 2px solid transparent;
+        outline-offset: 2px;
+        box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.2);
+    }
+
+    .signup-footer {
+        text-align: center;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--gray-200);
+    }
+
+    .signup-footer p {
+        font-size: 0.875rem;
+        color: var(--gray-500);
+        margin-bottom: 0;
+    }
+
+    .signup-footer a {
+        color: var(--gray-900);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.15s ease;
+    }
+
+    .signup-footer a:hover {
+        color: var(--gray-700);
+    }
+
+    .error-message {
+        background: rgba(255, 59, 48, 0.1);
+        border: 1px solid rgba(255, 59, 48, 0.2);
+        color: #A91E1E;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .field-error {
+        color: #A91E1E;
+        font-size: 0.8125rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-control.error {
+        border-color: rgba(255, 59, 48, 0.5);
+    }
+
+    .doctor-section {
+        background: var(--gray-50);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius);
+        padding: 1.5rem;
+        margin-top: 1rem;
+    }
+
+    .doctor-section-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .form-check-input {
+        width: 18px;
+        height: 18px;
+        margin: 0;
+        cursor: pointer;
+    }
+
+    .form-check-label {
+        font-size: 0.875rem;
+        color: var(--gray-700);
+        cursor: pointer;
+        margin: 0;
+    }
+
+    @media (max-width: 768px) {
+        .signup-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+        
+        .signup-title {
+            font-size: 1.5rem;
+        }
+
+        .form-row {
+            flex-direction: column;
+        }
+
+        .form-col {
+            width: 100%;
+            margin-bottom: 0;
+        }
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 0;
+    }
+
+    .form-col {
+        flex: 1;
+    }
+
+    .hidden {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="glass-card p-4 fade-in">
-                <div class="text-center mb-4">
-                    <div class="feature-icon mb-3">
-                        <i class="fas fa-user-plus fa-3x text-gradient"></i>
-                    </div>
-                    <h2 class="text-white mb-2">Create Your Account</h2>
-                    <p class="text-white-50">Join Dr. Charaka's AI-powered healthcare platform</p>
+<div class="signup-container">
+    <div class="signup-card">
+        <div class="signup-header">
+            <div class="signup-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h1 class="signup-title">Create Your Account</h1>
+            <p class="signup-subtitle">Join Dr. Charaka's AI-powered healthcare platform</p>
+        </div>
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="error-message">
+                    {% for error in form.non_field_errors %}
+                        {{ error }}
+                    {% endfor %}
                 </div>
-                <form method="post" novalidate class="signup-form">
-                    {% csrf_token %}
-                    {{ form.non_field_errors }}
-                    <div class="row">
-                        <div class="col-md-6">
-                             <div class="mb-3">
-                                <label class="form-label text-white">{{ form.first_name.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-user"></i>
-                                    </span>
-                                    {{ form.first_name }}
-                                </div>
-                                {{ form.first_name.errors }}
+            {% endif %}
+
+            <!-- Personal Information Row -->
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="id_first_name" class="form-label">
+                            {{ form.first_name.label }}
+                        </label>
+                        <input 
+                            type="text" 
+                            name="first_name" 
+                            id="id_first_name"
+                            class="form-control {% if form.first_name.errors %}error{% endif %}"
+                            placeholder="Enter your first name"
+                            value="{{ form.first_name.value|default:'' }}"
+                        >
+                        {% if form.first_name.errors %}
+                            <div class="field-error">
+                                {% for error in form.first_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
                             </div>
-                             <div class="mb-3">
-                                <label class="form-label text-white">{{ form.last_name.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-user"></i>
-                                    </span>
-                                    {{ form.last_name }}
-                                </div>
-                                {{ form.last_name.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.username.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-user"></i>
-                                    </span>
-                                    {{ form.username }}
-                                </div>
-                                {{ form.username.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.email.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-envelope"></i>
-                                    </span>
-                                    {{ form.email }}
-                                </div>
-                                {{ form.email.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.password1.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                    {{ form.password1 }}
-                                </div>
-                                {{ form.password1.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.password2.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-lock"></i>
-                                    </span>
-                                    {{ form.password2 }}
-                                </div>
-                                {{ form.password2.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    {{ form.is_doctor }}
-                                    <label class="form-check-label text-white" for="{{ form.is_doctor.id_for_label }}">
-                                        I am a healthcare professional
-                                    </label>
-                                </div>
-                                {{ form.is_doctor.errors }}
-                            </div>
-                        </div>
-                        <div class="col-md-6" id="doctor-fields" style="display: none;">
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.specialization.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-stethoscope"></i>
-                                    </span>
-                                    {{ form.specialization }}
-                                </div>
-                                {{ form.specialization.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.license_number.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-id-card"></i>
-                                    </span>
-                                    {{ form.license_number }}
-                                </div>
-                                {{ form.license_number.errors }}
-                            </div>
-                            <div class="mb-3">
-                                <label class="form-label text-white">{{ form.years_of_experience.label }}</label>
-                                <div class="input-group">
-                                    <span class="input-group-text glass-input">
-                                        <i class="fas fa-clock"></i>
-                                    </span>
-                                    {{ form.years_of_experience }}
-                                </div>
-                                {{ form.years_of_experience.errors }}
-                            </div>
-                        </div>
+                        {% endif %}
                     </div>
-                    <div class="d-grid gap-2 mt-4">
-                        <button type="submit" class="btn-gradient btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>Create Account
-                        </button>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="id_last_name" class="form-label">
+                            {{ form.last_name.label }}
+                        </label>
+                        <input 
+                            type="text" 
+                            name="last_name" 
+                            id="id_last_name"
+                            class="form-control {% if form.last_name.errors %}error{% endif %}"
+                            placeholder="Enter your last name"
+                            value="{{ form.last_name.value|default:'' }}"
+                        >
+                        {% if form.last_name.errors %}
+                            <div class="field-error">
+                                {% for error in form.last_name.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
                     </div>
-                </form>
-                <div class="text-center mt-4">
-                    <p class="text-white-50 mb-0">
-                        Already have an account? 
-                        <a href="{% url 'accounts:login' %}" class="text-white text-decoration-none fw-bold">
-                            <i class="fas fa-sign-in-alt me-1"></i>Login
-                        </a>
-                    </p>
                 </div>
             </div>
+
+            <!-- Account Information Row -->
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="id_username" class="form-label">
+                            {{ form.username.label }}
+                        </label>
+                        <input 
+                            type="text" 
+                            name="username" 
+                            id="id_username"
+                            class="form-control {% if form.username.errors %}error{% endif %}"
+                            placeholder="Choose a username"
+                            value="{{ form.username.value|default:'' }}"
+                        >
+                        {% if form.username.errors %}
+                            <div class="field-error">
+                                {% for error in form.username.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="id_email" class="form-label">
+                            {{ form.email.label }}
+                        </label>
+                        <input 
+                            type="email" 
+                            name="email" 
+                            id="id_email"
+                            class="form-control {% if form.email.errors %}error{% endif %}"
+                            placeholder="Enter your email address"
+                            value="{{ form.email.value|default:'' }}"
+                        >
+                        {% if form.email.errors %}
+                            <div class="field-error">
+                                {% for error in form.email.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Row -->
+            <div class="form-row">
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="id_password1" class="form-label">
+                            {{ form.password1.label }}
+                        </label>
+                        <input 
+                            type="password" 
+                            name="password1" 
+                            id="id_password1"
+                            class="form-control {% if form.password1.errors %}error{% endif %}"
+                            placeholder="Create a password"
+                        >
+                        {% if form.password1.errors %}
+                            <div class="field-error">
+                                {% for error in form.password1.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="form-col">
+                    <div class="form-group">
+                        <label for="id_password2" class="form-label">
+                            {{ form.password2.label }}
+                        </label>
+                        <input 
+                            type="password" 
+                            name="password2" 
+                            id="id_password2"
+                            class="form-control {% if form.password2.errors %}error{% endif %}"
+                            placeholder="Confirm your password"
+                        >
+                        {% if form.password2.errors %}
+                            <div class="field-error">
+                                {% for error in form.password2.errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Healthcare Professional Checkbox -->
+            <div class="form-group">
+                <div class="form-check">
+                    <input 
+                        type="checkbox" 
+                        name="is_doctor" 
+                        id="id_is_doctor"
+                        class="form-check-input"
+                        {% if form.is_doctor.value %}checked{% endif %}
+                    >
+                    <label class="form-check-label" for="id_is_doctor">
+                        I am a healthcare professional
+                    </label>
+                </div>
+                {% if form.is_doctor.errors %}
+                    <div class="field-error">
+                        {% for error in form.is_doctor.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Doctor-specific fields -->
+            <div id="doctor-fields" class="doctor-section hidden">
+                <div class="doctor-section-title">
+                    <i class="fas fa-user-md"></i>
+                    Professional Information
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="id_specialization" class="form-label">
+                                {{ form.specialization.label }}
+                            </label>
+                            <input 
+                                type="text" 
+                                name="specialization" 
+                                id="id_specialization"
+                                class="form-control {% if form.specialization.errors %}error{% endif %}"
+                                placeholder="e.g., Cardiology, Neurology"
+                                value="{{ form.specialization.value|default:'' }}"
+                            >
+                            {% if form.specialization.errors %}
+                                <div class="field-error">
+                                    {% for error in form.specialization.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="form-col">
+                        <div class="form-group">
+                            <label for="id_license_number" class="form-label">
+                                {{ form.license_number.label }}
+                            </label>
+                            <input 
+                                type="text" 
+                                name="license_number" 
+                                id="id_license_number"
+                                class="form-control {% if form.license_number.errors %}error{% endif %}"
+                                placeholder="Enter license number"
+                                value="{{ form.license_number.value|default:'' }}"
+                            >
+                            {% if form.license_number.errors %}
+                                <div class="field-error">
+                                    {% for error in form.license_number.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="id_years_of_experience" class="form-label">
+                        {{ form.years_of_experience.label }}
+                    </label>
+                    <input 
+                        type="number" 
+                        name="years_of_experience" 
+                        id="id_years_of_experience"
+                        class="form-control {% if form.years_of_experience.errors %}error{% endif %}"
+                        placeholder="Years of experience"
+                        value="{{ form.years_of_experience.value|default:'' }}"
+                        min="0"
+                        max="50"
+                    >
+                    {% if form.years_of_experience.errors %}
+                        <div class="field-error">
+                            {% for error in form.years_of_experience.errors %}
+                                {{ error }}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <button type="submit" class="signup-btn">
+                Create Account
+            </button>
+        </form>
+
+        <div class="signup-footer">
+            <p>
+                Already have an account? 
+                <a href="{% url 'accounts:login' %}">Sign in here</a>
+            </p>
         </div>
     </div>
 </div>
 
-<style>
-.glass-card {
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 15px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
-
-.feature-icon {
-    width: 80px;
-    height: 80px;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-.text-gradient {
-    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-.glass-input {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    backdrop-filter: blur(10px);
-}
-
-.glass-input:focus {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
-    color: white;
-}
-
-.btn-gradient {
-    background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-    border: none;
-    color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
-    transition: all 0.3s ease;
-}
-
-.btn-gradient:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
-    color: white;
-}
-
-.fade-in {
-    animation: fadeIn 0.5s ease-in;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.form-control {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: white;
-    padding: 12px;
-    border-radius: 10px;
-}
-
-.form-control:focus {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: #8b5cf6;
-    box-shadow: 0 0 0 0.2rem rgba(139, 92, 246, 0.25);
-    color: white;
-}
-
-.form-control::placeholder {
-    color: rgba(255, 255, 255, 0.6);
-}
-
-.input-group-text {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    color: rgba(255, 255, 255, 0.8);
-}
-
-.form-check-input {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-.form-check-input:checked {
-    background-color: #8b5cf6;
-    border-color: #8b5cf6;
-}
-</style>
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    var isDoctor = document.getElementById('id_is_doctor');
-    var doctorFields = document.getElementById('doctor-fields');
+    const isDoctorCheckbox = document.getElementById('id_is_doctor');
+    const doctorFields = document.getElementById('doctor-fields');
     
     function toggleDoctorFields() {
-        if (isDoctor && isDoctor.checked) {
-            doctorFields.style.display = 'block';
-            doctorFields.classList.add('fade-in');
+        if (isDoctorCheckbox && isDoctorCheckbox.checked) {
+            doctorFields.classList.remove('hidden');
         } else {
-            doctorFields.style.display = 'none';
+            doctorFields.classList.add('hidden');
         }
     }
     
-    if (isDoctor) {
-        isDoctor.addEventListener('change', toggleDoctorFields);
+    if (isDoctorCheckbox) {
+        isDoctorCheckbox.addEventListener('change', toggleDoctorFields);
+        // Check initial state
         toggleDoctorFields();
     }
 });
 </script>
-{% endblock %} 
+{% endblock %}

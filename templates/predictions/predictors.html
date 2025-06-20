@@ -1,90 +1,157 @@
 {% extends 'base.html' %}
-{% block title %}Home - Dr. Charaka{% endblock %}
+{% block title %}Cancer Predictor - Dr. Charaka{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="text-center mb-5 fade-in">
-        <h1 class="display-4 fw-bold text-white mb-3">
-            Welcome, <span class="text-gradient">{{ user.get_full_name }}!</span>
-        </h1>
-        <p class="lead text-white-50">Your AI-powered healthcare dashboard</p>
+<div class="container mt-4">
+    <!-- Header Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center">
+                <div class="medical-icon mb-3">
+                    <i class="fas fa-microscope"></i>
+                </div>
+                <h1 class="display-5 fw-bold text-gray-900 mb-3">Risk Assessment</h1>
+                <p class="lead text-gray-600 mb-0">Advanced AI-powered medical diagnosis tool</p>
+                <div class="medical-divider mx-auto mt-4"></div>
+            </div>
+        </div>
     </div>
-    
-    <div class="row g-4">
-       
-       <div class="col-md-4 mb-4">
-            <div class="glass-card p-4 h-100 text-center fade-in">
-                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #06b6d4, #10b981);">
-                    <i class="fas fa-search-plus"></i>
+
+    <!-- Predictor Selection Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="predictor-card h-100">
+                <div class="predictor-header">
+                    <div class="predictor-icon breast-cancer">
+                        <i class="fas fa-ribbon"></i>
+                    </div>
+                    <h3 class="predictor-title">Breast Cancer Predictor</h3>
+                    <p class="predictor-subtitle">Early detection through advanced analysis</p>
                 </div>
-                <h5 class="text-white mb-3">Breast Cancer Predictor</h5>
-                <p class="text-white-50 mb-4">Detecting breast cancer before it strikes — with intelligence, compassion, and precision.</p>
-                <a href="{% url "predictor:select_patient" %}" class="btn-gradient">
-                    <i class="fas fa-play"></i>
-                    Start Prediction
-                </a>
+                <div class="predictor-body">
+                    <div class="predictor-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Machine Learning Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>High Accuracy Detection</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Comprehensive Report</span>
+                        </div>
+                    </div>
+                    <div class="predictor-stats">
+                        <div class="stat">
+                            <span class="stat-number">95%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">10k+</span>
+                            <span class="stat-label">Tests Done</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="predictor-footer">
+                    <a href="{% url 'predictor:select_patient' %}" class="btn-medical">
+                        <i class="fas fa-stethoscope"></i>
+                        Start Breast Cancer Analysis
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="col-md-4 mb-4">
-            <div class="glass-card p-4 h-100 text-center fade-in">
-                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #06b6d4, #10b981);">
-                    <i class="fas fa-search-plus"></i>
+        <div class="col-md-6">
+            <div class="predictor-card h-100">
+                <div class="predictor-header">
+                    <div class="predictor-icon liver-cancer">
+                        <i class="fas fa-liver"></i>
+                    </div>
+                    <h3 class="predictor-title">Liver Cancer Predictor</h3>
+                    <p class="predictor-subtitle">Comprehensive hepatic health assessment</p>
                 </div>
-                <h5 class="text-white mb-3">Liver Cancer Predictor</h5>
-                <p class="text-white-50 mb-4">Detecting breast cancer before it strikes — with intelligence, compassion, and precision.</p>
-                <a href="{% url "predictor:select_patient" %}" class="btn-gradient">
-                    <i class="fas fa-play"></i>
-                    Start Prediction
-                </a>
+                <div class="predictor-body">
+                    <div class="predictor-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Advanced Diagnostics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Risk Factor Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Detailed Assessment</span>
+                        </div>
+                    </div>
+                    <div class="predictor-stats">
+                        <div class="stat">
+                            <span class="stat-number">92%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">8k+</span>
+                            <span class="stat-label">Tests Done</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="predictor-footer">
+                    <a href="{% url 'predictor:select_patient' %}" class="btn-medical">
+                        <i class="fas fa-stethoscope"></i>
+                        Start Liver Cancer Analysis
+                    </a>
+                </div>
             </div>
         </div>
+    </div>
 
-
-
-
-
-
-        {% comment %}         
-        <div class="col-md-4 mb-4">
-            <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.2s;">
-                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
-                    <i class="fas fa-users"></i>
+    <!-- How It Works Section -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="info-section">
+                <h2 class="section-title text-center mb-4">How Our AI Diagnosis Works</h2>
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="process-step">
+                            <div class="step-number">1</div>
+                            <h4 class="step-title">Patient Data Input</h4>
+                            <p class="step-description">Enter comprehensive patient information and medical history for accurate analysis.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="process-step">
+                            <div class="step-number">2</div>
+                            <h4 class="step-title">AI Analysis</h4>
+                            <p class="step-description">Our advanced machine learning algorithms process the data using medical research.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="process-step">
+                            <div class="step-number">3</div>
+                            <h4 class="step-title">Detailed Report</h4>
+                            <p class="step-description">Receive comprehensive results with risk assessment and recommendations.</p>
+                        </div>
+                    </div>
                 </div>
-                <h5 class="text-white mb-3">Patient Data</h5>
-                <p class="text-white-50 mb-4">View and manage your patient data and medical history.</p>
-                <a href="{% url 'accounts:dashboard' %}" class="btn-gradient">
-                    <i class="fas fa-eye"></i>
-                    View Patients
-                </a>
             </div>
-        </div> {% endcomment %}
-        
-        {% comment %} <div class="col-md-4 mb-4">
-            <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.4s;">
-                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
-                    <i class="fas fa-file-medical-alt"></i>
+        </div>
+    </div>
+
+    <!-- Medical Disclaimer -->
+    <div class="row">
+        <div class="col-12">
+            <div class="medical-disclaimer">
+                <div class="disclaimer-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
-                <h5 class="text-white mb-3">Dr. Charaka AI Reports</h5>
-                <p class="text-white-50 mb-4">View your personalized health reports and recommendations.</p>
-                <a href="#" class="btn-gradient">
-                    <i class="fas fa-chart-line"></i>
-                    View Reports
-                </a>
+                <div class="disclaimer-content">
+                    <h5 class="disclaimer-title">Medical Disclaimer</h5>
+                    <p class="disclaimer-text">This AI-powered tool is designed to assist healthcare professionals and should not replace professional medical advice, diagnosis, or treatment. Always consult with qualified healthcare providers for medical decisions.</p>
+                </div>
             </div>
-        </div> {% endcomment %}
-{% comment %} 
-        <div class="col-md-4 mb-4">
-            <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.6s;">
-                <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #3b82f6, #2563eb);">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h5 class="text-white mb-3">AI Health Assistant</h5>
-                <p class="text-white-50 mb-4">Chat with Dr. Charaka AI for instant health advice and information.</p>
-                <a href="{% url 'chatbot:chatbot_page' %}" class="btn-gradient">
-                    <i class="fas fa-comments"></i>
-                    Start Chat
-                </a>
-            </div> {% endcomment %}
         </div>
     </div>
 </div>
@@ -92,93 +159,268 @@
 
 {% block extra_css %}
 <style>
-    .glass-input {
-        background: var(--glass);
-        border: 1px solid var(--glass-border);
-        border-radius: 10px;
-        padding: 12px 15px;
-        color: white;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+    /* Medical Theme Styling */
+    .medical-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--primary);
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
     }
 
-    .glass-input:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
-        color: white;
+    .medical-icon i {
+        font-size: 2.5rem;
+        color: var(--white);
     }
 
-    .glass-input::placeholder {
-        color: rgba(255, 255, 255, 0.6);
+    .medical-divider {
+        width: 60px;
+        height: 3px;
+        background: var(--primary);
+        border-radius: 2px;
+    }
+
+    /* Predictor Cards */
+    .predictor-card {
+        background: var(--white);
+        border: 1px solid var(--border-light);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+        overflow: hidden;
+    }
+
+    .predictor-card:hover {
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .predictor-header {
+        padding: 2rem 2rem 1rem;
+        text-align: center;
+        background: var(--gray-50);
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .predictor-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-md);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+    }
+
+    .predictor-icon.breast-cancer {
+        background: linear-gradient(135deg, #FF6B9D, #E91E63);
+    }
+
+    .predictor-icon.liver-cancer {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    }
+
+    .predictor-icon i {
+        font-size: 1.8rem;
+        color: var(--white);
+    }
+
+    .predictor-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 0.5rem;
+    }
+
+    .predictor-subtitle {
+        color: var(--gray-600);
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .predictor-body {
+        padding: 2rem;
+    }
+
+    .predictor-features {
+        margin-bottom: 2rem;
     }
 
     .feature-item {
         display: flex;
         align-items: center;
-        padding: 8px 0;
-        transition: all 0.3s ease;
+        margin-bottom: 0.75rem;
+        font-size: 0.9rem;
     }
 
-    .feature-item:hover {
-        transform: translateX(5px);
+    .feature-item i {
+        color: var(--success);
+        margin-right: 0.75rem;
+        font-size: 0.9rem;
     }
 
-    .text-gradient {
-        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
+    .predictor-stats {
+        display: flex;
+        justify-content: space-around;
+        padding: 1.5rem 0;
+        background: var(--gray-50);
+        border-radius: var(--radius);
+        margin-bottom: 1rem;
     }
 
-    /* Crispy forms styling */
-    .crispy-form .form-control,
-    .signup-form .form-control {
-        background: var(--glass);
-        border: 1px solid var(--glass-border);
-        border-radius: 10px;
-        padding: 12px 15px;
-        color: white;
-        backdrop-filter: blur(10px);
-        transition: all 0.3s ease;
+    .stat {
+        text-align: center;
     }
 
-    .crispy-form .form-control:focus,
-    .signup-form .form-control:focus {
-        background: rgba(255, 255, 255, 0.15);
-        border-color: var(--primary);
-        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
-        color: white;
+    .stat-number {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary);
+        line-height: 1;
     }
 
-    .crispy-form .form-control::placeholder,
-    .signup-form .form-control::placeholder {
-        color: rgba(255, 255, 255, 0.6);
+    .stat-label {
+        font-size: 0.8rem;
+        color: var(--gray-600);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
 
-    .crispy-form label,
-    .signup-form label {
-        color: white !important;
-        font-weight: 500;
+    .predictor-footer {
+        padding: 0 2rem 2rem;
     }
 
-    .crispy-form .form-text,
-    .signup-form .form-text {
-        color: rgba(255, 255, 255, 0.7) !important;
+    .btn-medical {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.875rem 1.5rem;
+        background: var(--primary);
+        color: var(--white);
+        text-decoration: none;
+        border-radius: var(--radius);
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s ease;
+        border: none;
     }
 
-    .crispy-form select,
-    .signup-form select {
-        background: var(--glass);
-        border: 1px solid var(--glass-border);
-        color: white;
-        backdrop-filter: blur(10px);
+    .btn-medical:hover {
+        background: var(--primary-hover);
+        color: var(--white);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow);
     }
 
-    .crispy-form select option,
-    .signup-form select option {
-        background: var(--dark-bg);
-        color: white;
+    /* Info Section */
+    .info-section {
+        padding: 3rem 0;
+    }
+
+    .section-title {
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 3rem;
+    }
+
+    .process-step {
+        text-align: center;
+        padding: 1.5rem;
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        background: var(--primary);
+        color: var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin: 0 auto 1rem;
+    }
+
+    .step-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: 1rem;
+    }
+
+    .step-description {
+        color: var(--gray-600);
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+
+    /* Medical Disclaimer */
+    .medical-disclaimer {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 2rem;
+        background: #FFF3CD;
+        border: 1px solid #FFECB5;
+        border-radius: var(--radius-md);
+        margin-bottom: 2rem;
+    }
+
+    .disclaimer-icon {
+        color: #856404;
+        font-size: 1.5rem;
+        margin-top: 0.25rem;
+    }
+
+    .disclaimer-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #856404;
+        margin-bottom: 0.5rem;
+    }
+
+    .disclaimer-text {
+        color: #856404;
+        margin-bottom: 0;
+        line-height: 1.5;
+        font-size: 0.95rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .predictor-header {
+            padding: 1.5rem 1.5rem 1rem;
+        }
+
+        .predictor-body {
+            padding: 1.5rem;
+        }
+
+        .predictor-footer {
+            padding: 0 1.5rem 1.5rem;
+        }
+
+        .predictor-stats {
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .medical-disclaimer {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .process-step {
+            padding: 1rem 0;
+        }
     }
 </style>
 {% endblock %}

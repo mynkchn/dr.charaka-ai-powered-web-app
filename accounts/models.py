@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.contrib.auth.models import User
 from django.utils import timezone
 import uuid
 
@@ -21,7 +22,7 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name']
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.first_name} {self.last_name}"
 
 class Patient(models.Model):
@@ -44,8 +45,28 @@ class Patient(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
+    def _str_(self):
         return f"{self.first_name} {self.last_name}"
 
     class Meta:
         ordering = ['-created_at']
+
+
+class Profile(models.Model):
+    GENDER_CHOICES = [
+        ('M', 'Male'),
+        ('F', 'Female'),
+        ('O', 'Other'),
+    ]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='profile_pics', default='default.jpg')
+    phone = models.CharField(max_length=15, blank=True)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, blank=True)
+    date_of_birth = models.DateField(null=True, blank=True)
+    specialization = models.CharField(max_length=100, blank=True)
+    license_number = models.CharField(max_length=50, blank=True)
+    years_of_experience = models.PositiveIntegerField(null=True, blank=True)
+    
+    def _str_(self):
+        return f"{self.user.username}'s Profile"

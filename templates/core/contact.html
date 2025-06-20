@@ -6,109 +6,187 @@
 <div class="container py-5">
     <div class="row justify-content-center">
         <div class="col-lg-8">
-            <div class="card shadow-lg border-0 rounded-lg fade-in">
-                <div class="card-header bg-gradient text-white text-center py-4">
-                    <h2 class="mb-0">Contact Us</h2>
+            <div class="glass-card p-4 rounded-lg fade-in">
+                <div class="text-center mb-5">
+                    <h2 class="display-5 fw-bold text-dark mb-3">
+                        Contact <span class="text-gradient">Dr. Charaka</span>
+                    </h2>
+                    <p class="lead text-secondary">We're here to help and answer any questions you might have</p>
                 </div>
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-envelope fa-3x text-primary mb-3"></i>
-                        <h3>Get in Touch</h3>
-                        <p class="text-muted">We're here to help and answer any questions you might have.</p>
-                    </div>
 
-                    <div class="row mb-4">
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="contact-info">
-                                <i class="fas fa-phone-alt feature-icon"></i>
-                                <h5>Phone</h5>
-                                <p>+1 (555) 123-4567</p>
+                <div class="row mb-5">
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="contact-info glass-card p-3">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #06b6d4, #10b981); color: black;">
+                                <i class="fas fa-phone-alt"></i>
                             </div>
-                        </div>
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="contact-info">
-                                <i class="fas fa-envelope feature-icon"></i>
-                                <h5>Email</h5>
-                                <p>support@drcharaka.com</p>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center mb-3">
-                            <div class="contact-info">
-                                <i class="fas fa-map-marker-alt feature-icon"></i>
-                                <h5>Location</h5>
-                                <p>123 Medical Center Dr.</p>
-                            </div>
+                            <h5 class="text-dark mb-2">Phone</h5>
+                            <p class="text-secondary">+91 8602763836</p>
                         </div>
                     </div>
-
-                    <form class="contact-form" method="post" action="{% url 'core:contact' %}">
-                        {% csrf_token %}
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="name" placeholder="Your Name" name="name">
-                                    <label for="name">Your Name</label>
-                                </div>
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="contact-info glass-card p-3">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #6366f1, #8b5cf6); color: black;">
+                                <i class="fas fa-envelope"></i>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <div class="form-floating">
-                                    <input type="email" class="form-control" id="email" placeholder="Your Email" name="email">
-                                    <label for="email">Your Email</label>
-                                </div>
+                            <h5 class="text-dark mb-2">Email</h5>
+                            <p class="text-secondary">support@drcharaka.com</p>
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center mb-4">
+                        <div class="contact-info glass-card p-3">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #f59e0b, #ef4444); color: black;">
+                                <i class="fas fa-map-marker-alt"></i>
                             </div>
+                            <h5 class="text-dark mb-2">Team</h5>
+                            <p class="text-secondary">Charaka Collective
+                            </p>
                         </div>
-                        <div class="mb-3">
-                            <div class="form-floating">
-                                <input type="text" class="form-control" id="subject" placeholder="Subject" name="subject">
-                                <label for="subject">Subject</label>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-floating">
-                                <textarea class="form-control" id="message" style="height: 150px" placeholder="Your Message" name="message"></textarea>
-                                <label for="message">Your Message</label>
-                            </div>
-                        </div>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-paper-plane me-2"></i>Send Message
-                            </button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
+
+                <form class="contact-form" method="post" action="{% url 'core:contact' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating">
+                                <input type="text" class="glass-input form-control" id="name" placeholder="Your Name" name="name" required>
+                                <label for="name" class="text-secondary">Your Name</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating">
+                                <input type="email" class="glass-input form-control" id="email" placeholder="Your Email" name="email" required>
+                                <label for="email" class="text-secondary">Your Email</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-floating">
+                            <input type="text" class="glass-input form-control" id="subject" placeholder="Subject" name="subject" required>
+                            <label for="subject" class="text-secondary">Subject</label>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <div class="form-floating">
+                            <textarea class="glass-input form-control" id="message" style="height: 150px" placeholder="Your Message" name="message" required></textarea>
+                            <label for="message" class="text-secondary">Your Message</label>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn-gradient">
+                            <i class="fas fa-paper-plane me-2"></i>Send Message
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
     .contact-info {
-        padding: 1.5rem;
-        border-radius: 15px;
-        background: white;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
+        transition: transform 0.2s ease;
     }
 
     .contact-info:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+
+    .glass-input {
+        background: var(--glass);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        padding: 12px 15px;
+        color: black;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+
+    .glass-input:focus {
+        background: rgba(255, 255, 255, 0.15);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(99, 102, 241, 0.25);
+        color: black;
+    }
+
+    .glass-input::placeholder {
+        color: rgba(0, 0, 0, 0.6);
+    }
+
+    .form-floating > label {
+        color: rgba(0, 0, 0, 0.6) !important;
+    }
+
+    .form-floating > .glass-input:focus ~ label,
+    .form-floating > .glass-input:not(:placeholder-shown) ~ label {
+        color: black !important;
+    }
+
+    .text-gradient {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .feature-icon {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: var(--secondary-color);
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        font-size: 1.5rem;
+        color: black;
     }
 
-    .contact-form .form-control {
-        border: 2px solid #e9ecef;
-        padding: 1rem;
+    .btn-gradient {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        font-size: 1rem;
     }
 
-    .contact-form .form-control:focus {
-        border-color: var(--secondary-color);
-        box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+    .btn-gradient:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(99, 102, 241, 0.3);
+        color: white;
+    }
+
+    .glass-card {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    }
+
+    .fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 </style>
-{% endblock %} 
+{% endblock %}

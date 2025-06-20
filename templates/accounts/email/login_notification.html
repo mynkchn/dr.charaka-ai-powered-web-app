@@ -1,157 +1,83 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
+    <title>New Login Notification</title>
     <style>
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f8f9fa;
+            background-color: #f4f4f7;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            color: #333333;
         }
-        .email-card {
-            background: white;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            padding: 30px;
             text-align: center;
+            font-size: 26px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 300;
-        }
-        .tagline {
-            margin: 8px 0 0 0;
-            opacity: 0.9;
-            font-size: 14px;
+        .sub-header {
+            text-align: center;
+            font-size: 16px;
+            color: #888888;
+            margin-bottom: 30px;
         }
         .content {
-            padding: 30px;
-        }
-        .greeting {
-            font-size: 18px;
-            font-weight: 500;
-            margin-bottom: 20px;
-        }
-        .info-box {
-            background: #f8f9ff;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-            margin: 25px 0;
-        }
-        .info-box h3 {
-            margin: 0 0 15px 0;
-            color: #333;
             font-size: 16px;
+            line-height: 1.6;
+            color: #444444;
         }
-        .info-box p {
-            margin: 5px 0;
-            color: #666;
-        }
-        .security-alert {
-            background: #fff5f5;
-            border: 1px solid #feb2b2;
-            padding: 15px;
-            border-radius: 8px;
+        .details {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 6px;
             margin: 20px 0;
-            color: #742a2a;
+            font-size: 15px;
         }
-        .features {
-            margin: 30px 0;
-        }
-        .features h3 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 20px;
-        }
-        .feature-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin: 20px 0;
-        }
-        .feature-item {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 14px;
-        }
-        .button {
-            display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            text-decoration: none;
-            border-radius: 25px;
-            font-weight: 500;
-            margin: 20px 0;
-            transition: transform 0.2s;
-        }
-        .button:hover {
-            transform: translateY(-1px);
+        .details div {
+            margin-bottom: 10px;
         }
         .footer {
-            background: #f8f9fa;
-            padding: 20px;
             text-align: center;
+            margin-top: 40px;
             font-size: 12px;
-            color: #666;
+            color: #999999;
         }
-        @media (max-width: 600px) {
-            .feature-grid { grid-template-columns: 1fr; }
-            .header { padding: 20px; }
-            .content { padding: 20px; }
+        .warning {
+            color: #e74c3c;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
-    <div class="email-card">
-        <div class="header">
-            <h1>Dr. Charaka</h1>
-            <p class="tagline">AI-Powered Healthcare Platform</p>
-        </div>
-
+    <div class="container">
+        <div class="header">Dr. Charaka</div>
+        <div class="sub-header">Security Alert - New Login Detected</div>
         <div class="content">
-            <p class="greeting">Hello {{ user.first_name }},</p>
-            
-            <p>Welcome to Dr. Charaka! Your AI healthcare assistant platform designed to help doctors with intelligent diagnostics and patient care.</p>
-
-            <div class="info-box">
-                <h3>Login Details</h3>
-                <p><strong>Time:</strong> {{ login_time }}</p>
-                <p><strong>Location:</strong> {{ location }}</p>
-                <p><strong>IP Address:</strong> {{ ip }}</p>
+            Hello {{ user.first_name|default:user.username }},
+            <br><br>
+            We noticed a new login to your account. Here are the details:
+            <div class="details">
+                <div><strong>Date & Time:</strong> {{ login_time }}</div>
+                <div><strong>IP Address:</strong> {{ ip }}</div>
+                <div><strong>Location:</strong> {{ location }}</div>
             </div>
-
-            <div class="security-alert">
-                <strong>Security Notice:</strong> If this wasn't you, contact support immediately.
-            </div>
-
-            <div class="features">
-                <h3>What's Available</h3>
-                <div class="feature-grid">
-                    <div class="feature-item">Disease Prediction Models</div>
-                    <div class="feature-item">AI Chatbot Assistant</div>
-                    <div class="feature-item">Patient Analytics</div>
-                    <div class="feature-item">Doctor Network</div>
-                </div>
-            </div>
+            If this was <strong>you</strong>, no further action is needed.<br>
+            <span class="warning">If this was not you, please change your password immediately and secure your account.</span>
         </div>
-
         <div class="footer">
-            <p>This is an automated message, please do not reply.</p>
-            <p>&copy; {% now "Y" %} Dr. Charaka. All rights reserved.</p>
+            &copy; {{ current_year }} Dr. Charaka. All rights reserved.<br>
+            This is an automated security notification.
         </div>
     </div>
 </body>

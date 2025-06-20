@@ -5,76 +5,133 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-                <div class="card-body p-4">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-heartbeat fa-3x text-primary mb-3"></i>
-                        <h3>Revolutionizing Healthcare with AI</h3>
+        <div class="col-lg-10">
+            <div class="glass-card p-5">
+                <div class="text-center mb-5 fade-in">
+                    <div class="feature-icon mb-4" style="background: linear-gradient(135deg, #ef4444, #f59e0b); margin: 0 auto; width: 80px; height: 80px; display: flex; align-items: center; justify-content: center;">
+                        <i class="fas fa-heartbeat" style="font-size: 2rem; color: white;"></i>
+                    </div>
+                    <h1 class="display-5 fw-bold text-dark mb-3">
+                        Revolutionizing Healthcare with <span class="text-gradient">AI</span>
+                    </h1>
+                </div>
+                
+                <div class="about-content text-center mb-5">
+                    <p class="lead text-dark mb-4">Dr. Charaka is an innovative AI-powered healthcare platform designed to assist medical professionals in providing better patient care through cutting-edge technology and intelligent insights.</p>
+                </div>
+                
+                <div class="row g-4 mt-4">
+                    <div class="col-md-6 mb-4">
+                        <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.1s;">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #06b6d4, #10b981);">
+                                <i class="fas fa-brain"></i>
+                            </div>
+                            <h4 class="text-dark mb-3">AI-Powered Diagnosis</h4>
+                            <p class="text-secondary">Advanced machine learning algorithms to assist in accurate diagnosis and treatment planning with real-time insights.</p>
+                        </div>
                     </div>
                     
-                    <div class="about-content">
-                        <p class="lead">Dr. Charaka is an innovative AI-powered healthcare platform designed to assist medical professionals in providing better patient care.</p>
-                        
-                        <div class="row mt-5">
-                            <div class="col-md-6 mb-4">
-                                <div class="feature-card h-100">
-                                    <i class="fas fa-brain feature-icon"></i>
-                                    <h4>AI-Powered Diagnosis</h4>
-                                    <p>Advanced machine learning algorithms to assist in accurate diagnosis and treatment planning.</p>
-                                </div>
+                    <div class="col-md-6 mb-4">
+                        <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.2s;">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
+                                <i class="fas fa-user-md"></i>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="feature-card h-100">
-                                    <i class="fas fa-user-md feature-icon"></i>
-                                    <h4>Doctor-Focused</h4>
-                                    <p>Built by doctors, for doctors. Streamline your workflow and enhance patient care.</p>
-                                </div>
+                            <h4 class="text-dark mb-3">Doctor-Focused</h4>
+                            <p class="text-secondary">Built by doctors, for doctors. Streamline your workflow and enhance patient care with intuitive tools.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.3s;">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fas fa-shield-alt"></i>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="feature-card h-100">
-                                    <i class="fas fa-shield-alt feature-icon"></i>
-                                    <h4>Secure & Private</h4>
-                                    <p>Enterprise-grade security to protect patient data and maintain confidentiality.</p>
-                                </div>
+                            <h4 class="text-dark mb-3">Secure & Private</h4>
+                            <p class="text-secondary">Enterprise-grade security to protect patient data and maintain confidentiality with end-to-end encryption.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 mb-4">
+                        <div class="glass-card p-4 h-100 text-center fade-in" style="animation-delay: 0.4s;">
+                            <div class="feature-icon mb-3" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
+                                <i class="fas fa-chart-line"></i>
                             </div>
-                            <div class="col-md-6 mb-4">
-                                <div class="feature-card h-100">
-                                    <i class="fas fa-chart-line feature-icon"></i>
-                                    <h4>Data Analytics</h4>
-                                    <p>Comprehensive analytics to track patient outcomes and improve care quality.</p>
-                                </div>
-                            </div>
+                            <h4 class="text-dark mb-3">Data Analytics</h4>
+                            <p class="text-secondary">Comprehensive analytics to track patient outcomes and improve care quality with actionable insights.</p>
                         </div>
                     </div>
                 </div>
-            </>
+
+                <!-- Additional Mission Section -->
+                <div class="row mt-5">
+                    <div class="col-12">
+                        <div class="glass-card p-4 text-center fade-in" style="animation-delay: 0.5s;">
+                            <h3 class="text-dark mb-4">Our Mission</h3>
+                            <p class="text-secondary lead">
+                                To empower healthcare professionals with AI-driven tools that enhance diagnostic accuracy, 
+                                improve patient outcomes, and transform the future of medicine through innovation and technology.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
-    .feature-card {
-        padding: 2rem;
-        border-radius: 15px;
-        background: white;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        transition: all 0.3s ease;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-    }
-
-    .feature-icon {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        color: var(--secondary-color);
+    .text-gradient {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 
     .about-content {
         font-size: 1.1rem;
         line-height: 1.8;
     }
+
+    .glass-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .feature-icon:hover {
+        transform: scale(1.1);
+    }
+
+    .fade-in {
+        opacity: 0;
+        transform: translateY(30px);
+        animation: fadeInUp 0.8s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: rgba(0, 0, 0, 0.05);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #06b6d4, #8b5cf6);
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #0891b2, #7c3aed);
+    }
 </style>
-{% endblock %} 
+{% endblock %}
