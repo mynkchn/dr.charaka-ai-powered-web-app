@@ -205,7 +205,7 @@
                                     <i class="fas fa-file-pdf me-2"></i>
                                     Generate PDF Report
                                 </a>
-                                <a href="{% url 'predictor:select_patient' %}" 
+                                <a href="{% url 'predictor:liver_prediction' %}" 
                                    class="btn btn-outline-primary d-flex align-items-center justify-content-center">
                                     <i class="fas fa-plus me-2"></i>
                                     New Analysis
@@ -248,6 +248,33 @@
                 </div>
             </div>
         </div>
+
+        
+            <!-- Disclaimer -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-info border-0" style="border-radius: 15px; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="alert-heading mb-2">Important Disclaimer</h6>
+                                <p class="mb-2">
+                                    This AI-powered diabetes risk assessment is for informational purposes only and should not replace professional medical advice, diagnosis, or treatment. The predictions are based on machine learning algorithms trained on historical data and may not account for all individual health factors.
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Always consult with qualified healthcare professionals</strong> for proper medical evaluation and personalized health recommendations. If you have concerns about diabetes or other health conditions, seek immediate medical attention.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
     </div>
 </div>
 

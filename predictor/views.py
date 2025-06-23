@@ -10,6 +10,7 @@ from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.cache import cache
 import json
+from django.urls import reverse
 import pickle
 import numpy as np
 import os
@@ -22,14 +23,15 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from accounts.models import Patient
-from .models import BreastCancerPrediction, PredictionReport
-from .forms import PatientSelectionForm, BreastCancerPredictionForm
+from .models import BreastCancerPrediction, PredictionReport,DiabetesPrediction
+from .forms import PatientSelectionForm, BreastCancerPredictionForm,DiabetesPredictionForm
 from datetime import datetime
 import logging
 from django.core.files.base import ContentFile
 from django.core.files.storage import default_storage
 from .models import LiverDiseasePrediction
 from .forms import LiverDiseasePredictionForm
+import joblib
 
 logger = logging.getLogger(__name__)
 
@@ -62,59 +64,239 @@ def select_patient(request):
         form = PatientSelectionForm(doctor=request.user)
     return render(request, 'predictions/select_patient.html', {'form': form})
 
+import numpy as np
+
+def convert_numpy_types(obj):
+    if isinstance(obj, dict):
+        return {k: convert_numpy_types(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(i) for i in obj]
+    elif isinstance(obj, np.generic):
+        return obj.item()
+    return obj
+
+def make_json_serializable(obj):
+    if isinstance(obj, dict):
+        return {k: make_json_serializable(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [make_json_serializable(v) for v in obj]
+    elif isinstance(obj, np.generic):
+        return obj.item()
+    elif isinstance(obj, (np.ndarray, )):
+        return obj.tolist()
+    return obj
+
 @login_required
-def breast_cancer_prediction(request, patient_id):
-    patient = get_object_or_404(Patient, id=patient_id, doctor=request.user)
+def breast_cancer_prediction(request, patient_id=None):
+    """
+    Handle breast cancer prediction with patient selection and analysis
+    """
+    # Get all patients for the dropdown
+    patients = Patient.objects.filter(doctor=request.user).order_by('first_name', 'last_name')
+    
+    # Get selected patient if patient_id provided
+    selected_patient = None
+    if patient_id:
+        try:
+            selected_patient = get_object_or_404(Patient, id=patient_id, doctor=request.user)
+        except:
+            selected_patient = None
 
     if request.method == 'POST':
-        form = BreastCancerPredictionForm(request.POST)
-        if form.is_valid():
-            prediction_obj = form.save(commit=False)
-            prediction_obj.patient = patient
-            prediction_obj.doctor = request.user
-
+        # Handle form submission with patient selection
+        try:
+            # Get patient from form data
+            form_patient_id = request.POST.get('patient_id')
+            if not form_patient_id:
+                error_message = 'Patient selection is required'
+                
+                # Handle AJAX request
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'error': error_message}, status=400)
+                
+                messages.error(request, error_message)
+                return render(request, 'predictions/breast_cancer_form.html', {
+                    'form': BreastCancerPredictionForm(),
+                    'patients': patients,
+                    'selected_patient': selected_patient,
+                })
+            
+            # Get the selected patient
             try:
-                # Use cached model for faster prediction
-                model = get_cached_model()
+                patient = get_object_or_404(Patient, id=form_patient_id, doctor=request.user)
+            except:
+                error_message = 'Invalid patient selection'
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({'error': error_message}, status=400)
+                
+                messages.error(request, error_message)
+                return render(request, 'predictions/breast_cancer_form.html', {
+                    'form': BreastCancerPredictionForm(),
+                    'patients': patients,
+                    'selected_patient': selected_patient,
+                })
+            
+            # Validate the form
+            form = BreastCancerPredictionForm(request.POST)
+            if form.is_valid():
+                # Create prediction object
+                prediction_obj = form.save(commit=False)
+                prediction_obj.patient = patient
+                prediction_obj.doctor = request.user
+                
+                try:
+                    # Use cached model for faster prediction
+                    model = get_cached_model()  # Specify model type
+                    if model is None:
+                        raise Exception("Breast cancer prediction model not available")
+                    
+                    # Prepare features efficiently
+                    features_dict = prediction_obj.get_features_dict()
+                    features = np.array(list(features_dict.values()), dtype=np.float32).reshape(1, -1)
+                    print(features)
+                    
+                    # Validate features (handle missing values)
+                    if np.any(np.isnan(features)) or np.any(np.isinf(features)):
+                        # Log warning about missing values
+                        logger.warning(f"Missing values detected in prediction for patient {patient.id}")
+                        # Handle missing values by replacing with 0 or median values
+                        features = np.nan_to_num(features, nan=0.0, posinf=0.0, neginf=0.0)
+                    
+                    # Make prediction
+                    pred = model.predict(features)[0]
+                    prob = model.predict_proba(features)[0]
+                    
+                    # Store prediction results
+                    prediction_obj.prediction = 'Malignant' if pred == 1 else 'Benign'
+                    prediction_obj.confidence = float(round(max(prob) * 100, 2))
+                    
+                    # Store individual probabilities if your model has them
+                    if len(prob) > 1:
+                        prediction_obj.malignant_probability = float(round(prob[1] * 100, 2))
+                        prediction_obj.benign_probability = float(round(prob[0] * 100, 2))
+                    
+                    # Save the prediction
+                    prediction_obj.save()
 
-                # Prepare features efficiently
-                features = np.array(list(prediction_obj.get_features_dict().values()), dtype=np.float32).reshape(1, -1)
+                    features_dict = convert_numpy_types(features_dict)
 
-                # Make prediction
-                pred = model.predict(features)[0]
-                prob = model.predict_proba(features)[0]
-
-                prediction_obj.prediction = 'Malignant' if pred == 1 else 'Benign'
-                prediction_obj.confidence = round(max(prob) * 100, 2)
-                prediction_obj.save()
-
-                # Create report entry
-                PredictionReport.objects.create(
-                    patient=patient,
-                    doctor=request.user,
-                    prediction_type='breast_cancer',
-                    prediction_data={
+                    
+                    # Create comprehensive report entry
+                    report_data = {
                         'prediction': str(prediction_obj.prediction),
                         'confidence': float(prediction_obj.confidence),
                         'prediction_id': prediction_obj.id,
-                        'features': prediction_obj.get_features_dict()
+                        'features': features_dict,
+                        'patient_info': {
+                            'name': patient.first_name,
+                            'gender': patient.gender,
+                        }
                     }
-                )
+                    
+                    # Add probability details if available
+                    if hasattr(prediction_obj, 'malignant_probability'):
+                        report_data['malignant_probability'] = float(prediction_obj.malignant_probability)
+                        report_data['benign_probability'] = float(prediction_obj.benign_probability)
 
-                return redirect('predictor:prediction_result', prediction_id=prediction_obj.id)
-
-            except Exception as e:
-                logger.error(f"Prediction failed for patient {patient_id}: {str(e)}")
-                messages.error(request, f'Analysis failed. Please try again.')
-
+                    report_data_clean=make_json_serializable(report_data)
+                    report_data_json=json.dumps(report_data_clean)
+                    
+                    # Create prediction report
+                    PredictionReport.objects.create(
+                        patient=patient,
+                        doctor=request.user,
+                        prediction_type='breast_cancer',
+                        prediction_data=report_data_json
+                    )
+                    
+                    # Handle AJAX request
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({
+                            'success': True,
+                            'redirect_url': reverse('predictor:prediction_result', kwargs={'prediction_id': prediction_obj.id}),
+                            'prediction': prediction_obj.prediction,
+                            'confidence': prediction_obj.confidence
+                        })
+                    
+                    # Add success message
+                    messages.success(
+                        request, 
+                        f'Breast cancer analysis completed for {patient.get_full_name()}. '
+                        f'Prediction: {prediction_obj.prediction} ({prediction_obj.confidence}% confidence)'
+                    )
+                    
+                    # Redirect to results page
+                    return redirect('predictor:prediction_result', prediction_id=prediction_obj.id)
+                    
+                except Exception as e:
+                    logger.error(f"Prediction failed for patient {patient.id}: {str(e)}")
+                    
+                    error_message = 'Analysis failed. Please check your input data and try again.'
+                    
+                    # Handle AJAX request
+                    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                        return JsonResponse({'error': error_message}, status=500)
+                    
+                    messages.error(request, f'Analysis failed: {str(e)}. Please check your input data and try again.')
+                    
+                    # Return form with error and maintain patient selection
+                    return render(request, 'predictions/breast_cancer_form.html', {
+                        'form': form,
+                        'patients': patients,
+                        'selected_patient': patient,
+                    })
+            else:
+                # Form validation failed
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'error': 'Invalid form data',
+                        'errors': dict(form.errors)
+                    }, status=400)
+                
+                # Get patient for form re-display
+                patient = None
+                if form_patient_id:
+                    try:
+                        patient = get_object_or_404(Patient, id=form_patient_id, doctor=request.user)
+                    except:
+                        pass
+                
+                messages.error(request, 'Please correct the form errors below.')
+                return render(request, 'predictions/breast_cancer_form.html', {
+                    'form': form,
+                    'patients': patients,
+                    'selected_patient': patient,
+                })
+                
+        except Exception as e:
+            logger.error(f"Breast cancer prediction error: {str(e)}")
+            
+            error_message = 'An unexpected error occurred. Please try again.'
+            
+            # Handle AJAX request
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({'error': error_message}, status=500)
+            
+            messages.error(request, error_message)
+            return render(request, 'predictions/breast_cancer_form.html', {
+                'form': BreastCancerPredictionForm(),
+                'patients': patients,
+                'selected_patient': selected_patient,
+            })
+    
     else:
+        # GET request - show the form
         form = BreastCancerPredictionForm()
-
+        
+        # If patient_id provided in URL, pre-select that patient
+        if patient_id and selected_patient:
+            messages.info(request, f'Selected patient: {selected_patient.get_full_name()}')
+    
     return render(request, 'predictions/breast_cancer_form.html', {
         'form': form,
-        'patient': patient
+        'patients': patients,
+        'selected_patient': selected_patient,
     })
-
 
 
 def save_pdf_to_media(buffer, filename, subfolder='reports'):
@@ -205,43 +387,43 @@ def generate_dr_charaka_pdf(prediction, doctor_name):
     ))
     story.append(Spacer(1, 15))
     
-    # Clinical Parameters Analyzed
-    story.append(Paragraph("CLINICAL PARAMETERS ANALYZED", header_style))
-    features_dict = prediction.get_features_dict()
+    # # Clinical Parameters Analyzed
+    # story.append(Paragraph("CLINICAL PARAMETERS ANALYZED", header_style))
+    # features_dict = prediction.get_features_dict()
     
-    # Group parameters logically
-    param_groups = {
-        'Nuclear Characteristics': ['radius_mean', 'texture_mean', 'perimeter_mean', 'area_mean', 'smoothness_mean'],
-        'Cellular Morphology': ['compactness_mean', 'concavity_mean', 'concave_points_mean', 'symmetry_mean', 'fractal_dimension_mean'],
-        'Variability Measures (SE)': [k for k in features_dict.keys() if '_se' in k],
-        'Extreme Values (Worst)': [k for k in features_dict.keys() if '_worst' in k]
-    }
+    # # Group parameters logically
+    # param_groups = {
+    #     'Nuclear Characteristics': ['radius_mean', 'texture_mean', 'perimeter_mean', 'area_mean', 'smoothness_mean'],
+    #     'Cellular Morphology': ['compactness_mean', 'concavity_mean', 'concave_points_mean', 'symmetry_mean', 'fractal_dimension_mean'],
+    #     'Variability Measures (SE)': [k for k in features_dict.keys() if '_se' in k],
+    #     'Extreme Values (Worst)': [k for k in features_dict.keys() if '_worst' in k]
+    # }
     
-    for group_name, params in param_groups.items():
-        if params:
-            story.append(Paragraph(f"<b>{group_name}:</b>", 
-                                 ParagraphStyle('subheader', parent=normal_style, fontSize=12, 
-                                              textColor=colors.HexColor('#2E8B57'), spaceAfter=8)))
+    # for group_name, params in param_groups.items():
+    #     if params:
+    #         story.append(Paragraph(f"<b>{group_name}:</b>", 
+    #                              ParagraphStyle('subheader', parent=normal_style, fontSize=12, 
+    #                                           textColor=colors.HexColor('#2E8B57'), spaceAfter=8)))
             
-            group_data = []
-            for param in params:
-                if param in features_dict:
-                    param_display = param.replace('_', ' ').title()
-                    value = features_dict[param]
-                    group_data.append([param_display, f"{value:.4f}"])
+    #         group_data = []
+    #         for param in params:
+    #             if param in features_dict:
+    #                 param_display = param.replace('_', ' ').title()
+    #                 value = features_dict[param]
+    #                 group_data.append([param_display, f"{value:.4f}"])
             
-            if group_data:
-                param_table = Table(group_data, colWidths=[3*inch, 1.5*inch])
-                param_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F8F0')),
-                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-                    ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-                    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 9),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
-                ]))
-                story.append(param_table)
-                story.append(Spacer(1, 10))
+    #         if group_data:
+    #             param_table = Table(group_data, colWidths=[3*inch, 1.5*inch])
+    #             param_table.setStyle(TableStyle([
+    #                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F8F0')),
+    #                 ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+    #                 ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+    #                 ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+    #                 ('FONTSIZE', (0, 0), (-1, -1), 9),
+    #                 ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
+    #             ]))
+    #             story.append(param_table)
+    #             story.append(Spacer(1, 10))
     
     # Analysis Results
     story.append(Paragraph("ANALYSIS RESULTS", header_style))
@@ -579,25 +761,29 @@ def get_report_details(request, report_id):
             'success': False,
             'error': str(e)
         })
- # Add these functions to your views.py - they integrate with your existing code
-
+ 
 def get_cached_liver_model():
     """Load and cache the liver disease ML model for better performance"""
     model = cache.get('liver_disease_model')
     if model is None:
         try:
-            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_prediction_xgb_model.pkl')
-            with open(model_path, 'rb') as f:
-                model = pickle.load(f)
+            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'predictor_done.pkl')
+            
+            # Load the dictionary containing model and scaler
+            with open(model_path, "rb") as f:
+                data = joblib.load(f)
+            
+            # Extract model from dictionary and cache it
+            model = data["model"]
             cache.set('liver_disease_model', model, 3600)  # Cache for 1 hour
+            
+            logger.info("Liver disease model loaded and cached successfully")
+            
         except Exception as e:
             logger.error(f"Liver model loading failed: {str(e)}")
             raise
     return model
 
-# Try these fixes one by one:
-
-# FIX 1: Check if your model expects different feature scaling
 def get_cached_liver_model_with_scaler():
     """Load model and scaler if available"""
     model = cache.get('liver_disease_model')
@@ -605,31 +791,47 @@ def get_cached_liver_model_with_scaler():
     
     if model is None:
         try:
-            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_prediction_xgb_model.pkl')
-            scaler_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_scaler.pkl')
+            model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'predictor_done.pkl')
             
-            with open(model_path, 'rb') as f:
-                model = pickle.load(f)
+            # Load the dictionary containing model and scaler
+            with open(model_path, "rb") as f:
+                data = joblib.load(f)
             
-            # Try to load scaler if it exists
-            if os.path.exists(scaler_path):
-                with open(scaler_path, 'rb') as f:
-                    scaler = pickle.load(f)
-                cache.set('liver_disease_scaler', scaler, 3600)
+            # Extract model and scaler from dictionary
+            model = data["model"]
+            scaler = data.get("scaler")  # Optional, if you saved it
             
             cache.set('liver_disease_model', model, 3600)
+            if scaler:
+                cache.set('liver_disease_scaler', scaler, 3600)
+                
         except Exception as e:
             logger.error(f"Model loading failed: {str(e)}")
             raise
     
     return model, scaler
 
-# FIX 2: Updated prediction view with multiple attempts
+# Remove the complex prediction function - keeping it simple and matching your original pattern
 @login_required
-def liver_disease_prediction(request, patient_id):
+def liver_disease_prediction(request, patient_id=None):
+    # If no patient_id is provided, show patient selection
+    if not patient_id:
+        patients = Patient.objects.filter(doctor=request.user).order_by('-created_at')
+        
+        if request.method == 'POST' and 'select_patient' in request.POST:
+            selected_patient_id = request.POST.get('patient_id')
+            if selected_patient_id:
+                return redirect('predictor:liver_prediction', patient_id=selected_patient_id)
+        
+        return render(request, 'predictions/liver_form.html', {
+            'patients': patients,
+            'show_patient_selection': True
+        })
+    
+    # If patient_id is provided, show the prediction form
     patient = get_object_or_404(Patient, id=patient_id, doctor=request.user)
     
-    if request.method == 'POST':
+    if request.method == 'POST' and 'predict' in request.POST:
         form = LiverDiseasePredictionForm(request.POST)
         if form.is_valid():
             prediction_obj = form.save(commit=False)
@@ -639,10 +841,8 @@ def liver_disease_prediction(request, patient_id):
             try:
                 model, scaler = get_cached_liver_model_with_scaler()
                 
-                # TRY DIFFERENT FEATURE ORDERS AND SCALING
-                
-                # Original order you were using
-                features_v1 = np.array([
+                # Prepare features in the correct order
+                features = np.array([
                     float(prediction_obj.age),
                     1.0 if prediction_obj.gender == 'Male' else 0.0,
                     float(prediction_obj.total_bilirubin),
@@ -655,51 +855,37 @@ def liver_disease_prediction(request, patient_id):
                     float(prediction_obj.albumin_and_globulin_ratio)
                 ], dtype=np.float32).reshape(1, -1)
                 
-                # Alternative order (Gender first, then Age)
-                features_v2 = np.array([
-                    1.0 if prediction_obj.gender == 'Male' else 0.0,
-                    float(prediction_obj.age),
-                    float(prediction_obj.total_bilirubin),
-                    float(prediction_obj.direct_bilirubin),
-                    float(prediction_obj.alkaline_phosphotase),
-                    float(prediction_obj.alamine_aminotransferase),
-                    float(prediction_obj.aspartate_aminotransferase),
-                    float(prediction_obj.total_protiens),
-                    float(prediction_obj.albumin),
-                    float(prediction_obj.albumin_and_globulin_ratio)
-                ], dtype=np.float32).reshape(1, -1)
-                
-                # Test different versions
-                test_features = [
-                    ("Version 1 (Age first)", features_v1),
-                    ("Version 2 (Gender first)", features_v2),
-                ]
-                
-                if scaler:
-                    test_features.extend([
-                        ("Version 1 Scaled", scaler.transform(features_v1)),
-                        ("Version 2 Scaled", scaler.transform(features_v2)),
-                    ])
-                
-                print("=== TESTING DIFFERENT FEATURE CONFIGURATIONS ===")
-                for name, features in test_features:
-                    try:
-                        pred = model.predict(features)[0]
-                        prob = model.predict_proba(features)[0]
-                        print(f"{name}: Prediction={pred}, Probabilities={prob}")
-                    except Exception as e:
-                        print(f"{name}: ERROR - {e}")
-                
-                # Use the first working version for actual prediction
-                features = features_v1
+                # Apply scaling if scaler exists
                 if scaler:
                     features = scaler.transform(features)
                 
-                pred = model.predict(features)[0]
-                prob = model.predict_proba(features)[0]
+                # Make prediction
+                prediction = model.predict(features)
+                result = 'Disease' if prediction[0] == 1 else 'No Disease'
                 
-                prediction_obj.prediction = 'No Disease' if pred == 0 else 'Disease'
-                prediction_obj.confidence = round(max(prob) * 100, 2)
+                # Get probabilities with threshold logic
+                if hasattr(model, 'predict_proba'):
+                    proba = model.predict_proba(features)[0]
+                    disease_probability = proba[1]
+                    no_disease_probability = proba[0]
+                    
+                    # Apply 0.6/0.4 threshold logic
+                    if disease_probability >= 0.6:
+                        final_prediction = 'Disease'
+                        confidence = round(disease_probability * 100, 2)
+                    elif no_disease_probability >= 0.6:
+                        final_prediction = 'No Disease'
+                        confidence = round(no_disease_probability * 100, 2)
+                    else:
+                        final_prediction = result
+                        confidence = round(max(proba) * 100, 2)
+                else:
+                    final_prediction = result
+                    confidence = 85.0 if result == 'Disease' else 80.0
+                    proba = [0.2, 0.8] if result == 'Disease' else [0.8, 0.2]
+                
+                prediction_obj.prediction = final_prediction
+                prediction_obj.confidence = confidence
                 prediction_obj.save()
                 
                 # Create report entry
@@ -711,6 +897,7 @@ def liver_disease_prediction(request, patient_id):
                         'prediction': str(prediction_obj.prediction),
                         'confidence': float(prediction_obj.confidence),
                         'prediction_id': prediction_obj.id,
+                        'raw_probabilities': proba.tolist() if hasattr(model, 'predict_proba') else proba,
                         'features': dict(zip([
                             'age', 'gender', 'total_bilirubin', 'direct_bilirubin',
                             'alkaline_phosphotase', 'alamine_aminotransferase',
@@ -724,46 +911,67 @@ def liver_disease_prediction(request, patient_id):
                 
             except Exception as e:
                 logger.error(f"Liver prediction failed for patient {patient_id}: {str(e)}")
-                print(f"Error details: {str(e)}")
-                messages.error(request, f'Liver analysis failed. Please try again.')
-    
+                messages.error(request, 'Liver analysis failed. Please try again.')
     else:
         form = LiverDiseasePredictionForm()
     
     return render(request, 'predictions/liver_form.html', {
         'form': form,
-        'patient': patient
+        'patient': patient,
+        'show_patient_selection': False
     })
 
-# FIX 3: If you need to retrain or check your model, use this simple test
 def test_liver_model_with_known_healthy_data():
     """Test with obviously healthy values"""
-    model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'liver_prediction_xgb_model.pkl')
-    
-    with open(model_path, 'rb') as f:
-        model = pickle.load(f)
-    
-    # Obviously healthy values
-    healthy_data = np.array([[
-        25,    # Young age
-        1,     # Male
-        0.8,   # Normal total bilirubin
-        0.2,   # Normal direct bilirubin
-        80,    # Normal alkaline phosphatase
-        25,    # Normal ALT
-        30,    # Normal AST
-        7.0,   # Normal total proteins
-        4.2,   # Normal albumin
-        1.5    # Normal A/G ratio
-    ]], dtype=np.float32)
-    
-    pred = model.predict(healthy_data)[0]
-    prob = model.predict_proba(healthy_data)[0]
-    
-    print(f"Healthy test data prediction: {pred}")
-    print(f"Healthy test data probabilities: {prob}")
-    
-    return pred, prob
+    try:
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'liver_disease_predictor', 'predictor_done.pkl')
+        
+        # Load the dictionary containing model and scaler
+        with open(model_path, "rb") as f:
+            data = joblib.load(f)
+        
+        # Get model and scaler
+        model = data["model"]
+        scaler = data.get("scaler")  # Optional, if you saved it
+        
+        # Obviously healthy values (matching your test pattern)
+        healthy_data = np.array([[
+            30,    # Age
+            1,     # Male
+            0.5,   # Normal total bilirubin
+            0.1,   # Normal direct bilirubin
+            85,    # Normal alkaline phosphatase
+            20,    # Normal ALT
+            22,    # Normal AST
+            7.0,   # Normal total proteins
+            4.5,   # Normal albumin
+            1.5    # Normal A/G ratio
+        ]], dtype=np.float32)
+        
+        # Apply scaling if scaler exists
+        if scaler:
+            test_data = scaler.transform(healthy_data)
+        else:
+            test_data = healthy_data
+        
+        # Predict
+        prediction = model.predict(test_data)
+        result = 'Liver Disease Detected' if prediction[0] == 1 else 'Disease NOT Detected'
+        
+        print(f"Healthy test data prediction: {prediction[0]}")
+        print(f"Result: {result}")
+        
+        # If you want probability
+        if hasattr(model, 'predict_proba'):
+            proba = model.predict_proba(test_data)
+            print(f"Probabilities: {proba}")
+        
+        return prediction[0], result
+        
+    except Exception as e:
+        print(f"Test failed: {str(e)}")
+        return None, None
+
 @login_required
 def liver_prediction_result(request, prediction_id):
     prediction = get_object_or_404(LiverDiseasePrediction, id=prediction_id, doctor=request.user)
@@ -847,46 +1055,46 @@ def generate_liver_pdf(prediction, doctor_name):
     ))
     story.append(Spacer(1, 15))
     
-    # Laboratory Parameters
-    story.append(Paragraph("LABORATORY PARAMETERS ANALYZED", header_style))
-    features_dict = prediction.get_features_dict()
+    # # Laboratory Parameters
+    # story.append(Paragraph("LABORATORY PARAMETERS ANALYZED", header_style))
+    # features_dict = prediction.get_features_dict()
     
-    # Group parameters logically
-    param_groups = {
-        'Bilirubin Levels': ['total_bilirubin', 'direct_bilirubin'],
-        'Liver Enzymes': ['alkaline_phosphotase', 'alamine_aminotransferase', 'aspartate_aminotransferase'],
-        'Protein Markers': ['total_protiens', 'albumin', 'albumin_and_globulin_ratio'],
-        'Demographics': ['age', 'gender']
-    }
+    # # Group parameters logically
+    # param_groups = {
+    #     'Bilirubin Levels': ['total_bilirubin', 'direct_bilirubin'],
+    #     'Liver Enzymes': ['alkaline_phosphotase', 'alamine_aminotransferase', 'aspartate_aminotransferase'],
+    #     'Protein Markers': ['total_protiens', 'albumin', 'albumin_and_globulin_ratio'],
+    #     'Demographics': ['age', 'gender']
+    # }
     
-    for group_name, params in param_groups.items():
-        if params:
-            story.append(Paragraph(f"<b>{group_name}:</b>", 
-                                 ParagraphStyle('subheader', parent=normal_style, fontSize=12, 
-                                              textColor=colors.HexColor('#4169E1'), spaceAfter=8)))
+    # for group_name, params in param_groups.items():
+    #     if params:
+    #         story.append(Paragraph(f"<b>{group_name}:</b>", 
+    #                              ParagraphStyle('subheader', parent=normal_style, fontSize=12, 
+    #                                           textColor=colors.HexColor('#4169E1'), spaceAfter=8)))
             
-            group_data = []
-            for param in params:
-                if param in features_dict:
-                    param_display = param.replace('_', ' ').title()
-                    value = features_dict[param]
-                    if param == 'gender':
-                        group_data.append([param_display, str(value)])
-                    else:
-                        group_data.append([param_display, f"{value:.2f}"])
+    #         group_data = []
+    #         for param in params:
+    #             if param in features_dict:
+    #                 param_display = param.replace('_', ' ').title()
+    #                 value = features_dict[param]
+    #                 if param == 'gender':
+    #                     group_data.append([param_display, str(value)])
+    #                 else:
+    #                     group_data.append([param_display, f"{value:.2f}"])
             
-            if group_data:
-                param_table = Table(group_data, colWidths=[3*inch, 1.5*inch])
-                param_table.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F8FF')),
-                    ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
-                    ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
-                    ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
-                    ('FONTSIZE', (0, 0), (-1, -1), 9),
-                    ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
-                ]))
-                story.append(param_table)
-                story.append(Spacer(1, 10))
+    #         if group_data:
+    #             param_table = Table(group_data, colWidths=[3*inch, 1.5*inch])
+    #             param_table.setStyle(TableStyle([
+    #                 ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#F0F8FF')),
+    #                 ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+    #                 ('ALIGN', (1, 0), (1, -1), 'RIGHT'),
+    #                 ('FONTNAME', (0, 0), (-1, -1), 'Helvetica'),
+    #                 ('FONTSIZE', (0, 0), (-1, -1), 9),
+    #                 ('GRID', (0, 0), (-1, -1), 0.5, colors.HexColor('#E0E0E0')),
+    #             ]))
+    #             story.append(param_table)
+    #             story.append(Spacer(1, 10))
     
     # Analysis Results
     story.append(Paragraph("ANALYSIS RESULTS", header_style))
@@ -982,6 +1190,7 @@ def generate_liver_pdf(prediction, doctor_name):
 
 @login_required
 def generate_liver_pdf_and_email(request, prediction_id):
+
     prediction = get_object_or_404(LiverDiseasePrediction, id=prediction_id, doctor=request.user)
     doctor_name = f"{request.user.first_name} {request.user.last_name}"
     
@@ -1114,3 +1323,259 @@ def generate_liver_pdf_and_email(request, prediction_id):
         logger.error(f"Liver PDF generation failed for prediction {prediction_id}: {str(e)}")
         messages.error(request, 'Report generation failed. Please try again.')
         return redirect('predictor:liver_prediction_result', prediction_id=prediction_id)
+    
+# Modified function for loading XGBoost model (no scaler needed)
+def get_cached_diabetes_model():
+    """Load diabetes XGBoost model from cache or file"""
+    cache_key = 'diabetes_xgb_model'
+    cached_model = cache.get(cache_key)
+    
+    if cached_model:
+        return cached_model
+    
+    try:
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'diabetes predictor', 'diabetes_prediction_xgb_model.pkl')
+        
+        with open(model_path, "rb") as f:
+            model = joblib.load(f)
+        
+        # Cache for 1 hour
+        cache.set(cache_key, model, 3600)
+        
+        return model
+        
+    except Exception as e:
+        logger.error(f"Failed to load diabetes model: {str(e)}")
+        raise
+
+@login_required
+def diabetes_prediction(request):
+    if request.method == 'POST':
+        form = DiabetesPredictionForm(doctor=request.user, data=request.POST)
+        if form.is_valid():
+            prediction_obj = form.save(commit=False)
+            prediction_obj.doctor = request.user
+            
+            try:
+                model = get_cached_diabetes_model()  # No scaler needed for XGBoost
+                
+                # Prepare features in the correct order (no scaling needed)
+                features = np.array([
+                    float(prediction_obj.pregnancies),
+                    float(prediction_obj.glucose),
+                    float(prediction_obj.blood_pressure),
+                    float(prediction_obj.skin_thickness),
+                    float(prediction_obj.insulin),
+                    float(prediction_obj.bmi),
+                    float(prediction_obj.diabetes_pedigree_function),
+                    float(prediction_obj.age)
+                ], dtype=np.float32).reshape(1, -1)
+                
+                # Make prediction with XGBoost (no scaling required)
+                prediction = model.predict(features)
+                result = 'Diabetes' if prediction[0] == 1 else 'No Diabetes'
+                
+                # Get probabilities with threshold logic
+                if hasattr(model, 'predict_proba'):
+                    proba = model.predict_proba(features)[0]
+                    diabetes_probability = proba[1]  # Diabetes probability
+                    no_diabetes_probability = proba[0]  # No diabetes probability
+                    
+                    # Apply 0.6/0.4 threshold logic
+                    if diabetes_probability >= 0.6:
+                        final_prediction = 'Diabetes'
+                        confidence = round(diabetes_probability * 100, 2)
+                    elif no_diabetes_probability >= 0.6:
+                        final_prediction = 'No Diabetes'
+                        confidence = round(no_diabetes_probability * 100, 2)
+                    else:
+                        # Borderline cases - use original prediction but flag as low confidence
+                        final_prediction = result
+                        confidence = round(max(proba) * 100, 2)
+                else:
+                    # Fallback if no predict_proba
+                    final_prediction = result
+                    confidence = 85.0 if result == 'Diabetes' else 80.0
+                    proba = [0.2, 0.8] if result == 'Diabetes' else [0.8, 0.2]
+                
+                prediction_obj.prediction = final_prediction
+                prediction_obj.confidence = confidence
+                prediction_obj.save()
+                
+                # Create report entry
+                PredictionReport.objects.create(
+                    patient=prediction_obj.patient,
+                    doctor=request.user,
+                    prediction_type='diabetes',
+                    prediction_data={
+                        'prediction': str(prediction_obj.prediction),
+                        'confidence': float(prediction_obj.confidence),
+                        'prediction_id': prediction_obj.id,
+                        'raw_probabilities': proba.tolist() if hasattr(model, 'predict_proba') else proba,
+                        'features': dict(zip([
+                            'pregnancies', 'glucose', 'blood_pressure', 'skin_thickness',
+                            'insulin', 'bmi', 'diabetes_pedigree_function', 'age'
+                        ], features.flatten().tolist()))
+                    }
+                )
+                
+                return redirect('predictor:diabetes_prediction_result', prediction_id=prediction_obj.id)
+                
+            except Exception as e:
+                logger.error(f"Diabetes prediction failed: {str(e)}")
+                print(f"Error details: {str(e)}")
+                messages.error(request, f'Diabetes analysis failed. Please try again.')
+    
+    else:
+        form = DiabetesPredictionForm(doctor=request.user)
+    
+    return render(request, 'predictions/diabetes_form.html', {
+        'form': form
+    })
+
+@login_required
+def diabetes_prediction_result(request, prediction_id):
+    prediction = get_object_or_404(DiabetesPrediction, id=prediction_id, doctor=request.user)
+    return render(request, 'predictions/diabetes_result.html', {'prediction': prediction})
+
+def generate_diabetes_pdf(prediction, doctor_name):
+    """Generate comprehensive Dr. Charaka themed diabetes report"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4169E1')
+    )
+    
+    header_style = ParagraphStyle(
+        'CustomHeader',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=colors.HexColor('#1E3A8A')
+    )
+    
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=11,
+        spaceAfter=6,
+        alignment=TA_JUSTIFY
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Header with Dr. Charaka branding
+    story.append(Paragraph("🏥 DR. CHARAKA DIABETES RISK ASSESSMENT", title_style))
+    story.append(Paragraph("<i>Advanced AI Diagnostics • Diabetes Risk Analysis • Comprehensive Care</i>", 
+                          ParagraphStyle('subtitle', parent=styles['Normal'], fontSize=12, 
+                                       alignment=TA_CENTER, textColor=colors.grey, spaceAfter=20)))
+    
+    # Patient Information
+    story.append(Paragraph("PATIENT INFORMATION", header_style))
+    patient_data = [
+        ['Patient Name:', f"{prediction.patient.first_name} {prediction.patient.last_name}"],
+        ['Patient ID:', f"DC-{prediction.patient.id:06d}"],
+        ['Date of Analysis:', prediction.created_at.strftime('%B %d, %Y at %I:%M %p')],
+        ['Attending Physician:', f"Dr. {doctor_name}"],
+        ['Test Type:', 'Diabetes Risk Assessment'],
+        ['Report ID:', f"DB-{prediction.id:08d}"],
+        ['Age:', f"{prediction.age} years"],
+        ['BMI:', f"{prediction.bmi}"]
+    ]
+    
+    patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
+    patient_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F2FF')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#D0E7FF')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(patient_table)
+    story.append(Spacer(1, 20))
+    
+    # Analysis Results
+    story.append(Paragraph("ANALYSIS RESULTS", header_style))
+    
+    result_color = colors.HexColor('#228B22') if prediction.prediction == 'No Diabetes' else colors.HexColor('#DC143C')
+    result_bg = colors.HexColor('#F0FFF0') if prediction.prediction == 'No Diabetes' else colors.HexColor('#FFF0F0')
+    
+    result_data = [
+        ['Assessment Result:', prediction.prediction],
+        ['Confidence Level:', f"{prediction.confidence:.1f}%"],
+        ['Risk Category:', 'Normal - Low Risk' if prediction.prediction == 'No Diabetes' else 'High Risk - Medical Attention Required']
+    ]
+    
+    result_table = Table(result_data, colWidths=[2.5*inch, 3.5*inch])
+    result_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), result_bg),
+        ('TEXTCOLOR', (1, 0), (1, 0), result_color),
+        ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (1, 0), (1, 0), 12),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#D0D0D0')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(result_table)
+    story.append(Spacer(1, 20))
+    
+    # Build PDF
+    doc.build(story)
+    return buffer
+
+@login_required
+def generate_diabetes_pdf_and_email(request, prediction_id):
+    prediction = get_object_or_404(DiabetesPrediction, id=prediction_id, doctor=request.user)
+    
+    try:
+        # Generate PDF
+        pdf_buffer = generate_diabetes_pdf(prediction, request.user.get_full_name() or request.user.username)
+        
+        # Save PDF to model
+        pdf_filename = f"diabetes_report_{prediction.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        
+        # Create report entry
+        report, created = PredictionReport.objects.get_or_create(
+            patient=prediction.patient,
+            doctor=request.user,
+            prediction_type='diabetes',
+            defaults={
+                'prediction_data': {
+                    'prediction': prediction.prediction,
+                    'confidence': prediction.confidence,
+                    'prediction_id': prediction.id
+                }
+            }
+        )
+        
+        # Save PDF file
+        report.pdf_file.save(
+            pdf_filename,
+            ContentFile(pdf_buffer.getvalue())
+        )
+        report.pdf_generated = True
+        report.save()
+        
+        messages.success(request, 'PDF report generated successfully!')
+        
+        # Return PDF response
+        response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+        return response
+        
+    except Exception as e:
+        logger.error(f"PDF generation failed for diabetes prediction {prediction_id}: {str(e)}")
+        messages.error(request, 'Failed to generate PDF report. Please try again.')
+        return redirect('predictor:diabetes_prediction_result', prediction_id=prediction_id)

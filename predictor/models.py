@@ -153,3 +153,41 @@ class PredictionReport(models.Model):
     
     def __str__(self):
         return f"{self.patient} - {self.prediction_type} - {self.created_at.date()}"
+    
+    # Add this to your existing models.py
+
+class DiabetesPrediction(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='diabetes_predictions')
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    # Diabetes features
+    pregnancies = models.IntegerField()
+    glucose = models.FloatField()
+    blood_pressure = models.FloatField()
+    skin_thickness = models.FloatField()
+    insulin = models.FloatField()
+    bmi = models.FloatField()
+    diabetes_pedigree_function = models.FloatField()
+    age = models.IntegerField()
+    
+    # Prediction results
+    prediction = models.CharField(max_length=20)  # 'No Diabetes' or 'Diabetes'
+    confidence = models.FloatField()
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.patient.first_name} {self.patient.last_name} - {self.prediction}"
+    
+    def get_features_dict(self):
+        """Return all features as a dictionary for ML model"""
+        return {
+            'Pregnancies': self.pregnancies,
+            'Glucose': self.glucose,
+            'BloodPressure': self.blood_pressure,
+            'SkinThickness': self.skin_thickness,
+            'Insulin': self.insulin,
+            'BMI': self.bmi,
+            'DiabetesPedigreeFunction': self.diabetes_pedigree_function,
+            'Age': self.age,
+        }

@@ -1,0 +1,429 @@
+{% extends 'base.html' %}
+{% block title %}Diabetes Risk Assessment Result - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1 text-gray-900" style="font-weight: 700;">Diabetes Risk Assessment</h1>
+                    <p class="text-muted mb-0">AI-powered diabetes prediction analysis</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-light text-dark px-3 py-2" style="font-size: 0.8rem;">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        {{ prediction.created_at|date:"M d, Y" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Main Result Card -->
+                <div class="col-12 col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                        <div class="card-body p-4">
+                            <!-- Patient Info Header -->
+                            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                                <div>
+                                    <h5 class="mb-1 text-gray-900">{{ prediction.patient.first_name }} {{ prediction.patient.last_name }}</h5>
+                                    <div class="d-flex gap-3 text-muted" style="font-size: 0.875rem;">
+                                        <span><i class="fas fa-user me-1"></i>{{ prediction.age }} years</span>
+                                        <span><i class="fas fa-calendar me-1"></i>{{ prediction.pregnancies }} pregnancies</span>
+                                        <span><i class="fas fa-weight me-1"></i>BMI: {{ prediction.bmi }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-light text-dark">ID: #{{ prediction.id }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Result Status -->
+                            <div class="text-center py-4">
+                                {% if prediction.prediction == 'No Diabetes' %}
+                                    <div class="mb-3">
+                                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
+                                             style="width: 100px; height: 100px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                            <i class="fas fa-check-circle text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-success mb-2" style="font-weight: 700;">Low Diabetes Risk</h3>
+                                    <p class="text-muted mb-3">No signs of diabetes detected in current assessment</p>
+                                {% else %}
+                                    <div class="mb-3">
+                                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
+                                             style="width: 100px; height: 100px; background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                            <i class="fas fa-exclamation-triangle text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-warning mb-2" style="font-weight: 700;">High Diabetes Risk</h3>
+                                    <p class="text-muted mb-3">Elevated risk detected - medical consultation recommended</p>
+                                {% endif %}
+                                
+                                <div class="d-inline-flex align-items-center gap-3 bg-light rounded-pill px-4 py-3" style="border-radius: 25px;">
+                                    <div class="text-center">
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Confidence</div>
+                                        <div class="fw-bold text-primary" style="font-size: 1.5rem;">{{ prediction.confidence|floatformat:1 }}%</div>
+                                    </div>
+                                    <div class="vr" style="height: 40px;"></div>
+                                    <div class="text-center">
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Model</div>
+                                        <div class="fw-semibold text-gray-700">XGBoost</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Clinical Parameters Grid -->
+                            <div class="mt-5">
+                                <h6 class="text-gray-700 mb-3" style="font-weight: 600;">Clinical Parameters</h6>
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-tint text-primary"></i>
+                                            </div>
+                                            <div class="parameter-label">Glucose</div>
+                                            <div class="parameter-value">{{ prediction.glucose }}</div>
+                                            <div class="parameter-unit">mg/dL</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-heartbeat text-danger"></i>
+                                            </div>
+                                            <div class="parameter-label">Blood Pressure</div>
+                                            <div class="parameter-value">{{ prediction.blood_pressure }}</div>
+                                            <div class="parameter-unit">mm Hg</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-syringe text-info"></i>
+                                            </div>
+                                            <div class="parameter-label">Insulin</div>
+                                            <div class="parameter-value">{{ prediction.insulin }}</div>
+                                            <div class="parameter-unit">mu U/ml</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-weight text-warning"></i>
+                                            </div>
+                                            <div class="parameter-label">BMI</div>
+                                            <div class="parameter-value">{{ prediction.bmi }}</div>
+                                            <div class="parameter-unit">kg/m²</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-ruler text-secondary"></i>
+                                            </div>
+                                            <div class="parameter-label">Skin Thickness</div>
+                                            <div class="parameter-value">{{ prediction.skin_thickness }}</div>
+                                            <div class="parameter-unit">mm</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-dna text-success"></i>
+                                            </div>
+                                            <div class="parameter-label">Pedigree Function</div>
+                                            <div class="parameter-value">{{ prediction.diabetes_pedigree_function }}</div>
+                                            <div class="parameter-unit">score</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-12 col-lg-4">
+                    <!-- Risk Assessment -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-radius: 15px 15px 0 0;">
+                            <h6 class="mb-0 fw-semibold text-gray-900">
+                                <i class="fas fa-stethoscope me-2 text-primary"></i>
+                                Risk Assessment
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                        {% if prediction.prediction == 'No Diabetes' %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-shield-alt text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1 text-success">Low Risk</h6>
+                                        <p class="text-muted mb-0 small">Continue healthy lifestyle</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success-soft border-0" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-info-circle text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <strong>Good News!</strong> Your current health parameters suggest a low risk for diabetes. Keep maintaining your healthy lifestyle.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-warning-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1 text-warning">High Risk</h6>
+                                        <p class="text-muted mb-0 small">Medical consultation advised</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-warning-soft border-0" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-exclamation-triangle text-warning"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <strong>Attention Required!</strong> Your health parameters indicate elevated diabetes risk. Please consult with a healthcare professional.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-radius: 15px 15px 0 0;">
+                            <h6 class="mb-0 fw-semibold text-gray-900">
+                                <i class="fas fa-lightbulb me-2 text-primary"></i>
+                                Recommendations
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                            {% if prediction.prediction == 'No Diabetes' %}
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Maintain healthy diet</strong>
+                                            <p class="text-muted mb-0 small">Continue balanced nutrition with whole grains, vegetables, and lean proteins</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Regular exercise</strong>
+                                            <p class="text-muted mb-0 small">Aim for 150 minutes of moderate activity per week</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Regular check-ups</strong>
+                                            <p class="text-muted mb-0 small">Annual health screenings to monitor your status</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-user-md text-warning me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Consult healthcare provider</strong>
+                                            <p class="text-muted mb-0 small">Schedule appointment for comprehensive diabetes screening</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-apple-alt text-warning me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Dietary modifications</strong>
+                                            <p class="text-muted mb-0 small">Reduce sugar intake and focus on low-glycemic foods</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-dumbbell text-warning me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Increase physical activity</strong>
+                                            <p class="text-muted mb-0 small">Start with 30 minutes of daily walking</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-chart-line text-warning me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Monitor blood sugar</strong>
+                                            <p class="text-muted mb-0 small">Regular glucose monitoring as advised by doctor</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                        <div class="card-body p-4">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'predictor:generate_diabetes_pdf_and_email' prediction.id %}" class="btn btn-primary btn-lg" style="border-radius: 12px;">
+                                    <i class="fas fa-download me-2"></i>
+                                    Download Report
+                                </a>
+                                <a href="{% url 'predictor:diabetes_prediction' %}" class="btn btn-outline-primary btn-lg" style="border-radius: 12px;">
+                                    <i class="fas fa-plus me-2"></i>
+                                    New Assessment
+                                </a>
+                                <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-lg" style="border-radius: 12px;">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-info border-0" style="border-radius: 15px; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="alert-heading mb-2">Important Disclaimer</h6>
+                                <p class="mb-2">
+                                    This AI-powered diabetes risk assessment is for informational purposes only and should not replace professional medical advice, diagnosis, or treatment. The predictions are based on machine learning algorithms trained on historical data and may not account for all individual health factors.
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Always consult with qualified healthcare professionals</strong> for proper medical evaluation and personalized health recommendations. If you have concerns about diabetes or other health conditions, seek immediate medical attention.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for parameter cards -->
+<style>
+.parameter-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+    height: 100%;
+}
+
+.parameter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.parameter-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.parameter-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.parameter-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.125rem;
+}
+
+.parameter-unit {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.recommendation-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.recommendation-item:hover {
+    background-color: #f8f9fa;
+}
+
+.bg-success-soft {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.bg-warning-soft {
+    background-color: rgba(245, 158, 11, 0.1) !important;
+}
+
+.alert-success-soft {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+}
+
+.alert-warning-soft {
+    background-color: rgba(245, 158, 11, 0.1);
+    color: #92400e;
+}
+
+@media (max-width: 768px) {
+    .parameter-card {
+        margin-bottom: 1rem;
+    }
+    
+    .d-inline-flex {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+    
+    .vr {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

@@ -49,13 +49,13 @@
                             <span class="stat-label">Accuracy</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">10k+</span>
+                            <span class="stat-number">100+</span>
                             <span class="stat-label">Tests Done</span>
                         </div>
                     </div>
                 </div>
                 <div class="predictor-footer">
-                    <a href="{% url 'predictor:select_patient' %}" class="btn-medical">
+                    <a href="{% url 'predictor:breast_cancer_prediction' %}" class="btn-medical">
                         <i class="fas fa-stethoscope"></i>
                         Start Breast Cancer Analysis
                     </a>
@@ -67,7 +67,7 @@
             <div class="predictor-card h-100">
                 <div class="predictor-header">
                     <div class="predictor-icon liver-cancer">
-                        <i class="fas fa-liver"></i>
+                        <i class="fas fa-vial"></i>
                     </div>
                     <h3 class="predictor-title">Liver Cancer Predictor</h3>
                     <p class="predictor-subtitle">Comprehensive hepatic health assessment</p>
@@ -93,19 +93,67 @@
                             <span class="stat-label">Accuracy</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">8k+</span>
+                            <span class="stat-number">90+</span>
                             <span class="stat-label">Tests Done</span>
                         </div>
                     </div>
                 </div>
                 <div class="predictor-footer">
-                    <a href="{% url 'predictor:select_patient' %}" class="btn-medical">
+                    <a href="{% url 'predictor:liver_prediction' %}" class="btn-medical">
                         <i class="fas fa-stethoscope"></i>
-                        Start Liver Cancer Analysis
+                        Start Liver Disease Analysis
                     </a>
                 </div>
             </div>
         </div>
+
+        <div class="col-md-6">
+            <div class="predictor-card h-100">
+                <div class="predictor-header">
+                    <div class="predictor-icon diabetes">
+                        <i class="fas fa-syringe"></i>
+                    </div>
+                    <h3 class="predictor-title">Diabetes Disease Predictor</h3>
+                    <p class="predictor-subtitle">Comprehensive diabetes health assessment</p>
+                </div>
+                <div class="predictor-body">
+                    <div class="predictor-features">
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Advanced Diagnostics</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Risk Factor Analysis</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Detailed Assessment</span>
+                        </div>
+                    </div>
+                    <div class="predictor-stats">
+                        <div class="stat">
+                            <span class="stat-number">92%</span>
+                            <span class="stat-label">Accuracy</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-number">80+</span>
+                            <span class="stat-label">Tests Done</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="predictor-footer">
+                    <a href="{% url 'predictor:diabetes_prediction' %}" class="btn-medical">
+                        <i class="fas fa-stethoscope"></i>
+                        Start Diabetes Disease Analysis
+                    </a>
+                </div>
+            </div>
+        </div>
+
+
+
+
     </div>
 
     <!-- How It Works Section -->
@@ -227,6 +275,25 @@
         font-size: 1.8rem;
         color: var(--white);
     }
+    .predictor-icon.diabetes {
+    background: linear-gradient(135deg, #3F51B5, #00BCD4);
+    box-shadow: 0 0 12px rgba(0, 188, 212, 0.6), 0 0 24px rgba(63, 81, 181, 0.3);
+    animation: pulseGlow 2s infinite ease-in-out;
+    color: white;
+}
+
+/* Optional: Neon Pulse Animation */
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 12px rgba(0, 188, 212, 0.6), 0 0 24px rgba(63, 81, 181, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.8), 0 0 40px rgba(63, 81, 181, 0.4);
+    }
+    100% {
+        box-shadow: 0 0 12px rgba(0, 188, 212, 0.6), 0 0 24px rgba(63, 81, 181, 0.3);
+    }
+}
 
     .predictor-title {
         font-size: 1.5rem;

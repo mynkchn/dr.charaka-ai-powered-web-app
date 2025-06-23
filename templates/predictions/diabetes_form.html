@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+{% block title %}Diabetes Risk Assessment - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-8">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <div class="d-inline-flex align-items-center justify-content-center bg-gradient-primary rounded-circle mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-heartbeat text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h1 class="h2 mb-2 text-gray-900 fw-bold">Diabetes Risk Assessment</h1>
+                <p class="text-muted mb-0">AI-powered diabetes prediction using advanced machine learning</p>
+            </div>
+
+            {% comment %} <!-- Debug Info -->
+            <div class="alert alert-info mb-4">
+                <strong>Debug Info:</strong>
+                <div>Current URL: <span id="currentUrl">{{ request.get_full_path }}</span></div>
+                <div>Form Action: <span id="formAction"></span></div>
+            </div> {% endcomment %}
+
+            <!-- Main Form Card -->
+            <div class="card border-0 shadow-lg mb-4" style="border-radius: 20px;">
+                <div class="card-body p-5">
+                    <!-- Show any Django messages -->
+                    {% comment %} {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %} {% endcomment %}
+
+                    <!-- Show form errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'predictor:diabetes_prediction' %}" id="diabetesForm">
+                        {% csrf_token %}
+                        
+                        <!-- Patient Selection Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Patient Information</h5>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        {{ form.patient }}
+                                        <label for="{{ form.patient.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-user-circle me-2"></i>Select Patient
+                                        </label>
+                                        {% if form.patient.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.patient.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Data Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-notes-medical text-success"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Clinical Parameters</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Pregnancies -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.pregnancies }}
+                                        <label for="{{ form.pregnancies.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-baby me-2"></i>{{ form.pregnancies.label }}
+                                        </label>
+                                        {% if form.pregnancies.help_text %}
+                                            <div class="form-text text-muted">{{ form.pregnancies.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.pregnancies.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.pregnancies.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Age -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.age }}
+                                        <label for="{{ form.age.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-calendar-alt me-2"></i>{{ form.age.label }}
+                                        </label>
+                                        {% if form.age.help_text %}
+                                            <div class="form-text text-muted">{{ form.age.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.age.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.age.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Laboratory Values Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-vial text-info"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Laboratory Values</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Glucose -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.glucose }}
+                                        <label for="{{ form.glucose.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-tint me-2"></i>{{ form.glucose.label }}
+                                        </label>
+                                        {% if form.glucose.help_text %}
+                                            <div class="form-text text-muted">{{ form.glucose.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.glucose.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.glucose.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Blood Pressure -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.blood_pressure }}
+                                        <label for="{{ form.blood_pressure.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-heartbeat me-2"></i>{{ form.blood_pressure.label }}
+                                        </label>
+                                        {% if form.blood_pressure.help_text %}
+                                            <div class="form-text text-muted">{{ form.blood_pressure.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.blood_pressure.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.blood_pressure.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Skin Thickness -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.skin_thickness }}
+                                        <label for="{{ form.skin_thickness.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-ruler me-2"></i>{{ form.skin_thickness.label }}
+                                        </label>
+                                        {% if form.skin_thickness.help_text %}
+                                            <div class="form-text text-muted">{{ form.skin_thickness.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.skin_thickness.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.skin_thickness.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Insulin -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.insulin }}
+                                        <label for="{{ form.insulin.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-syringe me-2"></i>{{ form.insulin.label }}
+                                        </label>
+                                        {% if form.insulin.help_text %}
+                                            <div class="form-text text-muted">{{ form.insulin.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.insulin.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.insulin.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- BMI -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.bmi }}
+                                        <label for="{{ form.bmi.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-weight me-2"></i>{{ form.bmi.label }}
+                                        </label>
+                                        {% if form.bmi.help_text %}
+                                            <div class="form-text text-muted">{{ form.bmi.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.bmi.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.bmi.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Diabetes Pedigree Function -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.diabetes_pedigree_function }}
+                                        <label for="{{ form.diabetes_pedigree_function.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-dna me-2"></i>{{ form.diabetes_pedigree_function.label }}
+                                        </label>
+                                        {% if form.diabetes_pedigree_function.help_text %}
+                                            <div class="form-text text-muted">{{ form.diabetes_pedigree_function.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.diabetes_pedigree_function.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.diabetes_pedigree_function.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3" id="submitBtn">
+                                <i class="fas fa-brain me-2"></i>
+                                Analyze Diabetes Risk
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" id="loadingSpinner"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Footer -->
+            <div class="card border-0 bg-light" style="border-radius: 15px;">
+                <div class="card-body py-3 px-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="fas fa-shield-alt me-2 text-success"></i>
+                                <small>
+                                    <strong>Secure & Confidential:</strong> All patient data is encrypted and HIPAA compliant. 
+                                    Results are for clinical decision support only.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                            <small class="text-muted">
+                                <i class="fas fa-robot me-1"></i>
+                                Powered by XGBoost ML
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enhanced form styling */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.form-floating > .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fafbfc;
+}
+
+.form-floating > .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    background-color: #fff;
+}
+
+.form-floating > label {
+    font-weight: 500;
+    color: #6c757d;
+    padding: 1rem 0.75rem;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+    color: #667eea;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.text-gray-900 {
+    color: #1f2937 !important;
+}
+
+.bg-primary.bg-opacity-10 {
+    background-color: rgba(102, 126, 234, 0.1) !important;
+}
+
+.bg-success.bg-opacity-10 {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-info.bg-opacity-10 {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.form-text {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.invalid-feedback {
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 2rem !important;
+        font-size: 1rem !important;
+    }
+}
+</style>
+
+<script>
+console.log('Form script loaded');
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('diabetesForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    // Display form action URL for debugging
+    const formAction = form.getAttribute('action');
+    document.getElementById('formAction').textContent = formAction;
+    console.log('Form action URL:', formAction);
+    
+    // Form submission handler with extensive logging
+    form.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered');
+        console.log('Form method:', form.method);
+        console.log('Form action:', form.action);
+        
+        // Check if all required fields are filled
+        const requiredFields = form.querySelectorAll('[required]');
+        let allValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                console.log('Empty required field:', field.name || field.id);
+                allValid = false;
+            }
+        });
+        
+        if (!allValid) {
+            console.log('Form validation failed - required fields empty');
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return false;
+        }
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        loadingSpinner.classList.remove('d-none');
+        submitBtn.innerHTML = '<i class="fas fa-brain me-2"></i>Analyzing... <span class="spinner-border spinner-border-sm ms-2"></span>';
+        
+        console.log('Form is being submitted...');
+        
+        // Let the form submit naturally
+        return true;
+    });
+    
+    // Add form validation feedback
+    const formControls = document.querySelectorAll('.form-control');
+    formControls.forEach(function(element) {
+        element.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && this.value.trim() === '') {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (this.value.trim() !== '') {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+    
+    console.log('All event listeners attached');
+});
+
+// Additional debugging
+window.addEventListener('beforeunload', function() {
+    console.log('Page is about to unload');
+});
+</script>
+{% endblock %}

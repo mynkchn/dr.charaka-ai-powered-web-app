@@ -4,265 +4,267 @@
 
 {% block extra_css %}
 <style>
+    :root {
+        --primary-color: #2563eb;
+        --primary-light: #3b82f6;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --background-color: #f8fafc;
+        --card-background: #ffffff;
+        --border-color: #e2e8f0;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+    }
+
     .prediction-container {
-        background: linear-gradient(135deg, rgba(33, 150, 243, 0.05) 0%, rgba(118, 75, 162, 0.05) 100%);
+        background-color: var(--background-color);
         min-height: 100vh;
         padding: 2rem 0;
     }
 
-    .prediction-card {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(20px);
-        border-radius: 24px;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.08);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+    .main-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--border-color);
         overflow: hidden;
         margin-bottom: 2rem;
     }
 
-    .patient-header {
-        background: linear-gradient(135deg, #e91e63, #f06292);
+    .header-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
         padding: 2rem;
+        color: white;
         text-align: center;
-        position: relative;
-        overflow: hidden;
     }
 
-    .patient-header::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: repeating-linear-gradient(
-            45deg,
-            transparent,
-            transparent 10px,
-            rgba(255, 255, 255, 0.05) 10px,
-            rgba(255, 255, 255, 0.05) 20px
-        );
-    }
-
-    .patient-info {
-        position: relative;
-        z-index: 1;
-    }
-
-    .patient-avatar {
-        width: 80px;
-        height: 80px;
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1rem;
-        font-size: 2rem;
-        color: white;
-    }
-
-    .patient-name {
-        color: white;
-        font-size: 1.75rem;
+    .header-title {
+        font-size: 1.875rem;
         font-weight: 700;
-        margin: 0;
-        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        margin: 0 0 0.5rem 0;
     }
 
-    .patient-subtitle {
-        color: rgba(255, 255, 255, 0.9);
+    .header-subtitle {
         font-size: 1rem;
-        margin-top: 0.5rem;
+        opacity: 0.9;
+        margin: 0;
     }
 
-    .form-section {
-        margin-bottom: 2.5rem;
+    .content-section {
+        padding: 2rem;
     }
 
-    .section-header {
+    /* Patient Selection Section */
+    .patient-selection {
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 2px solid var(--border-color);
+    }
+
+    .patient-selection.selected {
+        border-color: var(--primary-color);
+        background: #eff6ff;
+    }
+
+    .selection-header {
         display: flex;
         align-items: center;
-        margin-bottom: 1.5rem;
-        padding-bottom: 0.75rem;
-        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 1rem;
     }
 
-    .section-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 12px;
+    .selection-icon {
+        width: 32px;
+        height: 32px;
+        background: var(--primary-color);
+        border-radius: 8px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin-right: 1rem;
-        font-size: 1.2rem;
         color: white;
+        margin-right: 0.75rem;
     }
 
-    .mean-features .section-icon {
-        background: linear-gradient(135deg, #4caf50, #81c784);
-    }
-
-    .error-features .section-icon {
-        background: linear-gradient(135deg, #ff9800, #ffb74d);
-    }
-
-    .worst-features .section-icon {
-        background: linear-gradient(135deg, #f44336, #ef5350);
-    }
-
-    .section-title {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-    }
-
-    .section-description {
-        font-size: 0.875rem;
-        color: #64748b;
-        margin: 0;
-    }
-
-    .form-group {
-        margin-bottom: 1.5rem;
-    }
-
-    .form-label {
-        display: block;
-        margin-bottom: 0.5rem;
+    .selection-title {
+        font-size: 1.125rem;
         font-weight: 600;
-        color: #374151;
-        font-size: 0.875rem;
-        letter-spacing: 0.025em;
+        color: var(--text-primary);
+        margin: 0;
     }
 
-    .form-input {
+    .patient-dropdown {
         width: 100%;
-        padding: 0.875rem 1rem;
-        border: 2px solid #e5e7eb;
-        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
         background: white;
         font-size: 0.95rem;
-        color: #374151;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        color: var(--text-primary);
+        transition: all 0.2s ease;
     }
 
-    .form-input:focus {
+    .patient-dropdown:focus {
         outline: none;
-        border-color: #2196F3;
-        box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1), 0 4px 8px rgba(0, 0, 0, 0.08);
-        transform: translateY(-1px);
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
     }
 
-    .form-input:hover {
-        border-color: #d1d5db;
-        transform: translateY(-1px);
+    .selected-patient-info {
+        display: none;
+        margin-top: 1rem;
+        padding: 1rem;
+        background: white;
+        border-radius: 8px;
+        border: 1px solid var(--border-color);
+    }
+
+    .selected-patient-info.show {
+        display: block;
+    }
+
+    .patient-details {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .patient-detail {
+        text-align: center;
+    }
+
+    .patient-detail-label {
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.025em;
+        margin-bottom: 0.25rem;
+    }
+
+    .patient-detail-value {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text-primary);
+    }
+
+    /* Form Sections */
+    .form-section {
+        margin-bottom: 2rem;
     }
 
     .form-card {
         background: white;
-        border-radius: 16px;
-        padding: 2rem;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        border: 1px solid #f1f5f9;
-        transition: all 0.3s ease;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
     }
 
     .form-card:hover {
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
     }
 
-    .submit-section {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        border-radius: 20px;
-        padding: 2rem;
-        text-align: center;
-        margin-top: 3rem;
-    }
-
-    .submit-btn {
-        background: white;
-        color: #667eea;
-        border: none;
-        border-radius: 16px;
-        padding: 1rem 3rem;
-        font-size: 1.1rem;
-        font-weight: 700;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .submit-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.1), transparent);
-        transition: left 0.5s;
-    }
-
-    .submit-btn:hover::before {
-        left: 100%;
-    }
-
-    .submit-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.2);
-    }
-
-    .submit-btn:active {
-        transform: translateY(-1px);
-    }
-
-    .submit-icon {
-        margin-right: 0.5rem;
-        font-size: 1rem;
-    }
-
-    .progress-indicator {
+    .section-header {
+        background: #f8fafc;
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
         display: flex;
-        justify-content: center;
         align-items: center;
-        margin-bottom: 2rem;
     }
 
-    .progress-step {
-        width: 12px;
-        height: 12px;
-        border-radius: 50%;
-        background: #e5e7eb;
-        margin: 0 0.5rem;
-        transition: all 0.3s ease;
+    .section-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1rem;
+        color: white;
     }
 
-    .progress-step.active {
-        background: #2196F3;
-        transform: scale(1.2);
+    .mean-features .section-icon {
+        background: var(--success-color);
     }
 
-    .form-row {
+    .error-features .section-icon {
+        background: var(--warning-color);
+    }
+
+    .worst-features .section-icon {
+        background: var(--danger-color);
+    }
+
+    .section-title {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 0 0 0.25rem 0;
+    }
+
+    .section-description {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin: 0;
+    }
+
+    .form-content {
+        padding: 1.5rem;
+    }
+
+    .form-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
+        gap: 1.25rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+    }
+
+    .form-input {
+        padding: 0.75rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: white;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        transition: all 0.2s ease;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgb(37 99 235 / 0.1);
+    }
+
+    .form-input:hover {
+        border-color: #cbd5e1;
     }
 
     .info-tooltip {
-        position: relative;
-        display: inline-block;
         margin-left: 0.5rem;
-        color: #6b7280;
+        color: var(--text-secondary);
         cursor: help;
+        position: relative;
     }
 
     .info-tooltip:hover::after {
@@ -271,15 +273,56 @@
         bottom: 125%;
         left: 50%;
         transform: translateX(-50%);
-        background: #1f2937;
+        background: var(--text-primary);
         color: white;
-        padding: 0.5rem;
+        padding: 0.5rem 0.75rem;
         border-radius: 6px;
         font-size: 0.75rem;
         white-space: nowrap;
         z-index: 1000;
+        box-shadow: var(--shadow-md);
     }
 
+    /* Submit Section */
+    .submit-section {
+        text-align: center;
+        margin-top: 2rem;
+        padding: 2rem 0;
+    }
+
+    .submit-btn {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 1rem 2.5rem;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: var(--shadow-md);
+    }
+
+    .submit-btn:hover {
+        background: #1d4ed8;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .submit-btn:active {
+        transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* Loading Overlay */
     .loading-overlay {
         position: fixed;
         top: 0;
@@ -293,17 +336,48 @@
         z-index: 9999;
     }
 
+    .loading-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: var(--shadow-lg);
+    }
+
     .loading-spinner {
-        width: 50px;
-        height: 50px;
-        border: 3px solid rgba(255, 255, 255, 0.3);
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--border-color);
         border-radius: 50%;
-        border-top-color: white;
+        border-top-color: var(--primary-color);
         animation: spin 1s ease-in-out infinite;
+        margin: 0 auto 1rem;
     }
 
     @keyframes spin {
         to { transform: rotate(360deg); }
+    }
+
+    /* Progress Indicator */
+    .progress-indicator {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin: 2rem 0;
+    }
+
+    .progress-step {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--border-color);
+        margin: 0 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .progress-step.active {
+        background: var(--primary-color);
+        transform: scale(1.2);
     }
 
     /* Responsive Design */
@@ -312,42 +386,43 @@
             padding: 1rem 0;
         }
         
-        .form-card {
+        .content-section {
             padding: 1.5rem;
         }
         
-        .patient-header {
-            padding: 1.5rem;
+        .form-content {
+            padding: 1rem;
         }
         
-        .patient-name {
-            font-size: 1.5rem;
+        .form-grid {
+            grid-template-columns: 1fr;
         }
         
-        .form-row {
+        .patient-details {
             grid-template-columns: 1fr;
         }
         
         .submit-btn {
             padding: 0.875rem 2rem;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
     }
 
-    /* Animation for sections */
+    /* Animations */
     .form-section {
-        animation: fadeInUp 0.6s ease-out;
+        animation: fadeInUp 0.5s ease-out;
         animation-fill-mode: both;
     }
 
     .form-section:nth-child(1) { animation-delay: 0.1s; }
     .form-section:nth-child(2) { animation-delay: 0.2s; }
     .form-section:nth-child(3) { animation-delay: 0.3s; }
+    .form-section:nth-child(4) { animation-delay: 0.4s; }
 
     @keyframes fadeInUp {
         from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px);
         }
         to {
             opacity: 1;
@@ -362,331 +437,299 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-10">
-                <!-- Patient Header -->
-                <div class="prediction-card">
-                    <div class="patient-header">
-                        <div class="patient-info">
-                            <div class="patient-avatar">
-                                <i class="fas fa-user-circle"></i>
+                <!-- Main Card -->
+                <div class="main-card">
+                    <!-- Header -->
+                    <div class="header-section">
+                        <h1 class="header-title">
+                            <i class="fas fa-microscope me-2"></i>
+                            Breast Cancer Prediction
+                        </h1>
+                        <p class="header-subtitle">AI-Powered Cell Nuclei Analysis</p>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="content-section">
+                        <!-- Patient Selection -->
+                        <div class="patient-selection" id="patientSelection">
+                            <div class="selection-header">
+                                <div class="selection-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <h3 class="selection-title">Select Patient</h3>
                             </div>
-                            <h2 class="patient-name">{{ patient.first_name }} {{ patient.last_name }}</h2>
-                            <p class="patient-subtitle">Breast Cancer Risk Assessment</p>
+                            
+                            <select class="patient-dropdown" id="patientDropdown" name="patient_id">
+                                <option value="">Choose a patient for analysis</option>
+                                <!-- This will be populated by your Django view -->
+                                {% for patient in patients %}
+                                <option value="{{ patient.id }}" 
+                                        data-name="{{ patient.first_name }} {{ patient.last_name }}"
+                                        data-age="{{ patient.age }}"
+                                        data-gender="{{ patient.gender }}"
+                                        data-phone="{{ patient.phone_number }}"
+                                        {% if patient.id == selected_patient.id %}selected{% endif %}>
+                                    {{ patient.first_name }} {{ patient.last_name }} - {{ patient.age }} years
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                            <div class="selected-patient-info" id="selectedPatientInfo">
+                                <div class="patient-details">
+                                    <div class="patient-detail">
+                                        <div class="patient-detail-label">Patient Name</div>
+                                        <div class="patient-detail-value" id="patientName">-</div>
+                                    </div>
+                                    <div class="patient-detail">
+                                        <div class="patient-detail-label">Age</div>
+                                        <div class="patient-detail-value" id="patientAge">-</div>
+                                    </div>
+                                    <div class="patient-detail">
+                                        <div class="patient-detail-label">Gender</div>
+                                        <div class="patient-detail-value" id="patientGender">-</div>
+                                    </div>
+                                    <div class="patient-detail">
+                                        <div class="patient-detail-label">Contact</div>
+                                        <div class="patient-detail-value" id="patientPhone">-</div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Progress Indicator -->
+                        <div class="progress-indicator">
+                            <div class="progress-step active"></div>
+                            <div class="progress-step" id="formStep"></div>
+                            <div class="progress-step" id="resultStep"></div>
+                        </div>
+
+                        <form method="post" id="predictionForm">
+                            {% csrf_token %}
+                            <input type="hidden" name="patient_id" id="selectedPatientId" value="{{ selected_patient.id|default:'' }}">
+                            
+                            <!-- Mean Features Section -->
+                            <div class="form-section mean-features">
+                                <div class="form-card">
+                                    <div class="section-header">
+                                        <div class="section-icon">
+                                            <i class="fas fa-chart-line"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="section-title">Mean Features</h4>
+                                            <p class="section-description">Average measurements of cell nuclei characteristics</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-content">
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Radius
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Average radius of cell nuclei"></i>
+                                                </label>
+                                                <input type="number" name="mean_radius" class="form-input" step="0.01" placeholder="e.g., 14.127">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Texture
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Standard deviation of gray-scale values"></i>
+                                                </label>
+                                                <input type="number" name="mean_texture" class="form-input" step="0.01" placeholder="e.g., 19.289">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Perimeter
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Average perimeter of cell nuclei"></i>
+                                                </label>
+                                                <input type="number" name="mean_perimeter" class="form-input" step="0.01" placeholder="e.g., 91.969">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Area
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Average area of cell nuclei"></i>
+                                                </label>
+                                                <input type="number" name="mean_area" class="form-input" step="0.01" placeholder="e.g., 654.889">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Smoothness
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Local variation in radius lengths"></i>
+                                                </label>
+                                                <input type="number" name="mean_smoothness" class="form-input" step="0.001" placeholder="e.g., 0.096">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Compactness
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Perimeter² / area - 1.0"></i>
+                                                </label>
+                                                <input type="number" name="mean_compactness" class="form-input" step="0.001" placeholder="e.g., 0.104">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Concavity
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Severity of concave portions of contour"></i>
+                                                </label>
+                                                <input type="number" name="mean_concavity" class="form-input" step="0.001" placeholder="e.g., 0.089">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Concave Points
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Number of concave portions of contour"></i>
+                                                </label>
+                                                <input type="number" name="mean_concave_points" class="form-input" step="0.001" placeholder="e.g., 0.048">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Symmetry
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Symmetry of cell nuclei"></i>
+                                                </label>
+                                                <input type="number" name="mean_symmetry" class="form-input" step="0.001" placeholder="e.g., 0.181">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">
+                                                    Mean Fractal Dimension
+                                                    <i class="fas fa-info-circle info-tooltip" data-tooltip="Coastline approximation - 1"></i>
+                                                </label>
+                                                <input type="number" name="mean_fractal_dimension" class="form-input" step="0.0001" placeholder="e.g., 0.063">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Error Features Section -->
+                            <div class="form-section error-features">
+                                <div class="form-card">
+                                    <div class="section-header">
+                                        <div class="section-icon">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="section-title">Error Features</h4>
+                                            <p class="section-description">Standard error measurements of cell nuclei characteristics</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-content">
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">Radius Error</label>
+                                                <input type="number" name="radius_error" class="form-input" step="0.001" placeholder="e.g., 0.405">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Texture Error</label>
+                                                <input type="number" name="texture_error" class="form-input" step="0.001" placeholder="e.g., 1.217">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Perimeter Error</label>
+                                                <input type="number" name="perimeter_error" class="form-input" step="0.001" placeholder="e.g., 2.868">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Area Error</label>
+                                                <input type="number" name="area_error" class="form-input" step="0.01" placeholder="e.g., 40.337">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Smoothness Error</label>
+                                                <input type="number" name="smoothness_error" class="form-input" step="0.0001" placeholder="e.g., 0.007">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Compactness Error</label>
+                                                <input type="number" name="compactness_error" class="form-input" step="0.001" placeholder="e.g., 0.025">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Concavity Error</label>
+                                                <input type="number" name="concavity_error" class="form-input" step="0.001" placeholder="e.g., 0.032">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Concave Points Error</label>
+                                                <input type="number" name="concave_points_error" class="form-input" step="0.0001" placeholder="e.g., 0.012">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Symmetry Error</label>
+                                                <input type="number" name="symmetry_error" class="form-input" step="0.001" placeholder="e.g., 0.021">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Fractal Dimension Error</label>
+                                                <input type="number" name="fractal_dimension_error" class="form-input" step="0.00001" placeholder="e.g., 0.003">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Worst Features Section -->
+                            <div class="form-section worst-features">
+                                <div class="form-card">
+                                    <div class="section-header">
+                                        <div class="section-icon">
+                                            <i class="fas fa-chart-bar"></i>
+                                        </div>
+                                        <div>
+                                            <h4 class="section-title">Worst Features</h4>
+                                            <p class="section-description">Largest (worst) measurements of cell nuclei characteristics</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-content">
+                                        <div class="form-grid">
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Radius</label>
+                                                <input type="number" name="worst_radius" class="form-input" step="0.01" placeholder="e.g., 16.269">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Texture</label>
+                                                <input type="number" name="worst_texture" class="form-input" step="0.01" placeholder="e.g., 25.678">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Perimeter</label>
+                                                <input type="number" name="worst_perimeter" class="form-input" step="0.01" placeholder="e.g., 107.570">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Area</label>
+                                                <input type="number" name="worst_area" class="form-input" step="0.01" placeholder="e.g., 880.200">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Smoothness</label>
+                                                <input type="number" name="worst_smoothness" class="form-input" step="0.001" placeholder="e.g., 0.132">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Compactness</label>
+                                                <input type="number" name="worst_compactness" class="form-input" step="0.001" placeholder="e.g., 0.254">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Concavity</label>
+                                                <input type="number" name="worst_concavity" class="form-input" step="0.001" placeholder="e.g., 0.272">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Concave Points</label>
+                                                <input type="number" name="worst_concave_points" class="form-input" step="0.001" placeholder="e.g., 0.114">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Symmetry</label>
+                                                <input type="number" name="worst_symmetry" class="form-input" step="0.001" placeholder="e.g., 0.290">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="form-label">Worst Fractal Dimension</label>
+                                                <input type="number" name="worst_fractal_dimension" class="form-input" step="0.0001" placeholder="e.g., 0.084">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Submit Section -->
+                            <div class="submit-section">
+                                <button type="submit" class="submit-btn" id="submitBtn" disabled>
+                                    <i class="fas fa-brain"></i>
+                                    <span>Analyze Sample</span>
+                                </button>
+                                <div style="margin-top: 1rem; font-size: 0.875rem; color: var(--text-secondary);">
+                                    Please select a patient to continue
+                                </div>
+                            </div>
+                        </form>
                     </div>
                 </div>
-
-                <!-- Progress Indicator -->
-                <div class="progress-indicator">
-                    <div class="progress-step active"></div>
-                    <div class="progress-step active"></div>
-                    <div class="progress-step active"></div>
-                </div>
-
-                <form method="post" id="predictionForm">
-                    {% csrf_token %}
-                    
-                    <!-- Mean Features Section -->
-                    <div class="form-section mean-features">
-                        <div class="form-card">
-                            <div class="section-header">
-                                <div class="section-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div>
-                                    <h4 class="section-title">Mean Features</h4>
-                                    <p class="section-description">Average measurements of cell nuclei characteristics</p>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Radius
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Average radius of cell nuclei"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_radius.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.mean_radius.value|default:'' }}"
-                                           placeholder="Enter mean radius">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Texture
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Standard deviation of gray-scale values"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_texture.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.mean_texture.value|default:'' }}"
-                                           placeholder="Enter mean texture">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Perimeter
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Average perimeter of cell nuclei"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_perimeter.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.mean_perimeter.value|default:'' }}"
-                                           placeholder="Enter mean perimeter">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Area
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Average area of cell nuclei"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_area.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.mean_area.value|default:'' }}"
-                                           placeholder="Enter mean area">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Smoothness
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Local variation in radius lengths"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_smoothness.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.mean_smoothness.value|default:'' }}"
-                                           placeholder="Enter mean smoothness">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Compactness
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Perimeter² / area - 1.0"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_compactness.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.mean_compactness.value|default:'' }}"
-                                           placeholder="Enter mean compactness">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Concavity
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Severity of concave portions of contour"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_concavity.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.mean_concavity.value|default:'' }}"
-                                           placeholder="Enter mean concavity">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Concave Points
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Number of concave portions of contour"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_concave_points.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.mean_concave_points.value|default:'' }}"
-                                           placeholder="Enter mean concave points">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Symmetry
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Symmetry of cell nuclei"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_symmetry.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.mean_symmetry.value|default:'' }}"
-                                           placeholder="Enter mean symmetry">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">
-                                        Mean Fractal Dimension
-                                        <i class="fas fa-info-circle info-tooltip" data-tooltip="Coastline approximation - 1"></i>
-                                    </label>
-                                    <input type="number" name="{{ form.mean_fractal_dimension.name }}" 
-                                           class="form-input" step="0.0001" 
-                                           value="{{ form.mean_fractal_dimension.value|default:'' }}"
-                                           placeholder="Enter mean fractal dimension">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Error Features Section -->
-                    <div class="form-section error-features">
-                        <div class="form-card">
-                            <div class="section-header">
-                                <div class="section-icon">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div>
-                                    <h4 class="section-title">Error Features</h4>
-                                    <p class="section-description">Standard error measurements of cell nuclei characteristics</p>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Radius Error</label>
-                                    <input type="number" name="{{ form.radius_error.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.radius_error.value|default:'' }}"
-                                           placeholder="Enter radius error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Texture Error</label>
-                                    <input type="number" name="{{ form.texture_error.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.texture_error.value|default:'' }}"
-                                           placeholder="Enter texture error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Perimeter Error</label>
-                                    <input type="number" name="{{ form.perimeter_error.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.perimeter_error.value|default:'' }}"
-                                           placeholder="Enter perimeter error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Area Error</label>
-                                    <input type="number" name="{{ form.area_error.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.area_error.value|default:'' }}"
-                                           placeholder="Enter area error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Smoothness Error</label>
-                                    <input type="number" name="{{ form.smoothness_error.name }}" 
-                                           class="form-input" step="0.0001" 
-                                           value="{{ form.smoothness_error.value|default:'' }}"
-                                           placeholder="Enter smoothness error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Compactness Error</label>
-                                    <input type="number" name="{{ form.compactness_error.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.compactness_error.value|default:'' }}"
-                                           placeholder="Enter compactness error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Concavity Error</label>
-                                    <input type="number" name="{{ form.concavity_error.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.concavity_error.value|default:'' }}"
-                                           placeholder="Enter concavity error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Concave Points Error</label>
-                                    <input type="number" name="{{ form.concave_points_error.name }}" 
-                                           class="form-input" step="0.0001" 
-                                           value="{{ form.concave_points_error.value|default:'' }}"
-                                           placeholder="Enter concave points error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Symmetry Error</label>
-                                    <input type="number" name="{{ form.symmetry_error.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.symmetry_error.value|default:'' }}"
-                                           placeholder="Enter symmetry error">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Fractal Dimension Error</label>
-                                    <input type="number" name="{{ form.fractal_dimension_error.name }}" 
-                                           class="form-input" step="0.00001" 
-                                           value="{{ form.fractal_dimension_error.value|default:'' }}"
-                                           placeholder="Enter fractal dimension error">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Worst Features Section -->
-                    <div class="form-section worst-features">
-                        <div class="form-card">
-                            <div class="section-header">
-                                <div class="section-icon">
-                                    <i class="fas fa-chart-bar"></i>
-                                </div>
-                                <div>
-                                    <h4 class="section-title">Worst Features</h4>
-                                    <p class="section-description">Largest (worst) measurements of cell nuclei characteristics</p>
-                                </div>
-                            </div>
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label class="form-label">Worst Radius</label>
-                                    <input type="number" name="{{ form.worst_radius.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.worst_radius.value|default:'' }}"
-                                           placeholder="Enter worst radius">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Texture</label>
-                                    <input type="number" name="{{ form.worst_texture.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.worst_texture.value|default:'' }}"
-                                           placeholder="Enter worst texture">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Perimeter</label>
-                                    <input type="number" name="{{ form.worst_perimeter.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.worst_perimeter.value|default:'' }}"
-                                           placeholder="Enter worst perimeter">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Area</label>
-                                    <input type="number" name="{{ form.worst_area.name }}" 
-                                           class="form-input" step="0.01" 
-                                           value="{{ form.worst_area.value|default:'' }}"
-                                           placeholder="Enter worst area">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Smoothness</label>
-                                    <input type="number" name="{{ form.worst_smoothness.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.worst_smoothness.value|default:'' }}"
-                                           placeholder="Enter worst smoothness">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Compactness</label>
-                                    <input type="number" name="{{ form.worst_compactness.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.worst_compactness.value|default:'' }}"
-                                           placeholder="Enter worst compactness">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Concavity</label>
-                                    <input type="number" name="{{ form.worst_concavity.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.worst_concavity.value|default:'' }}"
-                                           placeholder="Enter worst concavity">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Concave Points</label>
-                                    <input type="number" name="{{ form.worst_concave_points.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.worst_concave_points.value|default:'' }}"
-                                           placeholder="Enter worst concave points">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Symmetry</label>
-                                    <input type="number" name="{{ form.worst_symmetry.name }}" 
-                                           class="form-input" step="0.001" 
-                                           value="{{ form.worst_symmetry.value|default:'' }}"
-                                           placeholder="Enter worst symmetry">
-                                </div>
-                                <div class="form-group">
-                                    <label class="form-label">Worst Fractal Dimension</label>
-                                    <input type="number" name="{{ form.worst_fractal_dimension.name }}" 
-                                           class="form-input" step="0.0001" 
-                                           value="{{ form.worst_fractal_dimension.value|default:'' }}"
-                                           placeholder="Enter worst fractal dimension">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Submit Section -->
-                    <div class="submit-section">
-                        <button type="submit" class="submit-btn" id="submitBtn">
-                            <i class="fas fa-microscope submit-icon"></i>
-                            <span>Generate Prediction</span>
-                        </button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -694,57 +737,282 @@
 
 <!-- Loading Overlay -->
 <div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
+    <div class="loading-content">
+        <div class="loading-spinner"></div>
+        <h4 style="margin: 0; color: var(--text-primary);">Analyzing Sample</h4>
+        <p style="margin: 0.5rem 0 0 0; color: var(--text-secondary);">Processing cell nuclei data...</p>
+    </div>
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('predictionForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const loadingOverlay = document.getElementById('loadingOverlay');
+    // Remaining JavaScript for breast cancer prediction form
+document.addEventListener('DOMContentLoaded', function() {
+    const patientDropdown = document.getElementById('patientDropdown');
+    const selectedPatientInfo = document.getElementById('selectedPatientInfo');
+    const patientSelection = document.getElementById('patientSelection');
+    const selectedPatientId = document.getElementById('selectedPatientId');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('predictionForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const formStep = document.getElementById('formStep');
+    const resultStep = document.getElementById('resultStep');
+
+    // Handle patient selection
+    patientDropdown.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
         
-        // Add loading state on form submission
-        form.addEventListener('submit', function(e) {
+        if (this.value) {
+            // Update patient info display
+            document.getElementById('patientName').textContent = selectedOption.dataset.name;
+            document.getElementById('patientAge').textContent = selectedOption.dataset.age + ' years';
+            document.getElementById('patientGender').textContent = selectedOption.dataset.gender;
+            document.getElementById('patientPhone').textContent = selectedOption.dataset.phone;
+            
+            // Show patient info
+            selectedPatientInfo.classList.add('show');
+            patientSelection.classList.add('selected');
+            
+            // Update hidden field
+            selectedPatientId.value = this.value;
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+            submitBtn.nextElementSibling.textContent = 'Enter cell nuclei measurements above';
+            
+            // Update progress
+            formStep.classList.add('active');
+        } else {
+            // Hide patient info
+            selectedPatientInfo.classList.remove('show');
+            patientSelection.classList.remove('selected');
+            
+            // Clear hidden field
+            selectedPatientId.value = '';
+            
+            // Disable submit button
             submitBtn.disabled = true;
-            loadingOverlay.style.display = 'flex';
-        });
-        
-        // Auto-save functionality (optional)
-        const inputs = document.querySelectorAll('.form-input');
-        inputs.forEach(input => {
-            input.addEventListener('blur', function() {
-                // Save to sessionStorage for form persistence
-                const formData = new FormData(form);
-                const data = {};
-                for (let [key, value] of formData.entries()) {
-                    data[key] = value;
-                }
-                sessionStorage.setItem('breastCancerForm', JSON.stringify(data));
-            });
-        });
-        
-        // Load saved data on page load
-        const savedData = sessionStorage.getItem('breastCancerForm');
-        if (savedData) {
-            const data = JSON.parse(savedData);
-            Object.keys(data).forEach(key => {
-                const input = document.querySelector(`[name="${key}"]`);
-                if (input && data[key]) {
-                    input.value = data[key];
-                }
-            });
+            submitBtn.nextElementSibling.textContent = 'Please select a patient to continue';
+            
+            // Reset progress
+            formStep.classList.remove('active');
+            resultStep.classList.remove('active');
         }
-        
-        // Form validation
-        inputs.forEach(input => {
-            input.addEventListener('input', function() {
-                if (this.value < 0) {
-                    this.style.borderColor = '#ef4444';
-                } else {
-                    this.style.borderColor = '#e5e7eb';
-                }
-            });
+    });
+
+    // Form validation
+    const validateForm = () => {
+        const requiredFields = form.querySelectorAll('input[type="number"]');
+        let isValid = true;
+        let filledCount = 0;
+
+        requiredFields.forEach(field => {
+            if (field.value.trim() !== '') {
+                filledCount++;
+                field.classList.remove('error');
+            }
+        });
+
+        // Check if patient is selected
+        if (!selectedPatientId.value) {
+            isValid = false;
+        }
+
+        // Update submit button state
+        if (isValid && filledCount > 0) {
+            submitBtn.disabled = false;
+            submitBtn.nextElementSibling.textContent = `Ready to analyze (${filledCount}/30 measurements entered)`;
+        }
+
+        return isValid;
+    };
+
+    // Add input validation
+    const numberInputs = form.querySelectorAll('input[type="number"]');
+    numberInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            validateForm();
+            
+            // Visual feedback
+            if (this.value) {
+                this.style.borderColor = '#10b981';
+            } else {
+                this.style.borderColor = '';
+            }
+        });
+
+        // Handle invalid input
+        input.addEventListener('invalid', function() {
+            this.style.borderColor = '#ef4444';
         });
     });
-</script>
+
+    // Form submission
+form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    if (!validateForm()) {
+        alert('Please select a patient first.');
+        return;
+    }
+
+    // Check if at least some measurements are provided
+    const filledInputs = Array.from(numberInputs).filter(input => input.value.trim() !== '');
+    if (filledInputs.length === 0) {
+        alert('Please enter at least some cell nuclei measurements.');
+        return;
+    }
+
+    // Show loading overlay
+    loadingOverlay.style.display = 'flex';
+    submitBtn.disabled = true;
+    
+    // Update progress
+    resultStep.classList.add('active');
+
+    // Submit form
+    const formData = new FormData(form);
+    
+    fetch(form.action || window.location.href, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data && data.error) {
+            throw new Error(data.error);
+        }
+        if (data.success && data.redirect_url) {
+            // ✅ This is where the redirect happens after successful prediction
+            window.location.href = data.redirect_url;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Analysis failed. Please try again.');
+        loadingOverlay.style.display = 'none';
+        submitBtn.disabled = false;
+        resultStep.classList.remove('active');
+    });
+});
+
+    // Auto-fill example data (for testing)
+    window.fillExampleData = function() {
+        const exampleData = {
+            'mean_radius': 14.127,
+            'mean_texture': 19.289,
+            'mean_perimeter': 91.969,
+            'mean_area': 654.889,
+            'mean_smoothness': 0.096,
+            'mean_compactness': 0.104,
+            'mean_concavity': 0.089,
+            'mean_concave_points': 0.048,
+            'mean_symmetry': 0.181,
+            'mean_fractal_dimension': 0.063,
+            'radius_error': 0.405,
+            'texture_error': 1.217,
+            'perimeter_error': 2.868,
+            'area_error': 40.337,
+            'smoothness_error': 0.007,
+            'compactness_error': 0.025,
+            'concavity_error': 0.032,
+            'concave_points_error': 0.012,
+            'symmetry_error': 0.021,
+            'fractal_dimension_error': 0.003,
+            'worst_radius': 16.269,
+            'worst_texture': 25.678,
+            'worst_perimeter': 107.570,
+            'worst_area': 880.200,
+            'worst_smoothness': 0.132,
+            'worst_compactness': 0.254,
+            'worst_concavity': 0.272,
+            'worst_concave_points': 0.114,
+            'worst_symmetry': 0.290,
+            'worst_fractal_dimension': 0.084
+        };
+
+        Object.keys(exampleData).forEach(key => {
+            const input = form.querySelector(`input[name="${key}"]`);
+            if (input) {
+                input.value = exampleData[key];
+                input.style.borderColor = '#10b981';
+            }
+        });
+
+        validateForm();
+    };
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + Enter to submit
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            if (!submitBtn.disabled) {
+                form.dispatchEvent(new Event('submit'));
+            }
+        }
+        
+        // Escape to clear form
+        if (e.key === 'Escape') {
+            if (confirm('Clear all entered data?')) {
+                form.reset();
+                patientDropdown.dispatchEvent(new Event('change'));
+            }
+        }
+    });
+
+    // Initialize validation on page load
+    if (patientDropdown.value) {
+        patientDropdown.dispatchEvent(new Event('change'));
+    }
+    validateForm();
+
+    // Add smooth scrolling for form sections
+    const formSections = document.querySelectorAll('.form-section');
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -100px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    formSections.forEach(section => {
+        observer.observe(section);
+    });
+
+    // Add input formatting
+    numberInputs.forEach(input => {
+        input.addEventListener('blur', function() {
+            if (this.value) {
+                const step = parseFloat(this.step) || 1;
+                const value = parseFloat(this.value);
+                if (!isNaN(value)) {
+                    if (step < 1) {
+                        const decimals = step.toString().split('.')[1]?.length || 0;
+                        this.value = value.toFixed(decimals);
+                    }
+                }
+            }
+        });
+    });
+
+    // Add tooltips for mobile
+    if (window.innerWidth <= 768) {
+        const tooltips = document.querySelectorAll('.info-tooltip');
+        tooltips.forEach(tooltip => {
+            tooltip.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert(this.dataset.tooltip);
+            });
+        });
+    }
+});</script>
 {% endblock %}

@@ -1,47 +1,662 @@
-
-<!-- templates/predictions/result.html -->
 {% extends 'base.html' %}
-{% block title %}Prediction Result - Dr. Charaka{% endblock %}
+{% block title %}Breast Cancer Risk Assessment Result - Dr. Charaka{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container-fluid">
     <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card glass-card">
-                <div class="card-body text-center">
-                    <h3 class="text-gradient mb-4">Prediction Result</h3>
-                    
-                    <div class="patient-info mb-4">
-                        <h5 class="text-white">{{ prediction.patient.first_name }} {{ prediction.patient.last_name }}</h5>
-                        <p class="text-white-50">{{ prediction.created_at|date:"F d, Y" }}</p>
-                    </div>
-                    
-                    <div class="prediction-result mb-4">
-                        <div class="result-badge 
-                            {% if prediction.prediction == 'Benign' %}
-                                bg-success
-                            {% else %}
-                                bg-warning
-                            {% endif %} 
-                            text-white p-4 rounded mb-3">
-                            <h2>{{ prediction.prediction }}</h2>
-                            <p class="mb-0">Confidence: {{ prediction.confidence|floatformat:2 }}%</p>
+        <div class="col-12 col-xl-10">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1 text-gray-900" style="font-weight: 700;">Breast Cancer Risk Assessment</h1>
+                    <p class="text-muted mb-0">AI-powered breast cancer prediction analysis</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-light text-dark px-3 py-2" style="font-size: 0.8rem;">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        {{ prediction.created_at|date:"M d, Y" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Main Result Card -->
+                <div class="col-12 col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                        <div class="card-body p-4">
+                            <!-- Patient Info Header -->
+                            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                                <div>
+                                    <h5 class="mb-1 text-gray-900">{{ prediction.patient.first_name }} {{ prediction.patient.last_name }}</h5>
+                                    <div class="d-flex gap-3 text-muted" style="font-size: 0.875rem;">
+                                        <span><i class="fas fa-user me-1"></i>Patient ID: {{ prediction.patient.id }}</span>
+                                        <span><i class="fas fa-stethoscope me-1"></i>Assessment Date: {{ prediction.created_at|date:"M d, Y" }}</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-light text-dark">ID: #{{ prediction.id }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Result Status -->
+                            <div class="text-center py-4">
+                                {% if prediction.prediction == 'Benign' %}
+                                    <div class="mb-3">
+                                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
+                                             style="width: 100px; height: 100px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                            <i class="fas fa-check-circle text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-success mb-2" style="font-weight: 700;">Benign Result</h3>
+                                    <p class="text-muted mb-3">No signs of malignancy detected in current assessment</p>
+                                {% else %}
+                                    <div class="mb-3">
+                                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
+                                             style="width: 100px; height: 100px; background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);">
+                                            <i class="fas fa-exclamation-triangle text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-danger mb-2" style="font-weight: 700;">Malignant Risk Detected</h3>
+                                    <p class="text-muted mb-3">Potential malignancy detected - immediate medical consultation required</p>
+                                {% endif %}
+                                
+                                <div class="d-inline-flex align-items-center gap-3 bg-light rounded-pill px-4 py-3" style="border-radius: 25px;">
+                                    <div class="text-center">
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Confidence</div>
+                                        <div class="fw-bold text-primary" style="font-size: 1.5rem;">{{ prediction.confidence|floatformat:1 }}%</div>
+                                    </div>
+                                    <div class="vr" style="height: 40px;"></div>
+                                    <div class="text-center">
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Model</div>
+                                        <div class="fw-semibold text-gray-700">ML Classifier</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Clinical Parameters Section -->
+                            <div class="mt-5">
+                                <!-- Mean Features -->
+                                <div class="mb-4">
+                                    <h6 class="text-gray-700 mb-3 d-flex align-items-center" style="font-weight: 600;">
+                                        <i class="fas fa-chart-line me-2 text-primary"></i>
+                                        Mean Values
+                                    </h6>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-circle text-primary"></i>
+                                                </div>
+                                                <div class="parameter-label">Radius</div>
+                                                <div class="parameter-value">{{ prediction.mean_radius|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-texture text-info"></i>
+                                                </div>
+                                                <div class="parameter-label">Texture</div>
+                                                <div class="parameter-value">{{ prediction.mean_texture|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-border-style text-success"></i>
+                                                </div>
+                                                <div class="parameter-label">Perimeter</div>
+                                                <div class="parameter-value">{{ prediction.mean_perimeter|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-expand text-warning"></i>
+                                                </div>
+                                                <div class="parameter-label">Area</div>
+                                                <div class="parameter-value">{{ prediction.mean_area|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-wave-square text-secondary"></i>
+                                                </div>
+                                                <div class="parameter-label">Smoothness</div>
+                                                <div class="parameter-value">{{ prediction.mean_smoothness|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-compress text-danger"></i>
+                                                </div>
+                                                <div class="parameter-label">Compactness</div>
+                                                <div class="parameter-value">{{ prediction.mean_compactness|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-indent text-dark"></i>
+                                                </div>
+                                                <div class="parameter-label">Concavity</div>
+                                                <div class="parameter-value">{{ prediction.mean_concavity|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-dot-circle text-primary"></i>
+                                                </div>
+                                                <div class="parameter-label">Concave Points</div>
+                                                <div class="parameter-value">{{ prediction.mean_concave_points|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-balance-scale text-info"></i>
+                                                </div>
+                                                <div class="parameter-label">Symmetry</div>
+                                                <div class="parameter-value">{{ prediction.mean_symmetry|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-project-diagram text-success"></i>
+                                                </div>
+                                                <div class="parameter-label">Fractal Dimension</div>
+                                                <div class="parameter-value">{{ prediction.mean_fractal_dimension|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Error Features -->
+                                <div class="mb-4">
+                                    <h6 class="text-gray-700 mb-3 d-flex align-items-center" style="font-weight: 600;">
+                                        <i class="fas fa-exclamation-circle me-2 text-warning"></i>
+                                        Standard Error Values
+                                    </h6>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-circle text-primary"></i>
+                                                </div>
+                                                <div class="parameter-label">Radius Error</div>
+                                                <div class="parameter-value">{{ prediction.radius_error|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-texture text-info"></i>
+                                                </div>
+                                                <div class="parameter-label">Texture Error</div>
+                                                <div class="parameter-value">{{ prediction.texture_error|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-border-style text-success"></i>
+                                                </div>
+                                                <div class="parameter-label">Perimeter Error</div>
+                                                <div class="parameter-value">{{ prediction.perimeter_error|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-expand text-warning"></i>
+                                                </div>
+                                                <div class="parameter-label">Area Error</div>
+                                                <div class="parameter-value">{{ prediction.area_error|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-wave-square text-secondary"></i>
+                                                </div>
+                                                <div class="parameter-label">Smoothness Error</div>
+                                                <div class="parameter-value">{{ prediction.smoothness_error|floatformat:4 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-compress text-danger"></i>
+                                                </div>
+                                                <div class="parameter-label">Compactness Error</div>
+                                                <div class="parameter-value">{{ prediction.compactness_error|floatformat:4 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-indent text-dark"></i>
+                                                </div>
+                                                <div class="parameter-label">Concavity Error</div>
+                                                <div class="parameter-value">{{ prediction.concavity_error|floatformat:4 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-dot-circle text-primary"></i>
+                                                </div>
+                                                <div class="parameter-label">Concave Points Error</div>
+                                                <div class="parameter-value">{{ prediction.concave_points_error|floatformat:4 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-balance-scale text-info"></i>
+                                                </div>
+                                                <div class="parameter-label">Symmetry Error</div>
+                                                <div class="parameter-value">{{ prediction.symmetry_error|floatformat:4 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-project-diagram text-success"></i>
+                                                </div>
+                                                <div class="parameter-label">Fractal Dimension Error</div>
+                                                <div class="parameter-value">{{ prediction.fractal_dimension_error|floatformat:4 }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Worst Features -->
+                                <div class="mb-4">
+                                    <h6 class="text-gray-700 mb-3 d-flex align-items-center" style="font-weight: 600;">
+                                        <i class="fas fa-arrow-up me-2 text-danger"></i>
+                                        Worst Values
+                                    </h6>
+                                    <div class="row g-2">
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-circle text-primary"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Radius</div>
+                                                <div class="parameter-value">{{ prediction.worst_radius|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-texture text-info"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Texture</div>
+                                                <div class="parameter-value">{{ prediction.worst_texture|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-border-style text-success"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Perimeter</div>
+                                                <div class="parameter-value">{{ prediction.worst_perimeter|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-expand text-warning"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Area</div>
+                                                <div class="parameter-value">{{ prediction.worst_area|floatformat:2 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-wave-square text-secondary"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Smoothness</div>
+                                                <div class="parameter-value">{{ prediction.worst_smoothness|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-compress text-danger"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Compactness</div>
+                                                <div class="parameter-value">{{ prediction.worst_compactness|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-indent text-dark"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Concavity</div>
+                                                <div class="parameter-value">{{ prediction.worst_concavity|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-dot-circle text-primary"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Concave Points</div>
+                                                <div class="parameter-value">{{ prediction.worst_concave_points|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-balance-scale text-info"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Symmetry</div>
+                                                <div class="parameter-value">{{ prediction.worst_symmetry|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 col-md-4 col-lg-3">
+                                            <div class="parameter-card">
+                                                <div class="parameter-icon">
+                                                    <i class="fas fa-project-diagram text-success"></i>
+                                                </div>
+                                                <div class="parameter-label">Worst Fractal Dimension</div>
+                                                <div class="parameter-value">{{ prediction.worst_fractal_dimension|floatformat:3 }}</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div class="actions">
-                        <a href="{% url 'predictor:generate_pdf_email' prediction.id %}" 
-                           class="btn btn-primary btn-lg me-3">
-                            <i class="fas fa-file-pdf"></i> Generate PDF & Email
-                        </a>
-                        <a href="{% url 'predictor:select_patient' %}" 
-                           class="btn btn-secondary btn-lg">
-                            New Prediction
-                        </a>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-12 col-lg-4">
+                    <!-- Risk Assessment -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-radius: 15px 15px 0 0;">
+                            <h6 class="mb-0 fw-semibold text-gray-900">
+                                <i class="fas fa-stethoscope me-2 text-primary"></i>
+                                Risk Assessment
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                            {% if prediction.prediction == 'Benign' %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-shield-alt text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1 text-success">Benign</h6>
+                                        <p class="text-muted mb-0 small">No immediate concern detected</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success-soft border-0" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-info-circle text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <strong>Good News!</strong> The analysis suggests benign characteristics. Continue regular screening and maintain healthy lifestyle habits.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-danger-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1 text-danger">Malignant Risk</h6>
+                                        <p class="text-muted mb-0 small">Immediate medical attention required</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-danger-soft border-0" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <strong>Urgent Attention Required!</strong> The analysis indicates potential malignant characteristics. Please consult with an oncologist immediately for further evaluation.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-radius: 15px 15px 0 0;">
+                            <h6 class="mb-0 fw-semibold text-gray-900">
+                                <i class="fas fa-lightbulb me-2 text-primary"></i>
+                                Recommendations
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                            {% if prediction.prediction == 'Benign' %}
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Continue regular screening</strong>
+                                            <p class="text-muted mb-0 small">Maintain annual mammograms and clinical breast exams</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Healthy lifestyle</strong>
+                                            <p class="text-muted mb-0 small">Maintain balanced diet, regular exercise, and limit alcohol</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Self-examination</strong>
+                                            <p class="text-muted mb-0 small">Perform monthly breast self-examinations</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-user-md text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Immediate oncology consultation</strong>
+                                            <p class="text-muted mb-0 small">Schedule urgent appointment with breast cancer specialist</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-microscope text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Additional testing</strong>
+                                            <p class="text-muted mb-0 small">Biopsy and comprehensive imaging studies required</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-users text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Support system</strong>
+                                            <p class="text-muted mb-0 small">Involve family members and consider counseling support</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-clock text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Time-sensitive</strong>
+                                            <p class="text-muted mb-0 small">Do not delay - seek medical attention within 24-48 hours</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                        <div class="card-body p-4">
+                            <div class="d-grid gap-2">
+                               <a href="{% url 'predictor:generate_pdf_email' prediction.id %}" 
+                                   class="btn btn-primary d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-file-pdf me-2"></i>
+                                    Generate PDF Report
+                                </a>
+                               {% comment %} <a href="{% url 'predictions:prediction' %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-plus me-2"></i>
+                                    New Assessment
+                                </a>
+                                <button class="btn btn-outline-secondary" onclick="window.print()">
+                                    <i class="fas fa-print me-2"></i>
+                                    Print Report
+                                </button> {% endcomment %}
+                                 <a href="" class="btn btn-outline-dark">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to List
+                                </a> 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            <!-- Disclaimer -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-info border-0" style="border-radius: 15px; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="alert-heading mb-2">Important Disclaimer</h6>
+                                <p class="mb-2">
+                                    This AI-powered diabetes risk assessment is for informational purposes only and should not replace professional medical advice, diagnosis, or treatment. The predictions are based on machine learning algorithms trained on historical data and may not account for all individual health factors.
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Always consult with qualified healthcare professionals</strong> for proper medical evaluation and personalized health recommendations. If you have concerns about diabetes or other health conditions, seek immediate medical attention.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+    </div>
+</div>
+
+<style>
+.parameter-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.parameter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.parameter-icon {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.parameter-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.parameter-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #495057;
+}
+
+.bg-success-soft {
+    background-color: rgba(25, 135, 84, 0.1);
+}
+
+.bg-danger-soft {
+    background-color: rgba(220, 53, 69, 0.1);
+}
+
+.alert-success-soft {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #0f5132;
+}
+
+.alert-danger-soft {
+    background-color: rgba(220, 53, 69, 0.1);
+    color: #842029;
+}
+
+.recommendation-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #f1f3f4;
+}
+
+.recommendation-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+@media print {
+    .btn, .card-header {
+        display: none !important;
+    }
+    
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+    }
+}
+</style>
 {% endblock %}

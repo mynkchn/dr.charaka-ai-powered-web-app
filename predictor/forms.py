@@ -1,6 +1,6 @@
 # forms.py
 from django import forms
-from .models import BreastCancerPrediction, LiverDiseasePrediction
+from .models import BreastCancerPrediction, LiverDiseasePrediction,DiabetesPrediction
 from accounts.models import Patient
 
 class PatientSelectionForm(forms.Form):
@@ -104,3 +104,85 @@ class LiverDiseasePredictionForm(forms.ModelForm):
                     'min': '0',
                     'step': '0.01'
                 })
+
+## forms.py
+from django import forms
+from .models import DiabetesPrediction
+from accounts.models import Patient
+
+class DiabetesPredictionForm(forms.ModelForm):
+    class Meta:
+        model = DiabetesPrediction
+        fields = [
+            'patient', 'pregnancies', 'glucose', 'blood_pressure', 
+            'skin_thickness', 'insulin', 'bmi', 'diabetes_pedigree_function', 'age'
+        ]
+        widgets = {
+            'patient': forms.Select(attrs={
+                'class': 'form-select form-select-lg',
+                'id': 'id_patient',
+                'required': True
+            }),
+            'pregnancies': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Number of pregnancies',
+                'min': '0',
+                'max': '20'
+            }),
+            'glucose': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Glucose level (mg/dL)',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'blood_pressure': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Blood pressure (mm Hg)',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'skin_thickness': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Skin thickness (mm)',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'insulin': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Insulin level (mu U/ml)',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'bmi': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Body Mass Index',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'diabetes_pedigree_function': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Diabetes pedigree function',
+                'step': '0.001',
+                'min': '0'
+            }),
+            'age': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Age in years',
+                'min': '1',
+                'max': '120'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        doctor = kwargs.pop('doctor', None)
+        super().__init__(*args, **kwargs)
+        
+        # Filter patients to show only those belonging to the current doctor
+        if doctor:
+            self.fields['patient'].queryset = Patient.objects.filter(doctor=doctor)
+            self.fields['patient'].empty_label = "Select a patient"
+        else:
+            self.fields['patient'].queryset = Patient.objects.none()
+            
+        # Improve patient display format
+        self.fields['patient'].label_from_instance = lambda obj: f"{obj.first_name} {obj.last_name} - {obj.email}"
