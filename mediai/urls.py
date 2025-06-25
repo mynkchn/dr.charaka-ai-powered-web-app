@@ -26,6 +26,11 @@ urlpatterns = [
     # path('chatbot/', include('chatbot.urls', namespace='chatbot')),
     path('predictor/',include('predictor.urls')),
     path('llm/', include('llm.urls', namespace='llm')),
+    path('conversation/', include('conversation.urls')),
+    # path('chat/',include('convo.urls')),
+    path('community/', include('community.urls')),
+    # path('scanner/', include('prescription.urls', namespace='prescription_scanner')),
+    path('drug/',include('drug_interaction.urls')),
 
     
 ]

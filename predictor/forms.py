@@ -186,3 +186,194 @@ class DiabetesPredictionForm(forms.ModelForm):
             
         # Improve patient display format
         self.fields['patient'].label_from_instance = lambda obj: f"{obj.first_name} {obj.last_name} - {obj.email}"
+
+# Add this to your forms.py file
+
+from .models import HeartDiseasePrediction
+
+class HeartDiseasePredictionForm(forms.ModelForm):
+    SEX_CHOICES = [
+        ('', 'Select Gender'),
+        (1, 'Male'),
+        (0, 'Female'),
+    ]
+    
+    CP_CHOICES = [
+        ('', 'Select Chest Pain Type'),
+        (0, 'Typical Angina'),
+        (1, 'Atypical Angina'),
+        (2, 'Non-Anginal Pain'),
+        (3, 'Asymptomatic'),
+    ]
+    
+    FBS_CHOICES = [
+        ('', 'Select Fasting Blood Sugar'),
+        (0, 'False (≤ 120 mg/dl)'),
+        (1, 'True (> 120 mg/dl)'),
+    ]
+    
+    RESTECG_CHOICES = [
+        ('', 'Select Resting ECG Results'),
+        (0, 'Normal'),
+        (1, 'ST-T Wave Abnormality'),
+        (2, 'Left Ventricular Hypertrophy'),
+    ]
+    
+    EXANG_CHOICES = [
+        ('', 'Exercise Induced Angina'),
+        (0, 'No'),
+        (1, 'Yes'),
+    ]
+    
+    SLOPE_CHOICES = [
+        ('', 'Select ST Slope'),
+        (0, 'Upsloping'),
+        (1, 'Flat'),
+        (2, 'Downsloping'),
+    ]
+    
+    CA_CHOICES = [
+        ('', 'Number of Major Vessels'),
+        (0, '0'),
+        (1, '1'),
+        (2, '2'),
+        (3, '3'),
+        (4, '4'),
+    ]
+    
+    THAL_CHOICES = [
+        ('', 'Select Thalassemia'),
+        (0, 'Normal'),
+        (1, 'Fixed Defect'),
+        (2, 'Reversible Defect'),
+        (3, 'Not Described'),
+    ]
+    
+    sex = forms.ChoiceField(
+        choices=SEX_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    cp = forms.ChoiceField(
+        choices=CP_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    fbs = forms.ChoiceField(
+        choices=FBS_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    restecg = forms.ChoiceField(
+        choices=RESTECG_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    exang = forms.ChoiceField(
+        choices=EXANG_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    slope = forms.ChoiceField(
+        choices=SLOPE_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    ca = forms.ChoiceField(
+        choices=CA_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    thal = forms.ChoiceField(
+        choices=THAL_CHOICES,
+        widget=forms.Select(attrs={'class': 'form-control glass-input'})
+    )
+    
+    class Meta:
+        model = HeartDiseasePrediction
+        fields = [
+            'patient', 'age', 'sex', 'cp', 'trestbps', 'chol', 'fbs', 
+            'restecg', 'thalach', 'exang', 'oldpeak', 'slope', 'ca', 'thal'
+        ]
+        widgets = {
+            'patient': forms.Select(attrs={
+                'class': 'form-select form-select-lg',
+                'id': 'id_patient',
+                'required': True
+            }),
+            'age': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Age in years',
+                'min': '1',
+                'max': '120'
+            }),
+            'trestbps': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Resting blood pressure (mm Hg)',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'chol': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Serum cholesterol (mg/dl)',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'thalach': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'Maximum heart rate achieved',
+                'step': '0.1',
+                'min': '0'
+            }),
+            'oldpeak': forms.NumberInput(attrs={
+                'class': 'form-control form-control-lg',
+                'placeholder': 'ST depression induced by exercise',
+                'step': '0.1',
+                'min': '0'
+            }),
+        }
+
+    def __init__(self, *args, **kwargs):
+        doctor = kwargs.pop('doctor', None)
+        super().__init__(*args, **kwargs)
+        
+        # Filter patients to show only those belonging to the current doctor
+        if doctor:
+            self.fields['patient'].queryset = Patient.objects.filter(doctor=doctor)
+            self.fields['patient'].empty_label = "Select a patient"
+        else:
+            self.fields['patient'].queryset = Patient.objects.none()
+            
+        # Improve patient display format
+        self.fields['patient'].label_from_instance = lambda obj: f"{obj.first_name} {obj.last_name} - {obj.email}"
+        
+        # Custom field labels
+        field_labels = {
+            'age': 'Age (years)',
+            'sex': 'Gender',
+            'cp': 'Chest Pain Type',
+            'trestbps': 'Resting Blood Pressure (mm Hg)',
+            'chol': 'Serum Cholesterol (mg/dl)',
+            'fbs': 'Fasting Blood Sugar > 120 mg/dl',
+            'restecg': 'Resting ECG Results',
+            'thalach': 'Maximum Heart Rate Achieved',
+            'exang': 'Exercise Induced Angina',
+            'oldpeak': 'ST Depression Induced by Exercise',
+            'slope': 'Slope of Peak Exercise ST Segment',
+            'ca': 'Number of Major Vessels (0-4)',
+            'thal': 'Thalassemia',
+        }
+        
+        field_help_texts = {
+            'trestbps': 'Normal range: 90-140 mm Hg',
+            'chol': 'Normal range: < 200 mg/dl',
+            'thalach': 'Normal range: 60-100 bpm at rest',
+            'oldpeak': 'ST depression relative to rest',
+        }
+        
+        for field_name, field in self.fields.items():
+            if field_name in field_labels:
+                field.label = field_labels[field_name]
+            
+            if field_name in field_help_texts:
+                field.help_text = field_help_texts[field_name]

@@ -1,0 +1,161 @@
+<!-- community/templates/community/case_list.html -->
+{% extends "base.html" %}
+
+{% block title %}Browse Cases - Medical Community{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Browse Medical Cases</h2>
+                <a href="{% url 'submit_case' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Submit New Case
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Specialization</label>
+                            <select name="specialization" class="form-select">
+                                <option value="">All Specializations</option>
+                                {% for spec in specializations %}
+                                <option value="{{ spec }}" {% if request.GET.specialization == spec %}selected{% endif %}>
+                                    {{ spec }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Urgency</label>
+                            <select name="urgency" class="form-select">
+                                <option value="">All Urgency Levels</option>
+                                {% for key, value in urgency_choices %}
+                                <option value="{{ key }}" {% if request.GET.urgency == key %}selected{% endif %}>
+                                    {{ value }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <button type="submit" class="btn btn-outline-primary me-2">Filter</button>
+                            <a href="{% url 'case_list' %}" class="btn btn-outline-secondary">Clear</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cases Grid -->
+    <div class="row">
+        {% for case in cases %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom-0 pb-2">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <span class="badge badge-{{ case.urgency|lower }} mb-2">{{ case.get_urgency_display }}</span>
+                        <small class="text-muted">{{ case.created_at|timesince }} ago</small>
+                    </div>
+                    <h6 class="card-title mb-0">
+                        <a href="{% url 'case_detail' case.id %}" class="text-decoration-none text-dark">
+                            {{ case.title|truncatechars:50 }}
+                        </a>
+                    </h6>
+                </div>
+                <div class="card-body pt-2">
+                    <div class="row text-sm mb-3">
+                        <div class="col-6">
+                            <strong>Patient:</strong><br>
+                            <span class="text-muted">{{ case.patient_age }}y {{ case.patient_gender }}</span>
+                        </div>
+                        <div class="col-6">
+                            <strong>Responses:</strong><br>
+                            <span class="text-muted">{{ case.responses.count }}</span>
+                        </div>
+                    </div>
+                    
+                    {% if case.required_specialization %}
+                    <div class="mb-2">
+                        <small class="text-primary">
+                            <i class="fas fa-stethoscope"></i> {{ case.required_specialization }}
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    <p class="card-text text-muted small">
+                        {{ case.symptoms|truncatechars:100 }}
+                    </p>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            By Dr. {{ case.submitting_doctor.last_name }}
+                        </small>
+                        <a href="{% url 'case_detail' case.id %}" class="btn btn-sm btn-outline-primary">
+                            View Case
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-search fa-3x text-muted"></i>
+                </div>
+                <h5 class="text-muted">No cases found</h5>
+                <p class="text-muted">Try adjusting your filters or submit a new case.</p>
+                <a href="{% url 'submit_case' %}" class="btn btn-primary">Submit New Case</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination if needed -->
+    {% if cases.has_other_pages %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <nav aria-label="Cases pagination">
+                <ul class="pagination justify-content-center">
+                    {% if cases.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ cases.previous_page_number }}">Previous</a>
+                    </li>
+                    {% endif %}
+                    
+                    {% for num in cases.paginator.page_range %}
+                    <li class="page-item {% if cases.number == num %}active{% endif %}">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endfor %}
+                    
+                    {% if cases.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ cases.next_page_number }}">Next</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.badge-low { background-color: #28a745; }
+.badge-medium { background-color: #ffc107; color: #212529; }
+.badge-high { background-color: #fd7e14; }
+.badge-critical { background-color: #dc3545; }
+.text-sm { font-size: 0.875rem; }
+.card:hover { transform: translateY(-2px); transition: transform 0.2s; }
+</style>
+{% endblock %}

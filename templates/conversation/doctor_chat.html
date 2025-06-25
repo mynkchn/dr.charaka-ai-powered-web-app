@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctor Chat - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4">Doctor-to-Doctor Chat</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="POST" class="mb-4">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="receiver_id">Select Doctor:</label>
+            <select name="receiver_id" id="receiver_id" class="form-control">
+                {% for doctor in doctors %}
+                    <option value="{{ doctor.id }}">Dr. {{ doctor.first_name }} {{ doctor.last_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group mt-3">
+            <label for="message">Your Message:</label>
+            <textarea name="message" id="message" class="form-control" rows="4" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">Send Message</button>
+    </form>
+
+    <hr>
+    <h4>Recent Messages</h4>
+    <ul class="list-group">
+        {% for chat in chats %}
+            <li class="list-group-item">
+                <strong>{{ chat.sender.first_name }}:</strong> {{ chat.message }}
+                <span class="text-muted float-end">{{ chat.timestamp|date:"Y-m-d H:i" }}</span>
+            </li>
+        {% empty %}
+            <li class="list-group-item">No messages yet.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

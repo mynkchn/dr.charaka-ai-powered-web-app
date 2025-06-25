@@ -23,8 +23,8 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_LEFT, TA_JUSTIFY
 from accounts.models import Patient
-from .models import BreastCancerPrediction, PredictionReport,DiabetesPrediction
-from .forms import PatientSelectionForm, BreastCancerPredictionForm,DiabetesPredictionForm
+from .models import BreastCancerPrediction, PredictionReport,DiabetesPrediction,HeartDiseasePrediction
+from .forms import PatientSelectionForm, BreastCancerPredictionForm,DiabetesPredictionForm,HeartDiseasePredictionForm
 from datetime import datetime
 import logging
 from django.core.files.base import ContentFile
@@ -1579,3 +1579,286 @@ def generate_diabetes_pdf_and_email(request, prediction_id):
         logger.error(f"PDF generation failed for diabetes prediction {prediction_id}: {str(e)}")
         messages.error(request, 'Failed to generate PDF report. Please try again.')
         return redirect('predictor:diabetes_prediction_result', prediction_id=prediction_id)
+
+
+def get_cached_heart_disease_model():
+    """Load heart disease model from cache or file"""
+    cache_key = 'heart_disease_model'
+    cached_model = cache.get(cache_key)
+    
+    if cached_model:
+        return cached_model
+    
+    try:
+        # Adjust this path according to your model location
+        model_path = os.path.join(settings.BASE_DIR, 'ml_models', 'heart_disease', 'heart_disease_random_forest_model.pkl')
+        
+        with open(model_path, "rb") as f:
+            model = joblib.load(f)
+        
+        # Cache for 1 hour
+        cache.set(cache_key, model, 3600)
+        
+        return model
+        
+    except Exception as e:
+        logger.error(f"Failed to load heart disease model: {str(e)}")
+        raise
+
+@login_required
+def heart_disease_prediction(request):
+    if request.method == 'POST':
+        form = HeartDiseasePredictionForm(doctor=request.user, data=request.POST)
+        if form.is_valid():
+            prediction_obj = form.save(commit=False)
+            prediction_obj.doctor = request.user
+
+            try:
+                model = get_cached_heart_disease_model()
+
+                # Extract raw form values (convert categorical string values to integers)
+                age = float(prediction_obj.age)
+                sex = int(prediction_obj.sex)
+                cp = int(prediction_obj.cp)
+                trestbps = float(prediction_obj.trestbps)
+                chol = float(prediction_obj.chol)
+                fbs = int(prediction_obj.fbs)
+                restecg = int(prediction_obj.restecg)
+                thalach = float(prediction_obj.thalach)
+                exang = int(prediction_obj.exang)
+                oldpeak = float(prediction_obj.oldpeak)
+                slope = int(prediction_obj.slope)
+                ca = float(prediction_obj.ca)
+                thal = int(prediction_obj.thal)
+
+                # Manual one-hot encoding
+                cp_encoded = [1 if cp == i else 0 for i in range(4)]
+                restecg_encoded = [1 if restecg == i else 0 for i in range(3)]
+                slope_encoded = [1 if slope == i else 0 for i in range(3)]
+                thal_encoded = [1 if thal == i else 0 for i in range(3)]
+
+                # Prepare final feature array (numeric + encoded categorical)
+                features = np.array([
+                    age, sex, trestbps, chol, fbs, thalach, exang, oldpeak, ca
+                ] + cp_encoded + restecg_encoded + slope_encoded + thal_encoded, dtype=np.float32).reshape(1, -1)
+
+                # Sanity check - features shape must match model input
+                assert features.shape[1] == 22, "Feature shape mismatch!"
+
+                # Prediction
+                prediction = model.predict(features)
+                result = 'Heart Disease' if prediction[0] == 1 else 'No Heart Disease'
+
+                if hasattr(model, 'predict_proba'):
+                    proba = model.predict_proba(features)[0]
+                    heart_disease_probability = proba[1]
+                    no_heart_disease_probability = proba[0]
+
+                    if heart_disease_probability >= 0.6:
+                        final_prediction = 'Heart Disease'
+                        confidence = round(heart_disease_probability * 100, 2)
+                    elif no_heart_disease_probability >= 0.6:
+                        final_prediction = 'No Heart Disease'
+                        confidence = round(no_heart_disease_probability * 100, 2)
+                    else:
+                        final_prediction = result
+                        confidence = round(max(proba) * 100, 2)
+                else:
+                    final_prediction = result
+                    confidence = 85.0 if result == 'Heart Disease' else 80.0
+                    proba = [0.2, 0.8] if result == 'Heart Disease' else [0.8, 0.2]
+
+                prediction_obj.prediction = final_prediction
+                prediction_obj.confidence = confidence
+                prediction_obj.save()
+
+                # Create report
+                PredictionReport.objects.create(
+                    patient=prediction_obj.patient,
+                    doctor=request.user,
+                    prediction_type='heart_disease',
+                    prediction_data={
+                        'prediction': str(prediction_obj.prediction),
+                        'confidence': float(prediction_obj.confidence),
+                        'prediction_id': prediction_obj.id,
+                        'raw_probabilities': proba.tolist() if hasattr(model, 'predict_proba') else proba,
+                        'features': {
+                            'age': age,
+                            'sex': sex,
+                            'trestbps': trestbps,
+                            'chol': chol,
+                            'fbs': fbs,
+                            'thalach': thalach,
+                            'exang': exang,
+                            'oldpeak': oldpeak,
+                            'ca': ca,
+                            'cp': cp,
+                            'restecg': restecg,
+                            'slope': slope,
+                            'thal': thal
+                        }
+                    }
+                )
+
+                return redirect('predictor:heart_disease_prediction_result', prediction_id=prediction_obj.id)
+
+            except Exception as e:
+                logger.error(f"Heart disease prediction failed: {str(e)}")
+                print(f"Error details: {str(e)}")
+                messages.error(request, f'Heart disease analysis failed. Please try again.')
+
+    else:
+        form = HeartDiseasePredictionForm(doctor=request.user)
+
+    return render(request, 'predictions/heart_disease_form.html', {
+        'form': form
+    })
+
+@login_required
+def heart_disease_prediction_result(request, prediction_id):
+    prediction = get_object_or_404(HeartDiseasePrediction, id=prediction_id, doctor=request.user)
+    return render(request, 'predictions/heart_disease_result.html', {'prediction': prediction})
+
+def generate_heart_disease_pdf(prediction, doctor_name):
+    """Generate comprehensive Dr. Charaka themed heart disease report"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=72, leftMargin=72, topMargin=72, bottomMargin=18)
+    
+    # Styles
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle(
+        'CustomTitle',
+        parent=styles['Heading1'],
+        fontSize=24,
+        spaceAfter=30,
+        alignment=TA_CENTER,
+        textColor=colors.HexColor('#4169E1')
+    )
+    
+    header_style = ParagraphStyle(
+        'CustomHeader',
+        parent=styles['Heading2'],
+        fontSize=16,
+        spaceAfter=12,
+        textColor=colors.HexColor('#1E3A8A')
+    )
+    
+    normal_style = ParagraphStyle(
+        'CustomNormal',
+        parent=styles['Normal'],
+        fontSize=11,
+        spaceAfter=6,
+        alignment=TA_JUSTIFY
+    )
+    
+    # Build PDF content
+    story = []
+    
+    # Header with Dr. Charaka branding
+    story.append(Paragraph("DR. CHARAKA HEART DISEASE RISK ASSESSMENT", title_style))
+    story.append(Paragraph("<i>Advanced AI Diagnostics • Cardiovascular Risk Analysis • Comprehensive Care</i>", 
+                          ParagraphStyle('subtitle', parent=styles['Normal'], fontSize=12, 
+                                       alignment=TA_CENTER, textColor=colors.grey, spaceAfter=20)))
+    
+    # Patient Information
+    story.append(Paragraph("PATIENT INFORMATION", header_style))
+    patient_data = [
+        ['Patient Name:', f"{prediction.patient.first_name} {prediction.patient.last_name}"],
+        ['Patient ID:', f"DC-{prediction.patient.id:06d}"],
+        ['Date of Analysis:', prediction.created_at.strftime('%B %d, %Y at %I:%M %p')],
+        ['Attending Physician:', f"Dr. {doctor_name}"],
+        ['Test Type:', 'Heart Disease Risk Assessment'],
+        ['Report ID:', f"HD-{prediction.id:08d}"],
+        ['Age:', f"{prediction.age} years"],
+        ['Gender:', 'Male' if prediction.sex == 1 else 'Female'],
+        ['Max Heart Rate:', f"{prediction.thalach} bpm"],
+        ['Cholesterol:', f"{prediction.chol} mg/dl"]
+    ]
+    
+    patient_table = Table(patient_data, colWidths=[2*inch, 4*inch])
+    patient_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (0, -1), colors.HexColor('#E8F2FF')),
+        ('TEXTCOLOR', (0, 0), (-1, -1), colors.black),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#D0E7FF')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(patient_table)
+    story.append(Spacer(1, 20))
+    
+    # Analysis Results
+    story.append(Paragraph("ANALYSIS RESULTS", header_style))
+    
+    result_color = colors.HexColor('#228B22') if prediction.prediction == 'No Heart Disease' else colors.HexColor('#DC143C')
+    result_bg = colors.HexColor('#F0FFF0') if prediction.prediction == 'No Heart Disease' else colors.HexColor('#FFF0F0')
+    
+    result_data = [
+        ['Assessment Result:', prediction.prediction],
+        ['Confidence Level:', f"{prediction.confidence:.1f}%"],
+        ['Risk Category:', 'Normal - Low Risk' if prediction.prediction == 'No Heart Disease' else 'High Risk - Medical Attention Required']
+    ]
+    
+    result_table = Table(result_data, colWidths=[2.5*inch, 3.5*inch])
+    result_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), result_bg),
+        ('TEXTCOLOR', (1, 0), (1, 0), result_color),
+        ('FONTNAME', (1, 0), (1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (1, 0), (1, 0), 12),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (0, -1), 'Helvetica-Bold'),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#D0D0D0')),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    story.append(result_table)
+    story.append(Spacer(1, 20))
+    
+    # Build PDF
+    doc.build(story)
+    return buffer
+
+@login_required
+def generate_heart_disease_pdf_and_email(request, prediction_id):
+    prediction = get_object_or_404(HeartDiseasePrediction, id=prediction_id, doctor=request.user)
+    
+    try:
+        # Generate PDF
+        pdf_buffer = generate_heart_disease_pdf(prediction, request.user.get_full_name() or request.user.username)
+        
+        # Save PDF to model
+        pdf_filename = f"heart_disease_report_{prediction.id}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+        
+        # Create report entry
+        report, created = PredictionReport.objects.get_or_create(
+            patient=prediction.patient,
+            doctor=request.user,
+            prediction_type='heart_disease',
+            defaults={
+                'prediction_data': {
+                    'prediction': prediction.prediction,
+                    'confidence': prediction.confidence,
+                    'prediction_id': prediction.id
+                }
+            }
+        )
+        
+        # Save PDF file
+        report.pdf_file.save(
+            pdf_filename,
+            ContentFile(pdf_buffer.getvalue())
+        )
+        report.pdf_generated = True
+        report.save()
+        
+        messages.success(request, 'PDF report generated successfully!')
+        
+        # Return PDF response
+        response = HttpResponse(pdf_buffer.getvalue(), content_type='application/pdf')
+        response['Content-Disposition'] = f'attachment; filename="{pdf_filename}"'
+        return response
+        
+    except Exception as e:
+        logger.error(f"PDF generation failed for heart disease prediction {prediction_id}: {str(e)}")
+        messages.error(request, 'Failed to generate PDF report. Please try again.')
+        return redirect('predictor:heart_disease_prediction_result', prediction_id=prediction_id)

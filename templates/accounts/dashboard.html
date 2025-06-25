@@ -84,7 +84,7 @@
         font-size: 1rem;
     }
 
-    /* Stats Card */
+    /* Stats Cards */
     .stats-card {
         background: var(--white);
         border: 1px solid var(--gray-200);
@@ -121,6 +121,168 @@
         margin: 0;
     }
 
+    /* Appointment specific styles */
+    .appointment-card {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary);
+    }
+
+    .appointment-card.urgent {
+        border-left-color: var(--danger);
+    }
+
+    .appointment-card.medium {
+        border-left-color: #ff9500;
+    }
+
+    .appointment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .appointment-patient {
+        font-weight: 600;
+        color: var(--gray-900);
+        font-size: 1.1rem;
+    }
+
+    .appointment-time {
+        background: var(--gray-100);
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .appointment-details {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+    }
+
+    .appointment-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-status {
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.75rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-confirm {
+        background: var(--success);
+        color: var(--white);
+    }
+
+    .btn-cancel {
+        background: var(--danger);
+        color: var(--white);
+    }
+
+    .btn-complete {
+        background: var(--primary);
+        color: var(--white);
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-confirmed {
+        background: #d1edff;
+        color: #0969da;
+    }
+
+    .status-cancelled {
+        background: #ffeaea;
+        color: #d1242f;
+    }
+
+    .status-completed {
+        background: #dafbe1;
+        color: #1a7f37;
+    }
+
+    .urgency-high {
+        color: var(--danger);
+        font-weight: 600;
+    }
+
+    .urgency-medium {
+        color: #ff9500;
+        font-weight: 600;
+    }
+
+    .urgency-low {
+        color: var(--success);
+        font-weight: 600;
+    }
+
+    /* Tab Navigation */
+    .tab-nav {
+        display: flex;
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md) var(--radius-md) 0 0;
+        overflow: hidden;
+    }
+
+    .tab-button {
+        background: none;
+        border: none;
+        padding: 1rem 1.5rem;
+        cursor: pointer;
+        font-weight: 500;
+        color: var(--gray-600);
+        flex: 1;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .tab-button.active {
+        background: var(--primary);
+        color: var(--white);
+    }
+
+    .tab-content {
+        background: var(--white);
+        border: 1px solid var(--gray-200);
+        border-top: none;
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+        min-height: 400px;
+    }
+
+    .tab-pane {
+        display: none;
+        padding: 1.5rem;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
     /* Content Cards */
     .content-card {
         background: var(--white);
@@ -137,7 +299,7 @@
         border-radius: var(--radius-md) var(--radius-md) 0 0;
         display: flex;
         align-items: center;
-        justify-content: between;
+        justify-content: space-between;
     }
 
     .card-header-custom h5 {
@@ -380,6 +542,12 @@
             align-items: flex-start;
             gap: 0.5rem;
         }
+
+        .appointment-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
     }
 </style>
 {% endblock %}
@@ -421,9 +589,9 @@
             <!-- Main Content -->
             <div class="col-lg-9">
                 {% if user.is_doctor %}
-                    <!-- Stats Card -->
+                    <!-- Stats Cards -->
                     <div class="row mb-4">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <div class="stats-card">
                                 <div class="stats-icon">
                                     <i class="fas fa-users"></i>
@@ -432,195 +600,319 @@
                                 <p class="stats-title">Total Patients</p>
                             </div>
                         </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div class="stats-number">{{ appointments.count }}</div>
+                                <p class="stats-title">Total Appointments</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stats-number">{{ pending_appointments.count }}</div>
+                                <p class="stats-title">Pending Appointments</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-icon">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div class="stats-number">{{ todays_appointments.count }}</div>
+                                <p class="stats-title">Today's Appointments</p>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Patient Management -->
+                    <!-- Tab Navigation -->
+                    <div class="content-card">
+                        <div class="tab-nav">
+                            <button class="tab-button active" onclick="switchTab('appointments')">
+                                <i class="fas fa-calendar-alt me-2"></i>Appointments
+                            </button>
+                            <button class="tab-button" onclick="switchTab('patients')">
+                                <i class="fas fa-users me-2"></i>Patients
+                            </button>
+                        </div>
+
+                        <div class="tab-content">
+                            <!-- Appointments Tab -->
+                            <div id="appointments-tab" class="tab-pane active">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-calendar-alt me-2"></i>Appointment Management
+                                </h5>
+                                
+                                <!-- Appointment Filters -->
+                                <div class="mb-3">
+                                    <div class="btn-group" role="group">
+                                        <button type="button" class="btn btn-outline-primary active" onclick="filterAppointments('all')">All</button>
+                                        <button type="button" class="btn btn-outline-primary" onclick="filterAppointments('today')">Today</button>
+                                        <button type="button" class="btn btn-outline-warning" onclick="filterAppointments('pending')">Pending</button>
+                                        <button type="button" class="btn btn-outline-success" onclick="filterAppointments('confirmed')">Confirmed</button>
+                                    </div>
+                                </div>
+
+                                <!-- Appointments List -->
+                                <div id="appointments-container">
+                                    {% for appointment in appointments %}
+                                    <div class="appointment-card {% if appointment.urgency == 'HIGH' %}urgent{% elif appointment.urgency == 'MEDIUM' %}medium{% endif %}" 
+                                         data-status="{{ appointment.status|lower }}" 
+                                         data-date="{{ appointment.appointment_date|date:'Y-m-d' }}">
+                                        <div class="appointment-header">
+                                            <div>
+                                                <div class="appointment-patient">{{ appointment.patient_name }}</div>
+                                                <div class="appointment-details">
+                                                    <strong>Contact:</strong> {{ appointment.patient.contact_number }} | {{ appointment.patient.email }}
+                                                </div>
+                                            </div>
+                                            <div class="appointment-time">
+                                                {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"h:i A" }}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="appointment-details">
+                                            <strong>Reason:</strong> {{ appointment.reason }}<br>
+                                            <strong>Urgency:</strong> <span class="urgency-{{ appointment.urgency|lower }}">{{ appointment.get_urgency_display }}</span><br>
+                                            <strong>Status:</strong> <span class="status-badge status-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span>
+                                        </div>
+
+                                        {% if appointment.status == 'PENDING' %}
+                                        <div class="appointment-actions">
+                                            <button class="btn-status btn-confirm" onclick="updateAppointmentStatus({{ appointment.id }}, 'CONFIRMED')">
+                                                <i class="fas fa-check me-1"></i>Confirm
+                                            </button>
+                                            <button class="btn-status btn-cancel" onclick="updateAppointmentStatus({{ appointment.id }}, 'CANCELLED')">
+                                                <i class="fas fa-times me-1"></i>Cancel
+                                            </button>
+                                        </div>
+                                        {% elif appointment.status == 'CONFIRMED' %}
+                                        <div class="appointment-actions">
+                                            <button class="btn-status btn-complete" onclick="updateAppointmentStatus({{ appointment.id }}, 'COMPLETED')">
+                                                <i class="fas fa-check-double me-1"></i>Mark Complete
+                                            </button>
+                                            <button class="btn-status btn-cancel" onclick="updateAppointmentStatus({{ appointment.id }}, 'CANCELLED')">
+                                                <i class="fas fa-times me-1"></i>Cancel
+                                            </button>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                    {% empty %}
+                                    <div class="empty-state">
+                                        <i class="fas fa-calendar-times"></i>
+                                        <h6>No Appointments Found</h6>
+                                        <p>Appointments booked through the Telegram bot will appear here.</p>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+
+                            <!-- Patients Tab -->
+                            <div id="patients-tab" class="tab-pane">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5>
+                                        <i class="fas fa-users me-2"></i>Patient Management
+                                    </h5>
+                                    <button type="button" class="toggle-form-btn" onclick="toggleAddPatientForm()">
+                                        <i class="fas fa-plus me-1"></i>Add Patient
+                                    </button>
+                                </div>
+                                
+                                <!-- Add Patient Form (Hidden by default) -->
+                                <div class="form-container" id="addPatientForm">
+                                    <form method="post" novalidate>
+                                        {% csrf_token %}
+                                        <div class="p-4">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                                                        {{ form.first_name }}
+                                                        {% if form.first_name.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.first_name.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                                                        {{ form.last_name }}
+                                                        {% if form.last_name.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.last_name.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.date_of_birth.id_for_label }}">{{ form.date_of_birth.label }}</label>
+                                                        {{ form.date_of_birth }}
+                                                        {% if form.date_of_birth.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.date_of_birth.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.gender.id_for_label }}">{{ form.gender.label }}</label>
+                                                        {{ form.gender }}
+                                                        {% if form.gender.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.gender.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.contact_number.id_for_label }}">{{ form.contact_number.label }}</label>
+                                                        {{ form.contact_number }}
+                                                        {% if form.contact_number.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.contact_number.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                                                        {{ form.email }}
+                                                        {% if form.email.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.email.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <div class="form-row">
+                                                        <label class="form-label" for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
+                                                        {{ form.address }}
+                                                        {% if form.address.errors %}
+                                                            <div class="invalid-feedback">
+                                                                {% for error in form.address.errors %}{{ error }}{% endfor %}
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-actions">
+                                            <button type="submit" class="btn-submit">
+                                                <i class="fas fa-save me-1"></i>Add Patient
+                                            </button>
+                                            <button type="button" class="btn-cancel" onclick="toggleAddPatientForm()">
+                                                <i class="fas fa-times me-1"></i>Cancel
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <!-- Patients Table -->
+                                <div class="table-container">
+                                    {% if patients %}
+                                    <table class="table-modern">
+                                        <thead>
+                                            <tr>
+                                                <th>Patient</th>
+                                                <th>Contact</th>
+                                                <th>Age</th>
+                                                <th>Gender</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for patient in patients %}
+                                            <tr>
+                                                <td>
+                                                    <div class="patient-info">
+                                                        <div class="patient-avatar">
+                                                            {{ patient.first_name|first }}{{ patient.last_name|first }}
+                                                        </div>
+                                                        <div class="patient-details">
+                                                            <h6>{{ patient.first_name }} {{ patient.last_name }}</h6>
+                                                            <small>ID: {{ patient.id }}</small>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>{{ patient.contact_number }}</div>
+                                                    <small class="text-muted">{{ patient.email }}</small>
+                                                </td>
+                                                <td>{{ patient.age|default:"N/A" }}</td>
+                                                <td>{{ patient.get_gender_display|default:"N/A" }}</td>
+                                                <td>
+                                                    <button class="btn-delete" onclick="deletePatient({{ patient.id }})">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                    {% else %}
+                                    <div class="empty-state">
+                                        <i class="fas fa-user-plus"></i>
+                                        <h6>No Patients Found</h6>
+                                        <p>Add patients manually or they will appear when registered through the system.</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- Patient Dashboard -->
                     <div class="content-card">
                         <div class="card-header-custom">
                             <h5>
-                                <i class="fas fa-users me-2"></i>Patient Management
+                                <i class="fas fa-calendar-alt me-2"></i>My Appointments
                             </h5>
-                            <button type="button" class="toggle-form-btn" onclick="toggleAddPatientForm()">
-                                <i class="fas fa-plus me-1"></i>Add Patient
-                            </button>
                         </div>
                         
-                        <!-- Add Patient Form (Hidden by default) -->
-                        <div class="form-container" id="addPatientForm">
-                            <form method="post" novalidate>
-                                {% csrf_token %}
-                                <div class="p-4">
-                                    <div class="row g-3">
-                                        <div class="col-md-6">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
-                                                {{ form.first_name }}
-                                                {% if form.first_name.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.first_name.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
+                        <div class="p-4">
+                            {% if appointments %}
+                                {% for appointment in appointments %}
+                                <div class="appointment-card {% if appointment.urgency == 'HIGH' %}urgent{% elif appointment.urgency == 'MEDIUM' %}medium{% endif %}">
+                                    <div class="appointment-header">
+                                        <div>
+                                            <div class="appointment-patient">Dr. {{ appointment.doctor.get_full_name }}</div>
+                                            <div class="appointment-details">
+                                                <strong>Date:</strong> {{ appointment.appointment_date|date:"M d, Y" }} at {{ appointment.appointment_time|time:"h:i A" }}
                                             </div>
                                         </div>
-                                        <div class="col-md-6">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
-                                                {{ form.last_name }}
-                                                {% if form.last_name.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.last_name.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.date_of_birth.id_for_label }}">{{ form.date_of_birth.label }}</label>
-                                                {{ form.date_of_birth }}
-                                                {% if form.date_of_birth.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.date_of_birth.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.gender.id_for_label }}">{{ form.gender.label }}</label>
-                                                {{ form.gender }}
-                                                {% if form.gender.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.gender.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.contact_number.id_for_label }}">{{ form.contact_number.label }}</label>
-                                                {{ form.contact_number }}
-                                                {% if form.contact_number.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.contact_number.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
-                                                {{ form.email }}
-                                                {% if form.email.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.email.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.address.id_for_label }}">{{ form.address.label }}</label>
-                                                {{ form.address }}
-                                                {% if form.address.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.address.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.medical_history.id_for_label }}">{{ form.medical_history.label }}</label>
-                                                {{ form.medical_history }}
-                                                {% if form.medical_history.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.medical_history.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-row">
-                                                <label class="form-label" for="{{ form.allergies.id_for_label }}">{{ form.allergies.label }}</label>
-                                                {{ form.allergies }}
-                                                {% if form.allergies.errors %}
-                                                    <div class="invalid-feedback">
-                                                        {% for error in form.allergies.errors %}{{ error }}{% endfor %}
-                                                    </div>
-                                                {% endif %}
-                                            </div>
+                                        <div class="appointment-time">
+                                            <span class="status-badge status-{{ appointment.status|lower }}">{{ appointment.get_status_display }}</span>
                                         </div>
                                     </div>
+                                    
+                                    <div class="appointment-details">
+                                        <strong>Reason:</strong> {{ appointment.reason }}<br>
+                                        <strong>Urgency:</strong> <span class="urgency-{{ appointment.urgency|lower }}">{{ appointment.get_urgency_display }}</span>
+                                        {% if appointment.notes %}
+                                        <br><strong>Doctor's Notes:</strong> {{ appointment.notes }}
+                                        {% endif %}
+                                    </div>
                                 </div>
-                                <div class="form-actions">
-                                    <button type="button" class="btn-cancel" onclick="cancelAddPatient()">Cancel</button>
-                                    <button type="submit" class="btn-submit">
-                                        <i class="fas fa-save me-1"></i>Save Patient
-                                    </button>
-                                </div>
-                            </form>
-                        </div>
-
-                        <!-- Patient List -->
-                        <div class="table-container">
-                            <table class="table-modern">
-                                <thead>
-                                    <tr>
-                                        <th>Patient</th>
-                                        <th>Contact</th>
-                                        <th>Date of Birth</th>
-                                        <th>Gender</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for patient in patients %}
-                                    <tr data-patient-id="{{ patient.id }}">
-                                        <td>
-                                            <div class="patient-info">
-                                                <div class="patient-avatar">
-                                                    <i class="fas fa-user"></i>
-                                                </div>
-                                                <div class="patient-details">
-                                                    <h6>{{ patient.first_name }} {{ patient.last_name }}</h6>
-                                                    <small>{{ patient.email }}</small>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td>{{ patient.contact_number }}</td>
-                                        <td>{{ patient.date_of_birth|date:"M d, Y" }}</td>
-                                        <td>{{ patient.get_gender_display }}</td>
-                                        <td>
-                                            <button type="button" class="btn-delete" onclick="deletePatient({{ patient.id }}, '{{ patient.first_name }} {{ patient.last_name }}')">
-                                                <i class="fas fa-trash me-1"></i>Delete
-                                            </button>
-                                        </td>
-                                    </tr>
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="5">
-                                            <div class="empty-state">
-                                                <i class="fas fa-users"></i>
-                                                <h6>No Patients Found</h6>
-                                                <p>Start by adding your first patient using the button above.</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                {% else %}
-                    <!-- Patient Dashboard - Simple welcome message -->
-                    <div class="content-card">
-                        <div class="card-header-custom">
-                            <h5><i class="fas fa-tachometer-alt me-2"></i>Patient Dashboard</h5>
-                        </div>
-                        <div class="p-4 text-center">
-                            <i class="fas fa-user-injured" style="font-size: 3rem; color: var(--gray-300); margin-bottom: 1rem;"></i>
-                            <h5 class="mb-3">Welcome to Your Patient Portal</h5>
-                            <p class="text-muted">Your personalized healthcare dashboard will be available soon.</p>
+                                {% endfor %}
+                            {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-calendar-times"></i>
+                                <h6>No Appointments Found</h6>
+                                <p>Your appointments will appear here. Use the Telegram bot to book appointments.</p>
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
@@ -629,143 +921,156 @@
     </div>
 </div>
 
+<!-- Success/Error Messages -->
+{% if messages %}
+<div class="position-fixed top-0 end-0 p-3" style="z-index: 11">
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
 <script>
-// Toggle Add Patient Form
+// Tab switching functionality
+function switchTab(tabName) {
+    // Hide all tab panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.classList.remove('active');
+    });
+    
+    // Show selected tab pane and activate button
+    document.getElementById(tabName + '-tab').classList.add('active');
+    event.target.classList.add('active');
+}
+
+// Toggle add patient form
 function toggleAddPatientForm() {
     const form = document.getElementById('addPatientForm');
-    const button = document.querySelector('.toggle-form-btn');
+    form.classList.toggle('active');
     
+    const button = document.querySelector('.toggle-form-btn');
     if (form.classList.contains('active')) {
-        form.classList.remove('active');
-        button.innerHTML = '<i class="fas fa-plus me-1"></i>Add Patient';
-    } else {
-        form.classList.add('active');
         button.innerHTML = '<i class="fas fa-times me-1"></i>Cancel';
-        // Focus on first input
-        setTimeout(() => {
-            const firstInput = form.querySelector('input');
-            if (firstInput) firstInput.focus();
-        }, 100);
+    } else {
+        button.innerHTML = '<i class="fas fa-plus me-1"></i>Add Patient';
+        // Reset form
+        form.querySelector('form').reset();
     }
 }
 
-// Cancel Add Patient
-function cancelAddPatient() {
-    const form = document.getElementById('addPatientForm');
-    const button = document.querySelector('.toggle-form-btn');
+// Filter appointments
+function filterAppointments(filter) {
+    const appointments = document.querySelectorAll('.appointment-card');
+    const buttons = document.querySelectorAll('.btn-group .btn');
+    const today = new Date().toISOString().split('T')[0];
     
-    form.classList.remove('active');
-    button.innerHTML = '<i class="fas fa-plus me-1"></i>Add Patient';
+    // Update button states
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
     
-    // Reset form
-    const formElement = form.querySelector('form');
-    if (formElement) {
-        formElement.reset();
-        // Remove error classes
-        const inputs = formElement.querySelectorAll('.form-control, .form-select');
-        inputs.forEach(input => input.classList.remove('is-invalid'));
-    }
-}
-
-// Delete Patient Function
-function deletePatient(patientId, patientName) {
-    if (confirm(`Are you sure you want to delete patient "${patientName}"? This action cannot be undone.`)) {
-        // In a real application, you would make an AJAX call to delete the patient
-        // For now, we'll just remove the row from the table
-        const row = document.querySelector(`tr[data-patient-id="${patientId}"]`);
-        if (row) {
-            row.remove();
-            
-            // Update patient count
-            const statsNumber = document.querySelector('.stats-number');
-            if (statsNumber) {
-                const currentCount = parseInt(statsNumber.textContent);
-                statsNumber.textContent = Math.max(0, currentCount - 1);
-            }
-            
-            // Show empty state if no patients left
-            const tbody = document.querySelector('.table-modern tbody');
-            if (tbody && tbody.children.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5">
-                            <div class="empty-state">
-                                <i class="fas fa-users"></i>
-                                <h6>No Patients Found</h6>
-                                <p>Start by adding your first patient using the button above.</p>
-                            </div>
-                        </td>
-                    </tr>
-                `;
-            }
-            
-            // Show success message
-            showMessage('Patient deleted successfully', 'success');
+    appointments.forEach(appointment => {
+        let show = false;
+        const status = appointment.dataset.status;
+        const date = appointment.dataset.date;
+        
+        switch(filter) {
+            case 'all':
+                show = true;
+                break;
+            case 'today':
+                show = date === today;
+                break;
+            case 'pending':
+                show = status === 'pending';
+                break;
+            case 'confirmed':
+                show = status === 'confirmed';
+                break;
         }
+        
+        appointment.style.display = show ? 'block' : 'none';
+    });
+}
+
+// Update appointment status
+async function updateAppointmentStatus(appointmentId, newStatus) {
+    if (!confirm(`Are you sure you want to ${newStatus.toLowerCase()} this appointment?`)) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/update-appointment-status/${appointmentId}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            },
+            body: JSON.stringify({
+                status: newStatus
+            })
+        });
+        
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to update appointment status.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while updating the appointment.');
     }
 }
 
-// Form validation
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.querySelector('#addPatientForm form');
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const inputs = form.querySelectorAll('[required]');
-            let isValid = true;
-            
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    input.classList.add('is-invalid');
-                    isValid = false;
-                } else {
-                    input.classList.remove('is-invalid');
-                }
-            });
-            
-            if (!isValid) {
-                e.preventDefault();
-                showMessage('Please fill in all required fields', 'danger');
-            } else {
-                // Hide form after successful submission
-                setTimeout(() => {
-                    cancelAddPatient();
-                    showMessage('Patient added successfully', 'success');
-                }, 100);
+// Delete patient
+async function deletePatient(patientId) {
+    if (!confirm('Are you sure you want to delete this patient? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        const response = await fetch(`/delete-patient/${patientId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
             }
         });
         
-        // Real-time validation
-        const inputs = form.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            input.addEventListener('input', function() {
-                if (this.hasAttribute('required') && this.value.trim()) {
-                    this.classList.remove('is-invalid');
-                }
-            });
-        });
+        if (response.ok) {
+            location.reload();
+        } else {
+            alert('Failed to delete patient.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while deleting the patient.');
     }
+}
+
+// Auto-dismiss alerts after 5 seconds
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(alert => {
+            alert.classList.remove('show');
+            setTimeout(() => alert.remove(), 150);
+        });
+    }, 5000);
 });
 
-// Show message function
-function showMessage(message, type) {
-    // Create alert element
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type} alert-dismissible fade show`;
-    alert.innerHTML = `
-        ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
-    
-    // Insert at top of main content
-    const mainContent = document.querySelector('.col-lg-9');
-    if (mainContent) {
-        mainContent.insertBefore(alert, mainContent.firstChild);
-        
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-            alert.remove();
-        }, 5000);
-    }
+// Real-time updates (optional - requires WebSocket)
+function setupRealTimeUpdates() {
+    // This would connect to WebSocket for real-time appointment updates
+    // Implementation depends on your WebSocket setup
 }
 </script>
 {% endblock %}

@@ -1,0 +1,575 @@
+{% extends "base.html" %}
+
+{% block title %}Medical Community - Charaka AI{% endblock %}
+
+{% block content %}
+<div class="medical-community-container">
+    <!-- Header Section -->
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-12">
+                    <h1 class="page-title">
+                        <i class="fas fa-user-md me-3"></i>
+                        Medical Community Hub
+                    </h1>
+                    <p class="page-subtitle">Collaborate, consult, and contribute to medical excellence</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Quick Actions Section -->
+        <div class="section-container">
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="action-card submit-case">
+                        <div class="card-icon">
+                            <i class="fas fa-plus-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Submit New Case</h3>
+                            <p>Get expert consultation on challenging medical cases from your peers</p>
+                            <a href="{% url 'submit_case' %}" class="btn-action">
+                                Submit Case
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="action-card browse-cases">
+                        <div class="card-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>Browse Cases</h3>
+                            <p>Share your expertise and help colleagues with complex diagnoses</p>
+                            <a href="{% url 'case_list' %}" class="btn-action">
+                                View Cases
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-4 col-md-6">
+                    <div class="action-card my-cases">
+                        <div class="card-icon">
+                            <i class="fas fa-folder-open"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3>My Cases</h3>
+                            <p>Track status and responses for all your submitted cases</p>
+                            <a href="{% url 'my_cases' %}" class="btn-action">
+                                My Cases
+                                <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cases Content Section -->
+        <div class="row g-4 mt-4">
+            <!-- Recent Cases for Specialization -->
+            <div class="col-lg-8">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h2>
+                            <i class="fas fa-stethoscope me-2"></i>
+                            Cases for Your Specialization
+                        </h2>
+                        <span class="header-accent"></span>
+                    </div>
+                    <div class="card-body-custom">
+                        {% if recent_cases %}
+                            <div class="cases-list">
+                                {% for case in recent_cases %}
+                                <div class="case-item">
+                                    <div class="case-header">
+                                        <h4 class="case-title">
+                                            <a href="{% url 'case_detail' case.id %}">{{ case.title }}</a>
+                                        </h4>
+                                        <span class="case-time">{{ case.created_at|timesince }} ago</span>
+                                    </div>
+                                    <div class="case-meta">
+                                        <div class="patient-info">
+                                            <span class="meta-item">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ case.patient_age }}y {{ case.patient_gender }}
+                                            </span>
+                                        </div>
+                                        <div class="case-badges">
+                                            <span class="urgency-badge urgency-{{ case.urgency|lower }}">
+                                                {{ case.get_urgency_display }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state">
+                                <i class="fas fa-clipboard-list"></i>
+                                <h4>No Cases Available</h4>
+                                <p>No cases are currently available for your specialization. Check back later or browse all cases.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- My Cases Sidebar -->
+            <div class="col-lg-4">
+                <div class="content-card">
+                    <div class="card-header-custom">
+                        <h2>
+                            <i class="fas fa-user-check me-2"></i>
+                            My Recent Cases
+                        </h2>
+                        <span class="header-accent"></span>
+                    </div>
+                    <div class="card-body-custom">
+                        {% if my_cases %}
+                            <div class="my-cases-list">
+                                {% for case in my_cases %}
+                                <div class="my-case-item">
+                                    <h5 class="my-case-title">
+                                        <a href="{% url 'case_detail' case.id %}">{{ case.title }}</a>
+                                    </h5>
+                                    <div class="my-case-stats">
+                                        <span class="response-count">
+                                            <i class="fas fa-comments me-1"></i>
+                                            {{ case.responses.count }} responses
+                                        </span>
+                                        <span class="status-badge status-{{ case.status|lower }}">
+                                            {{ case.get_status_display }}
+                                        </span>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="empty-state-small">
+                                <i class="fas fa-plus-square"></i>
+                                <h5>No Cases Yet</h5>
+                                <p>You haven't submitted any cases. Start by submitting your first case for consultation.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Medical Community Specific Styles */
+.medical-community-container {
+    min-height: 100vh;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.page-header {
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border-bottom: 1px solid #e2e8f0;
+    padding: 2.5rem 0;
+    margin-bottom: 2rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.page-title {
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.page-title i {
+    color: #3b82f6;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #64748b;
+    margin: 0;
+    font-weight: 400;
+}
+
+.section-container {
+    margin-bottom: 2rem;
+}
+
+/* Action Cards */
+.action-card {
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.action-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.action-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 24px -4px rgba(59, 130, 246, 0.15);
+}
+
+.action-card:hover::before {
+    opacity: 1;
+}
+
+.card-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+
+.card-icon i {
+    font-size: 1.5rem;
+    color: #3b82f6;
+}
+
+.card-content h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 0.75rem;
+}
+
+.card-content p {
+    color: #64748b;
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+    flex-grow: 1;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    color: white;
+    text-decoration: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    align-self: flex-start;
+}
+
+.btn-action:hover {
+    color: white;
+    transform: translateX(2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+/* Content Cards */
+.content-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+}
+
+.card-header-custom {
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+    position: relative;
+}
+
+.card-header-custom h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 0;
+    display: flex;
+    align-items: center;
+}
+
+.card-header-custom i {
+    color: #3b82f6;
+}
+
+.header-accent {
+    position: absolute;
+    bottom: 0;
+    left: 2rem;
+    right: 2rem;
+    height: 2px;
+    background: linear-gradient(90deg, #3b82f6, #1d4ed8);
+}
+
+.card-body-custom {
+    padding: 2rem;
+}
+
+/* Case Items */
+.cases-list {
+    space-y: 1rem;
+}
+
+.case-item {
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.case-item:last-child {
+    border-bottom: none;
+}
+
+.case-header {
+    display: flex;
+    justify-content: between;
+    align-items: flex-start;
+    margin-bottom: 0.75rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.case-title a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: color 0.2s ease;
+}
+
+.case-title a:hover {
+    color: #3b82f6;
+}
+
+.case-time {
+    color: #64748b;
+    font-size: 0.85rem;
+    white-space: nowrap;
+}
+
+.case-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.meta-item {
+    color: #64748b;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+}
+
+.meta-item i {
+    color: #94a3b8;
+}
+
+/* Urgency Badges */
+.urgency-badge, .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.urgency-low {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.urgency-medium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.urgency-high {
+    background: #fed7aa;
+    color: #c2410c;
+}
+
+.urgency-critical {
+    background: #fecaca;
+    color: #dc2626;
+}
+
+.status-open {
+    background: #e0f2fe;
+    color: #0277bd;
+}
+
+.status-resolved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.status-closed {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+/* My Cases */
+.my-cases-list {
+    space-y: 1rem;
+}
+
+.my-case-item {
+    padding: 1rem 0;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.my-case-item:last-child {
+    border-bottom: none;
+}
+
+.my-case-title {
+    margin-bottom: 0.5rem;
+}
+
+.my-case-title a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: color 0.2s ease;
+}
+
+.my-case-title a:hover {
+    color: #3b82f6;
+}
+
+.my-case-stats {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.response-count {
+    color: #64748b;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+}
+
+.response-count i {
+    color: #94a3b8;
+}
+
+/* Empty States */
+.empty-state, .empty-state-small {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #64748b;
+}
+
+.empty-state-small {
+    padding: 2rem 1rem;
+}
+
+.empty-state i, .empty-state-small i {
+    font-size: 3rem;
+    color: #cbd5e1;
+    margin-bottom: 1rem;
+}
+
+.empty-state-small i {
+    font-size: 2rem;
+}
+
+.empty-state h4, .empty-state-small h5 {
+    color: #475569;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p, .empty-state-small p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .page-title {
+        font-size: 1.75rem;
+    }
+    
+    .page-subtitle {
+        font-size: 1rem;
+    }
+    
+    .action-card {
+        padding: 1.5rem;
+    }
+    
+    .card-body-custom {
+        padding: 1.5rem;
+    }
+    
+    .case-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .case-meta {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .container-fluid {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+    
+    .page-header {
+        padding: 1.5rem 0;
+    }
+    
+    .page-title {
+        font-size: 1.5rem;
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .page-title i {
+        margin-bottom: 0.5rem;
+        margin-right: 0;
+    }
+}
+</style>
+{% endblock %}

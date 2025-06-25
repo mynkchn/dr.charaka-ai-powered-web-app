@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}{{ case.title }} - Medical Community{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Case Details -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">{{ case.title }}</h4>
+                    <span class="badge badge-{{ case.urgency|lower }} badge-lg">{{ case.get_urgency_display }}</span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-3"><strong>Patient:</strong></div>
+                        <div class="col-md-9">{{ case.patient_age }}y {{ case.patient_gender }}</div>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-3"><strong>Submitted:</strong></div>
+                        <div class="col-md-9">{{ case.created_at|date:"M d, Y" }} by Dr. {{ case.submitting_doctor.last_name }}</div>
+                    </div>
+                    {% if case.required_specialization %}
+                    <div class="row mb-3">
+                        <div class="col-md-3"><strong>Specialization:</strong></div>
+                        <div class="col-md-9">{{ case.required_specialization }}</div>
+                    </div>
+                    {% endif %}
+                    
+                    <h6 class="mt-4">Case Description:</h6>
+                    <p>{{ case.description|linebreaks }}</p>
+                    
+                    <h6>Symptoms:</h6>
+                    <p>{{ case.symptoms|linebreaks }}</p>
+                    
+                    {% if case.medical_history %}
+                    <h6>Medical History:</h6>
+                    <p>{{ case.medical_history|linebreaks }}</p>
+                    {% endif %}
+                    
+                    {% if case.current_medications %}
+                    <h6>Current Medications:</h6>
+                    <p>{{ case.current_medications|linebreaks }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Responses -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Professional Responses ({{ responses.count }})</h5>
+                </div>
+                <div class="card-body">
+                    {% if user != case.submitting_doctor %}
+                    <!-- Response Form -->
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="{{ form.response_text.id_for_label }}" class="form-label">Your Professional Opinion</label>
+                            {{ form.response_text }}
+                        </div>
+                        <button type="submit" class="btn btn-success">Submit Response</button>
+                    </form>
+                    <hr>
+                    {% endif %}
+                    
+                    <!-- Existing Responses -->
+                    {% for response in responses %}
+                    <div class="border-bottom pb-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <strong>Dr. {{ response.responding_doctor.last_name }}</strong>
+                            <div>
+                                <span class="text-muted">{{ response.created_at|timesince }} ago</span>
+                                <span class="badge badge-success ms-2">{{ response.helpful_votes }} helpful</span>
+                            </div>
+                        </div>
+                        <p>{{ response.response_text|linebreaks }}</p>
+                        
+                        {% if user != response.responding_doctor %}
+                        <div class="vote-buttons" data-response-id="{{ response.id }}">
+                            <button class="btn btn-sm btn-outline-success vote-btn" data-helpful="true">
+                                👍 Helpful
+                            </button>
+                            <button class="btn btn-sm btn-outline-secondary vote-btn" data-helpful="false">
+                                👎 Not Helpful
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <p class="text-muted">No responses yet. Be the first to help!</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">Case Status</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Status:</strong> <span class="badge badge-{{ case.status|lower }}">{{ case.get_status_display }}</span></p>
+                    <p><strong>Responses:</strong> {{ responses.count }}</p>
+                    <p><strong>Last Updated:</strong> {{ case.updated_at|date:"M d, Y" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.querySelectorAll('.vote-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const responseId = this.closest('.vote-buttons').dataset.responseId;
+        const isHelpful = this.dataset.helpful === 'true';
+        
+        fetch('{% url "vote_response" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: `response_id=${responseId}&is_helpful=${isHelpful}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

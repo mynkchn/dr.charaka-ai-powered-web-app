@@ -1,0 +1,272 @@
+<!-- community/templates/community/submit_case.html -->
+{% extends "base.html" %}
+
+{% block title %}Submit Case - Medical Community{% endblock %}
+
+{% block extra_css %}
+<style>
+    .card {
+        border-radius: 10px;
+    }
+    .card-header {
+        border-radius: 10px 10px 0 0 !important;
+    }
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
+    }
+    .required-field::after {
+        content: " *";
+        color: red;
+    }
+    .urgency-indicator {
+        transition: border-left 0.3s ease;
+    }
+    .form-control.is-invalid {
+        border-color: #dc3545;
+        box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">Submit New Case for Consultation</h4>
+                </div>
+                <div class="card-body">
+                    {% comment %} {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %} {% endcomment %}
+
+                    <form method="post" id="caseForm">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="{{ form.title.id_for_label }}" class="form-label required-field">Case Title</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.title.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.urgency.id_for_label }}" class="form-label required-field">Urgency</label>
+                                {{ form.urgency }}
+                                {% if form.urgency.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.urgency.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.description.id_for_label }}" class="form-label required-field">Case Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.description.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.patient_age.id_for_label }}" class="form-label required-field">Patient Age</label>
+                                {{ form.patient_age }}
+                                {% if form.patient_age.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.patient_age.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.patient_gender.id_for_label }}" class="form-label required-field">Gender</label>
+                                {{ form.patient_gender }}
+                                {% if form.patient_gender.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.patient_gender.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="{{ form.required_specialization.id_for_label }}" class="form-label">Required Specialization</label>
+                                {{ form.required_specialization }}
+                                {% if form.required_specialization.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.required_specialization.errors.0 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.symptoms.id_for_label }}" class="form-label required-field">Symptoms</label>
+                            {{ form.symptoms }}
+                            {% if form.symptoms.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.symptoms.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.medical_history.id_for_label }}" class="form-label">Medical History</label>
+                            {{ form.medical_history }}
+                            {% if form.medical_history.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.medical_history.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.current_medications.id_for_label }}" class="form-label">Current Medications</label>
+                            {{ form.current_medications }}
+                            {% if form.current_medications.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.current_medications.errors.0 }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'community_home' %}" class="btn btn-secondary">Cancel</a>
+                            <button type="submit" class="btn btn-primary">Submit Case</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add urgency color indicator
+    const urgencyField = document.getElementById('{{ form.urgency.id_for_label }}');
+    if (urgencyField) {
+        urgencyField.addEventListener('change', function() {
+            const urgencyColors = {
+                'Low': '#28a745',
+                'Medium': '#ffc107', 
+                'High': '#fd7e14',
+                'Critical': '#dc3545'
+            };
+            
+            if (this.value && urgencyColors[this.value]) {
+                this.style.borderLeft = `4px solid ${urgencyColors[this.value]}`;
+                this.classList.add('urgency-indicator');
+            } else {
+                this.style.borderLeft = '';
+                this.classList.remove('urgency-indicator');
+            }
+        });
+        
+        // Trigger on page load if value exists
+        if (urgencyField.value) {
+            urgencyField.dispatchEvent(new Event('change'));
+        }
+    }
+
+    // Enhanced form validation feedback
+    const form = document.getElementById('caseForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            // Remove any existing validation classes
+            const formControls = this.querySelectorAll('.form-control');
+            formControls.forEach(control => {
+                control.classList.remove('is-invalid', 'is-valid');
+            });
+
+            // Add basic client-side validation feedback
+            const requiredFields = ['{{ form.title.id_for_label }}', '{{ form.description.id_for_label }}', 
+                                  '{{ form.patient_age.id_for_label }}', '{{ form.patient_gender.id_for_label }}', 
+                                  '{{ form.symptoms.id_for_label }}', '{{ form.urgency.id_for_label }}'];
+            
+            let hasErrors = false;
+            requiredFields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field && (!field.value || field.value.trim() === '')) {
+                    field.classList.add('is-invalid');
+                    hasErrors = true;
+                } else if (field) {
+                    field.classList.add('is-valid');
+                }
+            });
+
+            // Age validation
+            const ageField = document.getElementById('{{ form.patient_age.id_for_label }}');
+            if (ageField) {
+                const age = parseInt(ageField.value);
+                if (age < 0 || age > 150 || isNaN(age)) {
+                    ageField.classList.remove('is-valid');
+                    ageField.classList.add('is-invalid');
+                    hasErrors = true;
+                }
+            }
+
+            if (hasErrors) {
+                e.preventDefault();
+                // Scroll to first error
+                const firstError = this.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+
+        // Real-time validation feedback
+        const inputs = form.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('input', function() {
+                this.classList.remove('is-invalid');
+                if (this.value.trim() !== '') {
+                    this.classList.add('is-valid');
+                } else {
+                    this.classList.remove('is-valid');
+                }
+            });
+
+            input.addEventListener('blur', function() {
+                if (this.hasAttribute('required') && this.value.trim() === '') {
+                    this.classList.remove('is-valid');
+                    this.classList.add('is-invalid');
+                }
+            });
+        });
+    }
+
+    // Auto-resize textareas
+    const textareas = document.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = this.scrollHeight + 'px';
+        });
+    });
+});
+</script>
+{% endblock %}

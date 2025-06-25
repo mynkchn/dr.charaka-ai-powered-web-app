@@ -1,0 +1,536 @@
+{% extends 'base.html' %}
+{% block title %}Heart Disease Risk Assessment - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-8">
+            <!-- Header Section -->
+            <div class="text-center mb-5">
+                <div class="d-inline-flex align-items-center justify-content-center bg-gradient-primary rounded-circle mb-3" style="width: 80px; height: 80px;">
+                    <i class="fas fa-heart text-white" style="font-size: 2rem;"></i>
+                </div>
+                <h1 class="h2 mb-2 text-gray-900 fw-bold">Heart Disease Risk Assessment</h1>
+                <p class="text-muted mb-0">AI-powered cardiac risk prediction using advanced machine learning</p>
+            </div>
+
+            <!-- Main Form Card -->
+            <div class="card border-0 shadow-lg mb-4" style="border-radius: 20px;">
+                <div class="card-body p-5">
+                    <!-- Show form errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'predictor:heart_disease_prediction' %}" id="heartDiseaseForm">
+                        {% csrf_token %}
+                        
+                        <!-- Patient Selection Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-primary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-user text-primary"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Patient Information</h5>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="form-floating mb-3">
+                                        {{ form.patient }}
+                                        <label for="{{ form.patient.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-user-circle me-2"></i>Select Patient
+                                        </label>
+                                        {% if form.patient.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {{ form.patient.errors.0 }}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Basic Demographics Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-success bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-id-card text-success"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Demographics</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Age -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.age }}
+                                        <label for="{{ form.age.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-calendar-alt me-2"></i>{{ form.age.label }}
+                                        </label>
+                                        {% if form.age.help_text %}
+                                            <div class="form-text text-muted">{{ form.age.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.age.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.age.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Gender -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.sex }}
+                                        <label for="{{ form.sex.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-venus-mars me-2"></i>{{ form.sex.label }}
+                                        </label>
+                                        {% if form.sex.help_text %}
+                                            <div class="form-text text-muted">{{ form.sex.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.sex.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.sex.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Clinical Symptoms Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-warning bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-stethoscope text-warning"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Clinical Symptoms</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Chest Pain Type -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.cp }}
+                                        <label for="{{ form.cp.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-lungs me-2"></i>{{ form.cp.label }}
+                                        </label>
+                                        {% if form.cp.help_text %}
+                                            <div class="form-text text-muted">{{ form.cp.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.cp.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.cp.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Exercise Induced Angina -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.exang }}
+                                        <label for="{{ form.exang.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-running me-2"></i>{{ form.exang.label }}
+                                        </label>
+                                        {% if form.exang.help_text %}
+                                            <div class="form-text text-muted">{{ form.exang.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.exang.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.exang.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Vital Signs Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-info bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-heartbeat text-info"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Vital Signs</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Resting Blood Pressure -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.trestbps }}
+                                        <label for="{{ form.trestbps.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-thermometer-half me-2"></i>{{ form.trestbps.label }}
+                                        </label>
+                                        {% if form.trestbps.help_text %}
+                                            <div class="form-text text-muted">{{ form.trestbps.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.trestbps.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.trestbps.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Maximum Heart Rate -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.thalach }}
+                                        <label for="{{ form.thalach.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-heartbeat me-2"></i>{{ form.thalach.label }}
+                                        </label>
+                                        {% if form.thalach.help_text %}
+                                            <div class="form-text text-muted">{{ form.thalach.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.thalach.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.thalach.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Laboratory Values Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-danger bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-vial text-danger"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Laboratory Values</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Cholesterol -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.chol }}
+                                        <label for="{{ form.chol.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-tint me-2"></i>{{ form.chol.label }}
+                                        </label>
+                                        {% if form.chol.help_text %}
+                                            <div class="form-text text-muted">{{ form.chol.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.chol.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.chol.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Fasting Blood Sugar -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.fbs }}
+                                        <label for="{{ form.fbs.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-cube me-2"></i>{{ form.fbs.label }}
+                                        </label>
+                                        {% if form.fbs.help_text %}
+                                            <div class="form-text text-muted">{{ form.fbs.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.fbs.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.fbs.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ECG & Cardiac Tests Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-4">
+                                <div class="bg-secondary bg-opacity-10 rounded-circle p-2 me-3">
+                                    <i class="fas fa-chart-line text-secondary"></i>
+                                </div>
+                                <h5 class="mb-0 text-gray-900 fw-semibold">Cardiac Tests</h5>
+                            </div>
+                            
+                            <div class="row g-4">
+                                <!-- Resting ECG -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.restecg }}
+                                        <label for="{{ form.restecg.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-activity me-2"></i>{{ form.restecg.label }}
+                                        </label>
+                                        {% if form.restecg.help_text %}
+                                            <div class="form-text text-muted">{{ form.restecg.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.restecg.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.restecg.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- ST Depression -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.oldpeak }}
+                                        <label for="{{ form.oldpeak.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-wave-square me-2"></i>{{ form.oldpeak.label }}
+                                        </label>
+                                        {% if form.oldpeak.help_text %}
+                                            <div class="form-text text-muted">{{ form.oldpeak.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.oldpeak.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.oldpeak.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- ST Slope -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.slope }}
+                                        <label for="{{ form.slope.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-chart-area me-2"></i>{{ form.slope.label }}
+                                        </label>
+                                        {% if form.slope.help_text %}
+                                            <div class="form-text text-muted">{{ form.slope.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.slope.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.slope.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Major Vessels -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.ca }}
+                                        <label for="{{ form.ca.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-project-diagram me-2"></i>{{ form.ca.label }}
+                                        </label>
+                                        {% if form.ca.help_text %}
+                                            <div class="form-text text-muted">{{ form.ca.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.ca.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.ca.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <!-- Thalassemia -->
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        {{ form.thal }}
+                                        <label for="{{ form.thal.id_for_label }}" class="text-muted">
+                                            <i class="fas fa-dna me-2"></i>{{ form.thal.label }}
+                                        </label>
+                                        {% if form.thal.help_text %}
+                                            <div class="form-text text-muted">{{ form.thal.help_text }}</div>
+                                        {% endif %}
+                                        {% if form.thal.errors %}
+                                            <div class="invalid-feedback d-block">{{ form.thal.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 py-3" id="submitBtn">
+                                <i class="fas fa-heart me-2"></i>
+                                Analyze Heart Disease Risk
+                                <span class="spinner-border spinner-border-sm ms-2 d-none" id="loadingSpinner"></span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Info Footer -->
+            <div class="card border-0 bg-light" style="border-radius: 15px;">
+                <div class="card-body py-3 px-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <div class="d-flex align-items-center text-muted">
+                                <i class="fas fa-shield-alt me-2 text-success"></i>
+                                <small>
+                                    <strong>Secure & Confidential:</strong> All patient data is encrypted and HIPAA compliant. 
+                                    Results are for clinical decision support only.
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-2 mt-md-0">
+                            <small class="text-muted">
+                                <i class="fas fa-robot me-1"></i>
+                                Powered by Advanced ML
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Enhanced form styling */
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.form-floating > .form-control,
+.form-floating > .form-select {
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    padding: 1rem 0.75rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background-color: #fafbfc;
+}
+
+.form-floating > .form-control:focus,
+.form-floating > .form-select:focus {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+    background-color: #fff;
+}
+
+.form-floating > label {
+    font-weight: 500;
+    color: #6c757d;
+    padding: 1rem 0.75rem;
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label,
+.form-floating > .form-select:focus ~ label,
+.form-floating > .form-select:not([value=""]) ~ label {
+    color: #e74c3c;
+    transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #d62c1a 0%, #a93226 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.text-gray-900 {
+    color: #1f2937 !important;
+}
+
+.bg-primary.bg-opacity-10 {
+    background-color: rgba(231, 76, 60, 0.1) !important;
+}
+
+.bg-success.bg-opacity-10 {
+    background-color: rgba(25, 135, 84, 0.1) !important;
+}
+
+.bg-info.bg-opacity-10 {
+    background-color: rgba(13, 202, 240, 0.1) !important;
+}
+
+.bg-warning.bg-opacity-10 {
+    background-color: rgba(255, 193, 7, 0.1) !important;
+}
+
+.bg-danger.bg-opacity-10 {
+    background-color: rgba(220, 53, 69, 0.1) !important;
+}
+
+.bg-secondary.bg-opacity-10 {
+    background-color: rgba(108, 117, 125, 0.1) !important;
+}
+
+.form-text {
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.invalid-feedback {
+    font-size: 0.875rem;
+    color: #dc3545;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 2rem !important;
+    }
+    
+    .btn-lg {
+        padding: 0.75rem 2rem !important;
+        font-size: 1rem !important;
+    }
+}
+</style>
+
+<script>
+console.log('Heart Disease Form script loaded');
+
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('heartDiseaseForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    
+    console.log('Form action URL:', form.action);
+    
+    // Form submission handler
+    form.addEventListener('submit', function(e) {
+        console.log('Form submit event triggered');
+        console.log('Form method:', form.method);
+        console.log('Form action:', form.action);
+        
+        // Check if all required fields are filled
+        const requiredFields = form.querySelectorAll('[required]');
+        let allValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                console.log('Empty required field:', field.name || field.id);
+                allValid = false;
+            }
+        });
+        
+        if (!allValid) {
+            console.log('Form validation failed - required fields empty');
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return false;
+        }
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        loadingSpinner.classList.remove('d-none');
+        submitBtn.innerHTML = '<i class="fas fa-heart me-2"></i>Analyzing... <span class="spinner-border spinner-border-sm ms-2"></span>';
+        
+        console.log('Form is being submitted...');
+        
+        // Let the form submit naturally
+        return true;
+    });
+    
+    // Add form validation feedback
+    const formControls = document.querySelectorAll('.form-control, .form-select');
+    formControls.forEach(function(element) {
+        element.addEventListener('blur', function() {
+            if (this.hasAttribute('required') && this.value.trim() === '') {
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
+            } else if (this.value.trim() !== '') {
+                this.classList.remove('is-invalid');
+                this.classList.add('is-valid');
+            }
+        });
+    });
+    
+    console.log('All event listeners attached');
+});
+
+// Additional debugging
+window.addEventListener('beforeunload', function() {
+    console.log('Page is about to unload');
+});
+</script>
+{% endblock %}

@@ -52,12 +52,15 @@ INSTALLED_APPS = [
     
     # Local apps
     'accounts.apps.AccountsConfig',
-    'chatbot.apps.ChatbotConfig',
+    # 'chatbot.apps.ChatbotConfig',
     'predictor.apps.PredictorConfig',
     'core.apps.CoreConfig',
     'rest_framework',
     'llm.apps.LlmConfig',
-    'convo.apps.ConvoConfig',
+    'conversation.apps.ConversationConfig',
+    'community.apps.CommunityConfig',
+    # 'prescription.apps.PrescriptionConfig',
+    'drug_interaction',
 ]
 
 MIDDLEWARE = [

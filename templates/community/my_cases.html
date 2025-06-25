@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}My Cases - Medical Community{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>My Submitted Cases</h2>
+                <a href="{% url 'submit_case' %}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Submit New Case
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ cases.count }}</h4>
+                            <small>Total Cases</small>
+                        </div>
+                        <i class="fas fa-folder fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ open_cases_count }}</h4>
+                            <small>Open Cases</small>
+                        </div>
+                        <i class="fas fa-clock fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-info text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ total_responses }}</h4>
+                            <small>Total Responses</small>
+                        </div>
+                        <i class="fas fa-comments fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm bg-warning text-white">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <h4 class="mb-0">{{ resolved_cases_count }}</h4>
+                            <small>Resolved Cases</small>
+                        </div>
+                        <i class="fas fa-check-circle fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filter and Search -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="row align-items-center">
+                        <div class="col-md-4">
+                            <select class="form-select" id="statusFilter" onchange="filterCases()">
+                                <option value="">All Status</option>
+                                <option value="OPEN">Open</option>
+                                <option value="RESOLVED">Resolved</option>
+                                <option value="CLOSED">Closed</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <select class="form-select" id="urgencyFilter" onchange="filterCases()">
+                                <option value="">All Urgency</option>
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="CRITICAL">Critical</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" id="searchInput" placeholder="Search cases..." onkeyup="filterCases()">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Cases List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Your Cases</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if cases %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="casesTable">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Case Title</th>
+                                    <th>Patient Info</th>
+                                    <th>Urgency</th>
+                                    <th>Status</th>
+                                    <th>Responses</th>
+                                    <th>Submitted</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for case in cases %}
+                                <tr data-status="{{ case.status }}" data-urgency="{{ case.urgency }}" data-search="{{ case.title|lower }} {{ case.symptoms|lower }} {{ case.required_specialization|lower }}">
+                                    <td>
+                                        <a href="{% url 'case_detail' case.id %}" class="text-decoration-none fw-bold">
+                                            {{ case.title|truncatechars:40 }}
+                                        </a>
+                                        {% if case.required_specialization %}
+                                        <br><small class="text-muted">{{ case.required_specialization }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="d-block">{{ case.patient_age }}y {{ case.patient_gender }}</span>
+                                        <small class="text-muted">{{ case.symptoms|truncatechars:30 }}</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ case.urgency|lower }}">
+                                            {{ case.get_urgency_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ case.status|lower }}">
+                                            {{ case.get_status_display }}
+                                        </span>
+                                        {% if case.resolved_at %}
+                                        <br><small class="text-muted">{{ case.resolved_at|timesince }} ago</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ case.responses.count }}</span>
+                                        {% if case.responses.count > 0 %}
+                                        <br><small class="text-success">{{ case.responses.count }} response{{ case.responses.count|pluralize }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <span class="d-block">{{ case.created_at|date:"M d, Y" }}</span>
+                                        <small class="text-muted">{{ case.created_at|timesince }} ago</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group btn-group-sm">
+                                            <a href="{% url 'case_detail' case.id %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-eye"></i> View
+                                            </a>
+                                            {% if case.status == 'OPEN' %}
+                                            <button class="btn btn-outline-success" onclick="markResolved({{ case.id }})">
+                                                <i class="fas fa-check"></i> Resolve
+                                            </button>
+                                            {% elif case.status == 'RESOLVED' %}
+                                            <button class="btn btn-outline-warning" onclick="reopenCase({{ case.id }})">
+                                                <i class="fas fa-undo"></i> Reopen
+                                            </button>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5">
+                        <div class="mb-4">
+                            <i class="fas fa-file-medical fa-3x text-muted"></i>
+                        </div>
+                        <h5 class="text-muted">No cases submitted yet</h5>
+                        <p class="text-muted">Start by submitting your first case for peer consultation.</p>
+                        <a href="{% url 'submit_case' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Submit Your First Case
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.badge-low { background-color: #28a745; }
+.badge-medium { background-color: #ffc107; color: #212529; }
+.badge-high { background-color: #fd7e14; }
+.badge-critical { background-color: #dc3545; }
+.badge-open { background-color: #17a2b8; }
+.badge-resolved { background-color: #28a745; }
+.badge-closed { background-color: #6c757d; }
+.opacity-75 { opacity: 0.75; }
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.table-responsive {
+    border-radius: 0.375rem;
+}
+
+.btn-group-sm .btn {
+    font-size: 0.875rem;
+    padding: 0.25rem 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .btn-group {
+        flex-direction: column;
+    }
+    
+    .btn-group .btn {
+        border-radius: 0.375rem !important;
+        margin-bottom: 0.25rem;
+    }
+}
+</style>
+
+<script>
+const csrftoken = '{{ csrf_token }}';
+
+function markResolved(caseId) {
+    if (confirm('Mark this case as resolved? This action can be undone later.')) {
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resolving...';
+        button.disabled = true;
+        
+        fetch(`{% url 'resolve_case' 0 %}`.replace('0', caseId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                showNotification('Case marked as resolved successfully!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                throw new Error(data.message || 'Failed to resolve case');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error resolving case: ' + error.message, 'error');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        });
+    }
+}
+
+function reopenCase(caseId) {
+    if (confirm('Reopen this case?')) {
+        const button = event.target.closest('button');
+        const originalContent = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Reopening...';
+        button.disabled = true;
+        
+        fetch(`{% url 'reopen_case' 0 %}`.replace('0', caseId), {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken,
+                'Content-Type': 'application/json',
+            },
+            credentials: 'same-origin'
+        })
+        .then(response => location.reload())
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('Error reopening case', 'error');
+            button.innerHTML = originalContent;
+            button.disabled = false;
+        });
+    }
+}
+
+function filterCases() {
+    const statusFilter = document.getElementById('statusFilter').value;
+    const urgencyFilter = document.getElementById('urgencyFilter').value;
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#casesTable tbody tr');
+    
+    rows.forEach(row => {
+        const status = row.dataset.status;
+        const urgency = row.dataset.urgency;
+        const searchText = row.dataset.search;
+        
+        const statusMatch = !statusFilter || status === statusFilter;
+        const urgencyMatch = !urgencyFilter || urgency === urgencyFilter;
+        const searchMatch = !searchTerm || searchText.includes(searchTerm);
+        
+        row.style.display = statusMatch && urgencyMatch && searchMatch ? '' : 'none';
+    });
+}
+
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+</script>
+{% endblock %}

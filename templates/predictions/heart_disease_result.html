@@ -1,0 +1,513 @@
+{% extends 'base.html' %}
+{% block title %}Heart Disease Risk Assessment Result - Dr. Charaka{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <!-- Header Section -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h3 mb-1 text-gray-900" style="font-weight: 700;">Heart Disease Risk Assessment</h1>
+                    <p class="text-muted mb-0">AI-powered cardiovascular risk analysis</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <span class="badge bg-light text-dark px-3 py-2" style="font-size: 0.8rem;">
+                        <i class="fas fa-calendar-alt me-1"></i>
+                        {{ prediction.created_at|date:"M d, Y" }}
+                    </span>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- Main Result Card -->
+                <div class="col-12 col-lg-8">
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 20px;">
+                        <div class="card-body p-4">
+                            <!-- Patient Info Header -->
+                            <div class="d-flex align-items-center justify-content-between mb-4 pb-3 border-bottom">
+                                <div>
+                                    <h5 class="mb-1 text-gray-900">{{ prediction.patient.first_name }} {{ prediction.patient.last_name }}</h5>
+                                    <div class="d-flex gap-3 text-muted" style="font-size: 0.875rem;">
+                                        <span><i class="fas fa-user me-1"></i>{{ prediction.age }} years</span>
+                                        <span><i class="fas fa-venus-mars me-1"></i>{% if prediction.sex == 1 %}Male{% else %}Female{% endif %}</span>
+                                        <span><i class="fas fa-heartbeat me-1"></i>Max HR: {{ prediction.thalach }} bpm</span>
+                                    </div>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-light text-dark">ID: #{{ prediction.id }}</span>
+                                </div>
+                            </div>
+
+                            <!-- Result Status -->
+                            <div class="text-center py-4">
+                                {% if prediction.prediction == 'No Heart Disease' %}
+                                    <div class="mb-3">
+                                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
+                                             style="width: 100px; height: 100px; background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                            <i class="fas fa-heart text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-success mb-2" style="font-weight: 700;">Low Heart Disease Risk</h3>
+                                    <p class="text-muted mb-3">No significant cardiovascular risk detected</p>
+                                {% else %}
+                                    <div class="mb-3">
+                                        <div class="d-inline-flex align-items-center justify-content-center rounded-circle" 
+                                             style="width: 100px; height: 100px; background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">
+                                            <i class="fas fa-heart-broken text-white" style="font-size: 3rem;"></i>
+                                        </div>
+                                    </div>
+                                    <h3 class="text-danger mb-2" style="font-weight: 700;">High Heart Disease Risk</h3>
+                                    <p class="text-muted mb-3">Elevated cardiovascular risk - immediate medical attention required</p>
+                                {% endif %}
+                                
+                                <div class="d-inline-flex align-items-center gap-3 bg-light rounded-pill px-4 py-3" style="border-radius: 25px;">
+                                    <div class="text-center">
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Confidence</div>
+                                        <div class="fw-bold text-primary" style="font-size: 1.5rem;">{{ prediction.confidence|floatformat:1 }}%</div>
+                                    </div>
+                                    <div class="vr" style="height: 40px;"></div>
+                                    <div class="text-center">
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Model</div>
+                                        <div class="fw-semibold text-gray-700">ML Classifier</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Clinical Parameters Grid -->
+                            <div class="mt-5">
+                                <h6 class="text-gray-700 mb-3" style="font-weight: 600;">Cardiovascular Parameters</h6>
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-heartbeat text-danger"></i>
+                                            </div>
+                                            <div class="parameter-label">Resting BP</div>
+                                            <div class="parameter-value">{{ prediction.trestbps }}</div>
+                                            <div class="parameter-unit">mm Hg</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-chart-line text-primary"></i>
+                                            </div>
+                                            <div class="parameter-label">Cholesterol</div>
+                                            <div class="parameter-value">{{ prediction.chol }}</div>
+                                            <div class="parameter-unit">mg/dl</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-running text-success"></i>
+                                            </div>
+                                            <div class="parameter-label">Max Heart Rate</div>
+                                            <div class="parameter-value">{{ prediction.thalach }}</div>
+                                            <div class="parameter-unit">bpm</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-bolt text-warning"></i>
+                                            </div>
+                                            <div class="parameter-label">ST Depression</div>
+                                            <div class="parameter-value">{{ prediction.oldpeak }}</div>
+                                            <div class="parameter-unit">mm</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-activity text-info"></i>
+                                            </div>
+                                            <div class="parameter-label">Chest Pain Type</div>
+                                            <div class="parameter-value">
+                                                {% if prediction.cp == 0 %}Typical{% elif prediction.cp == 1 %}Atypical{% elif prediction.cp == 2 %}Non-Anginal{% else %}Asymptomatic{% endif %}
+                                            </div>
+                                            <div class="parameter-unit">Type {{ prediction.cp }}</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-4">
+                                        <div class="parameter-card">
+                                            <div class="parameter-icon">
+                                                <i class="fas fa-vial text-secondary"></i>
+                                            </div>
+                                            <div class="parameter-label">Major Vessels</div>
+                                            <div class="parameter-value">{{ prediction.ca }}</div>
+                                            <div class="parameter-unit">count</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Clinical Indicators -->
+                            <div class="mt-4">
+                                <h6 class="text-gray-700 mb-3" style="font-weight: 600;">Clinical Indicators</h6>
+                                <div class="row g-3">
+                                    <div class="col-6 col-md-3">
+                                        <div class="indicator-card">
+                                            <div class="indicator-label">Fasting Blood Sugar</div>
+                                            <div class="indicator-value {% if prediction.fbs == 1 %}text-warning{% else %}text-success{% endif %}">
+                                                {% if prediction.fbs == 1 %}> 120 mg/dl{% else %}≤ 120 mg/dl{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="indicator-card">
+                                            <div class="indicator-label">Exercise Angina</div>
+                                            <div class="indicator-value {% if prediction.exang == 1 %}text-danger{% else %}text-success{% endif %}">
+                                                {% if prediction.exang == 1 %}Present{% else %}Absent{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="indicator-card">
+                                            <div class="indicator-label">ST Slope</div>
+                                            <div class="indicator-value">
+                                                {% if prediction.slope == 0 %}Upsloping{% elif prediction.slope == 1 %}Flat{% else %}Downsloping{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="indicator-card">
+                                            <div class="indicator-label">Thalassemia</div>
+                                            <div class="indicator-value">
+                                                {% if prediction.thal == 1 %}Fixed{% elif prediction.thal == 2 %}Normal{% else %}Reversible{% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sidebar -->
+                <div class="col-12 col-lg-4">
+                    <!-- Risk Assessment -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-radius: 15px 15px 0 0;">
+                            <h6 class="mb-0 fw-semibold text-gray-900">
+                                <i class="fas fa-stethoscope me-2 text-primary"></i>
+                                Risk Assessment
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                        {% if prediction.prediction == 'No Heart Disease' %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-success-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-heart text-success"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1 text-success">Low Risk</h6>
+                                        <p class="text-muted mb-0 small">Maintain heart-healthy lifestyle</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-success-soft border-0" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-info-circle text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <strong>Excellent News!</strong> Your cardiovascular parameters indicate a low risk for heart disease. Continue your healthy habits to maintain optimal heart health.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-danger-soft rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-heart-broken text-danger"></i>
+                                        </div>
+                                    </div>
+                                    <div class="ms-3">
+                                        <h6 class="mb-1 text-danger">High Risk</h6>
+                                        <p class="text-muted mb-0 small">Immediate medical attention required</p>
+                                    </div>
+                                </div>
+                                <div class="alert alert-danger-soft border-0" role="alert">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-exclamation-triangle text-danger"></i>
+                                        </div>
+                                        <div class="flex-grow-1 ms-2">
+                                            <strong>Urgent Attention Required!</strong> Your cardiovascular parameters suggest high heart disease risk. Please consult a cardiologist immediately for comprehensive evaluation.
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Recommendations -->
+                    <div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+                        <div class="card-header bg-white border-bottom py-3" style="border-radius: 15px 15px 0 0;">
+                            <h6 class="mb-0 fw-semibold text-gray-900">
+                                <i class="fas fa-lightbulb me-2 text-primary"></i>
+                                Recommendations
+                            </h6>
+                        </div>
+                        <div class="card-body p-4">
+                            {% if prediction.prediction == 'No Heart Disease' %}
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Heart-healthy diet</strong>
+                                            <p class="text-muted mb-0 small">Continue low-sodium, low-saturated fat diet rich in fruits and vegetables</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Regular cardio exercise</strong>
+                                            <p class="text-muted mb-0 small">Maintain 150 minutes of moderate aerobic activity weekly</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Stress management</strong>
+                                            <p class="text-muted mb-0 small">Practice relaxation techniques and maintain work-life balance</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-check-circle text-success me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Annual checkups</strong>
+                                            <p class="text-muted mb-0 small">Regular cardiovascular screening and blood pressure monitoring</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-user-md text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Immediate cardiology consultation</strong>
+                                            <p class="text-muted mb-0 small">Schedule urgent appointment with cardiologist for comprehensive evaluation</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-pills text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Medication review</strong>
+                                            <p class="text-muted mb-0 small">Discuss cholesterol-lowering and blood pressure medications with doctor</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-utensils text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Strict dietary changes</strong>
+                                            <p class="text-muted mb-0 small">Implement DASH diet - reduce sodium, saturated fats, and processed foods</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-walking text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Supervised exercise program</strong>
+                                            <p class="text-muted mb-0 small">Begin medically supervised cardiac rehabilitation program</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="recommendation-item">
+                                    <div class="d-flex align-items-start">
+                                        <div class="flex-shrink-0">
+                                            <i class="fas fa-chart-line text-danger me-2"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <strong>Continuous monitoring</strong>
+                                            <p class="text-muted mb-0 small">Daily blood pressure monitoring and regular lipid profile checks</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                        <div class="card-body p-4">
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'predictor:generate_heart_disease_pdf_and_email' prediction.id %}" class="btn btn-primary btn-lg" style="border-radius: 12px;">
+                                    <i class="fas fa-download me-2"></i>
+                                    Download Report
+                                </a>
+                                <a href="{% url 'predictor:heart_disease_prediction' %}" class="btn btn-outline-primary btn-lg" style="border-radius: 12px;">
+                                    <i class="fas fa-plus me-2"></i>
+                                    New Assessment
+                                </a>
+                                <a href="{% url 'accounts:dashboard' %}" class="btn btn-outline-secondary btn-lg" style="border-radius: 12px;">
+                                    <i class="fas fa-arrow-left me-2"></i>
+                                    Back to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="row mt-5">
+                <div class="col-12">
+                    <div class="alert alert-info border-0" style="border-radius: 15px; background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);">
+                        <div class="d-flex align-items-start">
+                            <div class="flex-shrink-0">
+                                <i class="fas fa-info-circle text-info" style="font-size: 1.5rem;"></i>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h6 class="alert-heading mb-2">Important Medical Disclaimer</h6>
+                                <p class="mb-2">
+                                    This AI-powered heart disease risk assessment is for informational purposes only and should not replace professional medical advice, diagnosis, or treatment. The predictions are based on machine learning algorithms and may not account for all cardiovascular risk factors.
+                                </p>
+                                <p class="mb-0">
+                                    <strong>Always consult with qualified cardiologists and healthcare professionals</strong> for proper cardiac evaluation and personalized treatment recommendations. If you experience chest pain, shortness of breath, or other cardiac symptoms, seek immediate medical attention.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Custom CSS for parameter cards -->
+<style>
+.parameter-card {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1rem;
+    text-align: center;
+    transition: transform 0.2s ease;
+    height: 100%;
+}
+
+.parameter-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.parameter-icon {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.parameter-label {
+    font-size: 0.75rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.25rem;
+}
+
+.parameter-value {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #212529;
+    margin-bottom: 0.125rem;
+}
+
+.parameter-unit {
+    font-size: 0.75rem;
+    color: #6c757d;
+}
+
+.indicator-card {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.75rem;
+    text-align: center;
+    height: 100%;
+}
+
+.indicator-label {
+    font-size: 0.7rem;
+    color: #6c757d;
+    font-weight: 600;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.indicator-value {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.recommendation-item {
+    padding: 0.75rem;
+    border-radius: 8px;
+    transition: background-color 0.2s ease;
+}
+
+.recommendation-item:hover {
+    background-color: #f8f9fa;
+}
+
+.bg-success-soft {
+    background-color: rgba(16, 185, 129, 0.1) !important;
+}
+
+.bg-danger-soft {
+    background-color: rgba(220, 38, 38, 0.1) !important;
+}
+
+.alert-success-soft {
+    background-color: rgba(16, 185, 129, 0.1);
+    color: #065f46;
+}
+
+.alert-danger-soft {
+    background-color: rgba(220, 38, 38, 0.1);
+    color: #7f1d1d;
+}
+
+@media (max-width: 768px) {
+    .parameter-card, .indicator-card {
+        margin-bottom: 1rem;
+    }
+    
+    .d-inline-flex {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+    
+    .vr {
+        display: none !important;
+    }
+}
+</style>
+{% endblock %}

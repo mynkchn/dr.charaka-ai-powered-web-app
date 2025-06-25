@@ -1,0 +1,335 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Drug Interaction Checker - Dr. Charaka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .drug-input-container {
+        position: relative;
+    }
+    
+    .drug-suggestion {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background: white;
+        border: 1px solid var(--gray-300);
+        border-top: none;
+        border-radius: 0 0 var(--radius) var(--radius);
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+    
+    .drug-suggestion-item {
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        border-bottom: 1px solid var(--gray-100);
+        font-size: 0.875rem;
+    }
+    
+    .drug-suggestion-item:hover {
+        background-color: var(--gray-50);
+    }
+    
+    .drug-suggestion-item:last-child {
+        border-bottom: none;
+    }
+    
+    .severity-high { 
+        background-color: rgba(255, 59, 48, 0.1); 
+        color: #A91E1E; 
+        border-left: 4px solid #FF3B30;
+    }
+    
+    .severity-moderate { 
+        background-color: rgba(255, 149, 0, 0.1); 
+        color: #B45309; 
+        border-left: 4px solid #FF9500;
+    }
+    
+    .severity-low { 
+        background-color: rgba(52, 199, 89, 0.1); 
+        color: #1D4F26; 
+        border-left: 4px solid #34C759;
+    }
+    
+    .drug-tag {
+        display: inline-block;
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius);
+        font-size: 0.75rem;
+        margin: 0.125rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="text-center">
+                <h1 class="display-4 fw-bold text-primary mb-3">
+                    <i class="fas fa-pills me-3"></i>
+                    Drug Interaction Checker
+                </h1>
+                <p class="lead text-muted">
+                    Quickly check for dangerous drug interactions before prescribing medications
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Form -->
+        <div class="col-lg-8">
+            <div class="card shadow-lg">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-search me-2"></i>Check Drug Interactions</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'drug_checker:check' %}" id="drugForm">
+                        {% csrf_token %}
+                        
+                        <!-- Patient Name -->
+                        <div class="mb-4">
+                            <label for="patient_name" class="form-label">
+                                <i class="fas fa-user me-1"></i>Patient Name (Optional)
+                            </label>
+                            <input type="text" class="form-control" id="patient_name" name="patient_name" 
+                                   placeholder="Enter patient name for record keeping">
+                        </div>
+
+                        <!-- Drug Inputs -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-capsules me-1"></i>Medications to Check
+                                <small class="text-muted">(Enter at least 2 drugs)</small>
+                            </label>
+                            <div id="drugInputs">
+                                <div class="drug-input-container mb-3">
+                                    <input type="text" class="form-control drug-input" name="drugs" 
+                                           placeholder="Enter first medication name" required>
+                                    <div class="drug-suggestion"></div>
+                                </div>
+                                <div class="drug-input-container mb-3">
+                                    <input type="text" class="form-control drug-input" name="drugs" 
+                                           placeholder="Enter second medication name" required>
+                                    <div class="drug-suggestion"></div>
+                                </div>
+                            </div>
+                            
+                            <button type="button" class="btn btn-outline-primary btn-sm" id="addDrugBtn">
+                                <i class="fas fa-plus me-1"></i>Add Another Drug
+                            </button>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-check-circle me-2"></i>Check Interactions
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Info -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>How It Works</h5>
+                </div>
+                <div class="card-body">
+                    <ol class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-edit text-primary me-2"></i>
+                            Enter medication names
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-search text-primary me-2"></i>
+                            System checks for interactions
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                            View severity and warnings
+                        </li>
+                        <li>
+                            <i class="fas fa-save text-success me-2"></i>
+                            Results saved to your history
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Severity Levels Guide -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-layer-group me-2"></i>Severity Levels</h5>
+                </div>
+                <div class="card-body">
+                    <div class="severity-low p-2 rounded mb-2">
+                        <strong>Low Risk:</strong> Minor interaction, monitor patient
+                    </div>
+                    <div class="severity-moderate p-2 rounded mb-2">
+                        <strong>Moderate Risk:</strong> Dosage adjustment may be needed
+                    </div>
+                    <div class="severity-high p-2 rounded">
+                        <strong>High Risk:</strong> Avoid combination or use extreme caution
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Checks -->
+            {% if recent_checks %}
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>Recent Checks
+                        <a href="{% url 'drug_checker:history' %}" class="btn btn-sm btn-outline-primary float-end">
+                            View All
+                        </a>
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for check in recent_checks %}
+                    <div class="mb-3 pb-3 {% if not forloop.last %}border-bottom{% endif %}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                {% if check.patient_name %}
+                                    <small class="text-muted">{{ check.patient_name }}</small><br>
+                                {% endif %}
+                                {% for drug in check.drugs_checked %}
+                                    <span class="drug-tag">{{ drug|title }}</span>
+                                {% endfor %}
+                            </div>
+                            <small class="text-muted">{{ check.created_at|date:"M d" }}</small>
+                        </div>
+                        {% if check.interaction_found %}
+                            <small class="text-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>
+                                {{ check.severity_level|title }} Risk Found
+                            </small>
+                        {% else %}
+                            <small class="text-success">
+                                <i class="fas fa-check me-1"></i>No Interactions
+                            </small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Drug Database for Suggestions -->
+<script>
+const commonDrugs = [
+    'Warfarin', 'Aspirin', 'Ibuprofen', 'Metformin', 'Lisinopril', 'Simvastatin',
+    'Amlodipine', 'Atorvastatin', 'Furosemide', 'Digoxin', 'Naproxen', 'Diclofenac',
+    'Hydrochlorothiazide', 'Spironolactone', 'Amiodarone', 'Diltiazem', 'Verapamil',
+    'Amiloride', 'Triamterene', 'Losartan', 'Carvedilol', 'Ramipril', 'Omeprazole'
+];
+
+document.addEventListener('DOMContentLoaded', function() {
+    let drugCounter = 2;
+    const maxDrugs = 6;
+
+    // Add drug input functionality
+    document.getElementById('addDrugBtn').addEventListener('click', function() {
+        if (drugCounter < maxDrugs) {
+            drugCounter++;
+            const drugInputs = document.getElementById('drugInputs');
+            const newInput = document.createElement('div');
+            newInput.className = 'drug-input-container mb-3';
+            newInput.innerHTML = `
+                <div class="input-group">
+                    <input type="text" class="form-control drug-input" name="drugs" 
+                           placeholder="Enter medication name">
+                    <button class="btn btn-outline-danger remove-drug" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="drug-suggestion"></div>
+            `;
+            drugInputs.appendChild(newInput);
+            
+            // Add remove functionality
+            newInput.querySelector('.remove-drug').addEventListener('click', function() {
+                newInput.remove();
+                drugCounter--;
+            });
+            
+            setupDrugSuggestions(newInput.querySelector('.drug-input'));
+        }
+        
+        if (drugCounter >= maxDrugs) {
+            this.style.display = 'none';
+        }
+    });
+
+    // Setup drug suggestions for existing inputs
+    document.querySelectorAll('.drug-input').forEach(setupDrugSuggestions);
+
+    function setupDrugSuggestions(input) {
+        const suggestionDiv = input.parentElement.querySelector('.drug-suggestion') || 
+                             input.nextElementSibling;
+        
+        input.addEventListener('input', function() {
+            const value = this.value.toLowerCase();
+            if (value.length < 2) {
+                suggestionDiv.style.display = 'none';
+                return;
+            }
+            
+            const matches = commonDrugs.filter(drug => 
+                drug.toLowerCase().includes(value)
+            ).slice(0, 5);
+            
+            if (matches.length > 0) {
+                suggestionDiv.innerHTML = matches.map(drug => 
+                    `<div class="drug-suggestion-item" data-drug="${drug}">${drug}</div>`
+                ).join('');
+                suggestionDiv.style.display = 'block';
+            } else {
+                suggestionDiv.style.display = 'none';
+            }
+        });
+        
+        // Handle suggestion clicks
+        input.addEventListener('click', function(e) {
+            if (e.target.classList.contains('drug-suggestion-item')) {
+                input.value = e.target.dataset.drug;
+                suggestionDiv.style.display = 'none';
+            }
+        });
+        
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!input.parentElement.contains(e.target)) {
+                suggestionDiv.style.display = 'none';
+            }
+        });
+    }
+    
+    // Handle suggestion clicks with event delegation
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('drug-suggestion-item')) {
+            const input = e.target.closest('.drug-input-container').querySelector('.drug-input');
+            input.value = e.target.dataset.drug;
+            e.target.parentElement.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

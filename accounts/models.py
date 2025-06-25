@@ -70,3 +70,48 @@ class Profile(models.Model):
     
     def _str_(self):
         return f"{self.user.username}'s Profile"
+    
+# Add this to your models.py file
+
+class Appointment(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Pending'),
+        ('CONFIRMED', 'Confirmed'),
+        ('CANCELLED', 'Cancelled'),
+        ('COMPLETED', 'Completed'),
+    ]
+    
+    URGENCY_CHOICES = [
+        ('LOW', 'Low'),
+        ('MEDIUM', 'Medium'),
+        ('HIGH', 'High'),
+    ]
+    
+    doctor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments')
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
+    appointment_date = models.DateField()
+    appointment_time = models.TimeField()
+    duration_minutes = models.IntegerField(default=30)  # Default 30 minutes
+    reason = models.TextField()
+    urgency = models.CharField(max_length=10, choices=URGENCY_CHOICES, default='MEDIUM')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    notes = models.TextField(blank=True, null=True)  # Doctor's notes
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['appointment_date', 'appointment_time']
+        unique_together = ['doctor', 'appointment_date', 'appointment_time']  # Prevent double booking
+    
+    def __str__(self):
+        return f"{self.patient.first_name} {self.patient.last_name} - {self.appointment_date} {self.appointment_time}"
+    
+    @property
+    def is_past(self):
+        from django.utils import timezone
+        appointment_datetime = timezone.datetime.combine(self.appointment_date, self.appointment_time)
+        return appointment_datetime < timezone.now()
+    
+    @property
+    def patient_name(self):
+        return f"{self.patient.first_name} {self.patient.last_name}"

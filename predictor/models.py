@@ -191,3 +191,51 @@ class DiabetesPrediction(models.Model):
             'DiabetesPedigreeFunction': self.diabetes_pedigree_function,
             'Age': self.age,
         }
+    
+# Add this to your models.py file
+
+class HeartDiseasePrediction(models.Model):
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='heart_disease_predictions')
+    doctor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    # Heart disease features
+    age = models.IntegerField()
+    sex = models.IntegerField()  # 1 = male, 0 = female
+    cp = models.IntegerField()  # chest pain type (0-3)
+    trestbps = models.FloatField()  # resting blood pressure
+    chol = models.FloatField()  # serum cholesterol in mg/dl
+    fbs = models.IntegerField()  # fasting blood sugar > 120 mg/dl (1 = true, 0 = false)
+    restecg = models.IntegerField()  # resting electrocardiographic results (0-2)
+    thalach = models.FloatField()  # maximum heart rate achieved
+    exang = models.IntegerField()  # exercise induced angina (1 = yes, 0 = no)
+    oldpeak = models.FloatField()  # ST depression induced by exercise relative to rest
+    slope = models.IntegerField()  # slope of peak exercise ST segment (0-2)
+    ca = models.IntegerField()  # number of major vessels colored by fluoroscopy (0-4)
+    thal = models.IntegerField()  # thalassemia (0-3)
+    
+    # Prediction results
+    prediction = models.CharField(max_length=20)  # 'No Heart Disease' or 'Heart Disease'
+    confidence = models.FloatField()
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.patient.first_name} {self.patient.last_name} - {self.prediction}"
+    
+    def get_features_dict(self):
+        """Return all features as a dictionary for ML model"""
+        return {
+            'age': self.age,
+            'sex': self.sex,
+            'cp': self.cp,
+            'trestbps': self.trestbps,
+            'chol': self.chol,
+            'fbs': self.fbs,
+            'restecg': self.restecg,
+            'thalach': self.thalach,
+            'exang': self.exang,
+            'oldpeak': self.oldpeak,
+            'slope': self.slope,
+            'ca': self.ca,
+            'thal': self.thal,
+        }

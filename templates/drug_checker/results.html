@@ -1,0 +1,402 @@
+<!-- drug_checker/templates/drug_checker/results.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Interaction Results - Dr. Charaka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .interaction-card {
+        border-left: 4px solid;
+        transition: all 0.15s ease;
+    }
+    
+    .interaction-high { border-left-color: #FF3B30; }
+    .interaction-moderate { border-left-color: #FF9500; }
+    .interaction-low { border-left-color: #34C759; }
+    
+    .severity-badge {
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+    }
+    
+    .severity-high { background: #FF3B30; color: white; }
+    .severity-moderate { background: #FF9500; color: white; }
+    .severity-low { background: #34C759; color: white; }
+    
+    .drug-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .drug-tag {
+        background: var(--primary);
+        color: white;
+        padding: 0.375rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .no-interaction {
+        background: linear-gradient(135deg, #34C759, #30D158);
+        color: white;
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        text-align: center;
+    }
+    
+    .drug-info-modal .modal-body {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+    
+    @media print {
+        .btn, .no-print {
+            display: none !important;
+        }
+        .interaction-card {
+            page-break-inside: avoid;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1">
+                        <i class="fas fa-flask me-2"></i>Interaction Results
+                    </h2>
+                    {% if patient_name %}
+                        <p class="text-muted mb-0">Patient: <strong>{{ patient_name }}</strong></p>
+                    {% endif %}
+                </div>
+                <div class="no-print">
+                    <a href="{% url 'drug_checker:home' %}" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left me-1"></i>New Check
+                    </a>
+                    <button onclick="window.print()" class="btn btn-secondary">
+                        <i class="fas fa-print me-1"></i>Print
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Drugs Checked -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-pills me-2"></i>Medications Checked</h5>
+                </div>
+                <div class="card-body">
+                    <div class="drug-list">
+                        {% for drug in drugs %}
+                            <span class="drug-tag">{{ drug|title }}</span>
+                        {% endfor %}
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        Checked on {{ check_record.created_at|date:"F d, Y \a\t H:i" }}
+                    </small>
+                </div>
+            </div>
+
+            <!-- Interaction Results -->
+            {% if interactions %}
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ interactions|length }} Interaction{{ interactions|length|pluralize }} Found
+                        </h5>
+                    </div>
+                    <div class="card-body p-0">
+                        {% for interaction in interactions %}
+                        <div class="interaction-card interaction-{{ interaction.severity|lower }} p-4 
+                                    {% if not forloop.last %}border-bottom{% endif %}">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h6 class="fw-bold mb-2">
+                                        {{ interaction.drug1 }} ⚡ {{ interaction.drug2 }}
+                                    </h6>
+                                    <span class="severity-badge severity-{{ interaction.severity|lower }}">
+                                        {{ interaction.severity }} RISK
+                                    </span>
+                                </div>
+                                <button class="btn btn-sm btn-outline-primary no-print" 
+                                        onclick="getDrugInfo('{{ interaction.drug1 }}')">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                            
+                            <p class="mb-0 text-muted">
+                                <i class="fas fa-quote-left me-2"></i>
+                                {{ interaction.description }}
+                            </p>
+                            
+                            {% if interaction.severity == 'HIGH' %}
+                            <div class="alert alert-danger mt-3 mb-0">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Clinical Recommendation:</strong> 
+                                Avoid this combination or use with extreme caution. 
+                                Consider alternative medications.
+                            </div>
+                            {% elif interaction.severity == 'MODERATE' %}
+                            <div class="alert alert-warning mt-3 mb-0">
+                                <i class="fas fa-eye me-2"></i>
+                                <strong>Clinical Recommendation:</strong> 
+                                Monitor patient closely. Dosage adjustment may be required.
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% else %}
+                <!-- No Interactions Found -->
+                <div class="no-interaction mb-4">
+                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                    <h4 class="mb-2">No Known Interactions</h4>
+                    <p class="mb-0">
+                        The medications you checked do not have any known dangerous interactions 
+                        in our database. However, always monitor patients for unexpected reactions.
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Summary Card -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Summary</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="h4 text-primary mb-1">{{ drugs|length }}</div>
+                            <small class="text-muted">Drugs Checked</small>
+                        </div>
+                        <div class="col-6">
+                            <div class="h4 {% if interactions %}text-warning{% else %}text-success{% endif %} mb-1">
+                                {{ interactions|length }}
+                            </div>
+                            <small class="text-muted">Interactions</small>
+                        </div>
+                    </div>
+                    
+                    {% if interactions %}
+                    <hr>
+                    <div class="text-center">
+                        <span class="severity-badge severity-{{ highest_severity|lower }}">
+                            HIGHEST: {{ highest_severity }} RISK
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Next Steps -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Next Steps</h5>
+                </div>
+                <div class="card-body">
+                    {% if interactions %}
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-user-md text-primary me-2"></i>
+                                Review patient's medical history
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-pills text-primary me-2"></i>
+                                Consider dosage adjustments
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-eye text-primary me-2"></i>
+                                Monitor for adverse effects
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-phone text-primary me-2"></i>
+                                Consult pharmacist if needed
+                            </li>
+                        </ul>
+                    {% else %}
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                No immediate concerns identified
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-eye text-primary me-2"></i>
+                                Continue routine monitoring
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-clipboard-list text-primary me-2"></i>
+                                Document in patient record
+                            </li>
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="card">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <i class="fas fa-info-circle text-info me-2"></i>Important Notice
+                    </h6>
+                    <p class="card-text small text-muted">
+                        This tool provides basic interaction screening. Always consult 
+                        comprehensive drug references and use clinical judgment. 
+                        Not all interactions are included in this database.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Drug Info Modal -->
+<div class="modal fade" id="drugInfoModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-pills me-2"></i>Drug Information
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="drugInfoContent">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading drug information...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getDrugInfo(drugName) {
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('drugInfoModal'));
+    modal.show();
+    
+    // Reset content
+    document.getElementById('drugInfoContent').innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-2">Loading drug information...</p>
+        </div>
+    `;
+    
+    // Fetch drug info
+    fetch(`{% url 'drug_checker:drug_info' %}?drug=${encodeURIComponent(drugName)}`)
+        .then(response => response.json())
+        .then(data => {
+            let content = '';
+            
+            if (data.success) {
+                content = `
+                    <div class="drug-info">
+                        <h6 class="fw-bold text-primary mb-3">${drugName}</h6>
+                        
+                        ${data.brand_name && data.brand_name.length > 0 ? `
+                        <div class="mb-3">
+                            <strong>Brand Names:</strong>
+                            <div class="mt-1">
+                                ${data.brand_name.slice(0, 5).map(name => 
+                                    `<span class="badge bg-primary me-1">${name}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${data.generic_name && data.generic_name.length > 0 ? `
+                        <div class="mb-3">
+                            <strong>Generic Names:</strong>
+                            <div class="mt-1">
+                                ${data.generic_name.slice(0, 3).map(name => 
+                                    `<span class="badge bg-secondary me-1">${name}</span>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${data.manufacturer && data.manufacturer.length > 0 ? `
+                        <div class="mb-3">
+                            <strong>Manufacturers:</strong>
+                            <ul class="list-unstyled mt-1">
+                                ${data.manufacturer.slice(0, 3).map(mfg => 
+                                    `<li><i class="fas fa-building text-muted me-2"></i>${mfg}</li>`
+                                ).join('')}
+                            </ul>
+                        </div>
+                        ` : ''}
+                        
+                        ${data.warnings && data.warnings.length > 0 ? `
+                        <div class="mb-3">
+                            <strong>Key Warnings:</strong>
+                            <div class="mt-2">
+                                ${data.warnings.map(warning => 
+                                    `<div class="alert alert-warning py-2">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        ${warning.substring(0, 200)}${warning.length > 200 ? '...' : ''}
+                                    </div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else {
+                content = `
+                    <div class="text-center text-muted">
+                        <i class="fas fa-exclamation-circle fa-2x mb-3"></i>
+                        <p>Unable to retrieve detailed information for <strong>${drugName}</strong></p>
+                        <p class="small">This may be due to the drug name not being found in the FDA database or network issues.</p>
+                    </div>
+                `;
+            }
+            
+            document.getElementById('drugInfoContent').innerHTML = content;
+        })
+        .catch(error => {
+            document.getElementById('drugInfoContent').innerHTML = `
+                <div class="text-center text-danger">
+                    <i class="fas fa-times-circle fa-2x mb-3"></i>
+                    <p>Error loading drug information</p>
+                    <p class="small">Please try again later.</p>
+                </div>
+            `;
+        });
+}
+
+// Print functionality
+window.addEventListener('beforeprint', function() {
+    document.title = `Drug Interaction Report - ${new Date().toLocaleDateString()}`;
+});
+</script>
+{% endblock %}
