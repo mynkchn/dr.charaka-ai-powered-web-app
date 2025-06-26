@@ -1,0 +1,438 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ article.title }} - Medical News - Dr. Charaka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .article-header {
+        background: linear-gradient(135deg, rgba(0, 122, 255, 0.1) 0%, rgba(88, 86, 214, 0.1) 100%);
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+    }
+    
+    .article-meta {
+        background: var(--white);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--gray-200);
+    }
+    
+    .meta-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .meta-item:last-child {
+        margin-bottom: 0;
+    }
+    
+    .meta-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--gray-100);
+        border-radius: var(--radius);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        color: var(--primary);
+    }
+    
+    .article-image {
+        width: 100%;
+        height: 400px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        margin-bottom: 2rem;
+    }
+    
+    .article-content {
+        background: var(--white);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        border: 1px solid var(--gray-200);
+        line-height: 1.8;
+        font-size: 1rem;
+    }
+    
+    .article-content p {
+        margin-bottom: 1.5rem;
+    }
+    
+    .category-badge {
+        background: var(--primary);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 1rem;
+    }
+    
+    .trending-badge {
+        background: var(--warning);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius-full);
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-left: 0.5rem;
+    }
+    
+    .share-buttons {
+        background: var(--gray-50);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin: 2rem 0;
+    }
+    
+    .share-btn {
+        width: 45px;
+        height: 45px;
+        border-radius: var(--radius);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 0.5rem 0.5rem 0;
+        text-decoration: none;
+        color: white;
+        transition: all 0.15s ease;
+    }
+    
+    .share-btn:hover {
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .share-btn.facebook { background: #1877F2; }
+    .share-btn.twitter { background: #1DA1F2; }
+    .share-btn.linkedin { background: #0A66C2; }
+    .share-btn.whatsapp { background: #25D366; }
+    .share-btn.copy { background: var(--gray-600); }
+    
+    .related-articles {
+        background: var(--white);
+        border-radius: var(--radius-md);
+        padding: 2rem;
+        border: 1px solid var(--gray-200);
+    }
+    
+    .related-item {
+        display: flex;
+        align-items: start;
+        padding: 1rem 0;
+        border-bottom: 1px solid var(--gray-100);
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.15s ease;
+    }
+    
+    .related-item:last-child {
+        border-bottom: none;
+    }
+    
+    .related-item:hover {
+        background: var(--gray-50);
+        border-radius: var(--radius);
+        margin: 0 -1rem;
+        padding: 1rem;
+    }
+    
+    .related-image {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: var(--radius);
+        margin-right: 1rem;
+        flex-shrink: 0;
+    }
+    
+    .related-content h6 {
+        margin-bottom: 0.5rem;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .related-meta {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+    }
+    
+    .back-button {
+        margin-bottom: 2rem;
+    }
+    
+    .view-count {
+        background: var(--info);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Back Button -->
+    <div class="back-button">
+        <a href="{% url 'medical_news:list' %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to News
+        </a>
+    </div>
+
+    <div class="row">
+        <!-- Main Article -->
+        <div class="col-lg-8">
+            <!-- Article Header -->
+            <div class="article-header">
+                <div class="category-badge">{{ article.category|default:"General" }}</div>
+                {% if article.is_trending %}
+                    <div class="trending-badge">
+                        <i class="fas fa-fire me-1"></i>Trending
+                    </div>
+                {% endif %}
+                <h1 class="display-5 fw-bold mb-3">{{ article.title }}</h1>
+                <p class="lead text-muted">{{ article.description }}</p>
+            </div>
+
+            <!-- Article Meta -->
+            <div class="article-meta">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-calendar"></i>
+                            </div>
+                            <div>
+                                <strong>Published</strong><br>
+                                <small class="text-muted">{{ article.published_at|date:"F j, Y g:i A" }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-building"></i>
+                            </div>
+                            <div>
+                                <strong>Source</strong><br>
+                                <small class="text-muted">{{ article.source_name }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% if article.author %}
+                    <div class="col-md-6">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div>
+                                <strong>Author</strong><br>
+                                <small class="text-muted">{{ article.author }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    <div class="col-md-6">
+                        <div class="meta-item">
+                            <div class="meta-icon">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <div>
+                                <strong>Views</strong><br>
+                                <span class="view-count">{{ article.view_count }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Article Image -->
+            {% if article.url_to_image %}
+                <img src="{{ article.url_to_image }}" alt="{{ article.title }}" class="article-image">
+            {% endif %}
+
+            <!-- Article Content -->
+            <div class="article-content">
+                {% if article.content %}
+                    <div class="content-text">
+                        {{ article.content|linebreaks }}
+                    </div>
+                {% else %}
+                    <div class="content-text">
+                        {{ article.description|linebreaks }}
+                    </div>
+                {% endif %}
+                
+                <div class="mt-4 pt-4 border-top">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">
+                            <i class="fas fa-clock me-1"></i>
+                            {{ article.time_since_published }}
+                        </small>
+                        <a href="{{ article.url }}" target="_blank" class="btn btn-primary">
+                            <i class="fas fa-external-link-alt me-2"></i>Read Full Article
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Share Buttons -->
+            <div class="share-buttons">
+                <h6 class="mb-3"><i class="fas fa-share-alt me-2"></i>Share this article</h6>
+                <div class="d-flex flex-wrap">
+                    <a href="#" class="share-btn facebook" onclick="shareOnFacebook()" title="Share on Facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </a>
+                    <a href="#" class="share-btn twitter" onclick="shareOnTwitter()" title="Share on Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="share-btn linkedin" onclick="shareOnLinkedIn()" title="Share on LinkedIn">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" class="share-btn whatsapp" onclick="shareOnWhatsApp()" title="Share on WhatsApp">
+                        <i class="fab fa-whatsapp"></i>
+                    </a>
+                    <a href="#" class="share-btn copy" onclick="copyToClipboard()" title="Copy Link">
+                        <i class="fas fa-copy"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Related Articles -->
+            {% if related_articles %}
+                <div class="related-articles">
+                    <h5 class="mb-3">
+                        <i class="fas fa-newspaper text-primary me-2"></i>Related Articles
+                    </h5>
+                    {% for related in related_articles %}
+                        <a href="{{ related.get_absolute_url }}" class="related-item">
+                            {% if related.url_to_image %}
+                                <img src="{{ related.url_to_image }}" alt="{{ related.title }}" class="related-image">
+                            {% else %}
+                                <div class="related-image bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-newspaper text-muted"></i>
+                                </div>
+                            {% endif %}
+                            <div class="related-content">
+                                <h6>{{ related.title|truncatechars:80 }}</h6>
+                                <div class="related-meta">
+                                    <i class="fas fa-calendar me-1"></i>{{ related.time_since_published }}
+                                    <span class="mx-2">•</span>
+                                    <i class="fas fa-eye me-1"></i>{{ related.view_count }} views
+                                </div>
+                            </div>
+                        </a>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <!-- Navigation -->
+            <div class="mt-4">
+                <a href="{% url 'medical_news:trending' %}" class="btn btn-outline-warning w-100 mb-2">
+                    <i class="fas fa-fire me-2"></i>View Trending News
+                </a>
+                <a href="{% url 'medical_news:list' %}" class="btn btn-outline-primary w-100">
+                    <i class="fas fa-list me-2"></i>Browse All News
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const currentUrl = window.location.href;
+const articleTitle = "{{ article.title|escapejs }}";
+
+function shareOnFacebook() {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+}
+
+function shareOnTwitter() {
+    const text = `${articleTitle} - Check out this medical news article`;
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(currentUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+}
+
+function shareOnLinkedIn() {
+    const url = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`;
+    window.open(url, '_blank', 'width=600,height=400');
+}
+
+function shareOnWhatsApp() {
+    const text = `${articleTitle} - ${currentUrl}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+}
+
+function copyToClipboard() {
+    navigator.clipboard.writeText(currentUrl).then(function() {
+        // Show success message
+        const copyBtn = document.querySelector('.share-btn.copy');
+        const originalIcon = copyBtn.innerHTML;
+        copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+        copyBtn.style.background = '#28a745';
+        
+        setTimeout(function() {
+            copyBtn.innerHTML = originalIcon;
+            copyBtn.style.background = 'var(--gray-600)';
+        }, 2000);
+    }).catch(function(err) {
+        // Fallback for older browsers
+        const textArea = document.createElement('textarea');
+        textArea.value = currentUrl;
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            // Show success message
+            const copyBtn = document.querySelector('.share-btn.copy');
+            const originalIcon = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+            copyBtn.style.background = '#28a745';
+            
+            setTimeout(function() {
+                copyBtn.innerHTML = originalIcon;
+                copyBtn.style.background = 'var(--gray-600)';
+            }, 2000);
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+            alert('Failed to copy link. Please copy manually.');
+        }
+        document.body.removeChild(textArea);
+    });
+}
+
+// Track article view (optional analytics)
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add analytics tracking here
+    // Example: gtag('event', 'page_view', { page_title: articleTitle });
+    
+    // Auto-hide any flash messages after 5 seconds
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                alert.remove();
+            }, 300);
+        }, 5000);
+    });
+});
+</script>
+{% endblock %}

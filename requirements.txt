@@ -22,3 +22,5 @@ transformers>=4.35.0
 accelerate>=0.20.0
 pillow>=9.0.0
 django>=4.2.0
+python-telegram-bot>=20.8
+groq

@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     'community.apps.CommunityConfig',
     # 'prescription.apps.PrescriptionConfig',
     'drug_interaction',
+    'medical_news',
 ]
 
 MIDDLEWARE = [
@@ -224,3 +225,6 @@ GROQ_API_KEY = os.environ.get('GROQ_API_KEY', 'gsk_QNz6G3TZOpolBBk9yHtOWGdyb3FYB
 # Time zone
 USE_TZ = True
 TIME_ZONE = 'Asia/Kolkata'
+
+# News API Configuration
+NEWS_API_KEY = 'e204dad0083f4b11b5d75b695dea5340'

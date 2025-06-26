@@ -1,0 +1,422 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Medical News - Dr. Charaka{% endblock %}
+
+{% block extra_css %}
+<style>
+    .news-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        color: white;
+        padding: 4rem 0 3rem;
+        margin-bottom: 2rem;
+    }
+    
+    .search-section {
+        background: var(--white);
+        border-radius: var(--radius-lg);
+        padding: 2rem;
+        margin-top: 0rem;
+        box-shadow: var(--shadow-lg);
+        position: relative;
+        z-index: 10;
+    }
+    
+    .news-card {
+        height: 100%;
+        transition: all 0.2s ease;
+        border: none;
+        overflow: hidden;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .news-image {
+        height: 200px;
+        object-fit: cover;
+        width: 100%;
+    }
+    
+    .news-category {
+        display: inline-block;
+        background: var(--primary);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: var(--radius-full);
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+    
+    .news-meta {
+        font-size: 0.8rem;
+        color: var(--gray-500);
+        margin-bottom: 0.5rem;
+    }
+    
+    .news-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        line-height: 1.4;
+        margin-bottom: 0.75rem;
+        color: var(--gray-900);
+    }
+    
+    .news-description {
+        color: var(--gray-600);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+    
+    .trending-badge {
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+        background: var(--warning);
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: var(--radius);
+        font-size: 0.7rem;
+        font-weight: 600;
+    }
+    
+    .category-filters {
+        margin-bottom: 2rem;
+    }
+    
+    .category-btn {
+        margin: 0.25rem;
+        padding: 0.5rem 1rem;
+        border: 1px solid var(--gray-300);
+        background: white;
+        color: var(--gray-600);
+        border-radius: var(--radius-full);
+        text-decoration: none;
+        font-size: 0.875rem;
+        transition: all 0.15s ease;
+    }
+    
+    .category-btn:hover,
+    .category-btn.active {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .sidebar-card {
+        background: var(--white);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--gray-200);
+    }
+    
+    .trending-item {
+        display: flex;
+        align-items: start;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--gray-100);
+        text-decoration: none;
+        color: inherit;
+    }
+    
+    .trending-item:last-child {
+        border-bottom: none;
+    }
+    
+    .trending-item:hover {
+        background: var(--gray-50);
+        border-radius: var(--radius);
+        margin: 0 -0.5rem;
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .trending-number {
+        background: var(--primary);
+        color: white;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    .pagination-wrapper {
+        display: flex;
+        justify-content: center;
+        margin-top: 3rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="news-hero">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-3">Medical News & Updates</h1>
+                <p class="lead mb-4">Stay informed with the latest medical breakthroughs, health news, and healthcare developments from trusted sources worldwide.</p>
+            </div>
+        </div>
+{% comment %}         
+        <!-- Search Section -->
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="search-section">
+                    <form method="GET" class="row g-3">
+                        <div class="col-md-8">
+                            <div class="position-relative">
+                                <i class="fas fa-search position-absolute" style="left: 1rem; top: 50%; transform: translateY(-50%); color: var(--gray-400);"></i>
+                                <input type="text" name="search" class="form-control ps-5" 
+                                       placeholder="Search medical news..." 
+                                       value="{{ search_query }}"
+                                       style="padding-left: 2.5rem;">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-search me-2"></i>Search
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div> {% endcomment %}
+</section>
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Category Filters -->
+            <div class="category-filters">
+                <div class="d-flex flex-wrap align-items-center">
+                    <span class="me-3 fw-semibold">Categories:</span>
+                    <a href="{% url 'medical_news:list' %}" 
+                       class="category-btn {% if not selected_category %}active{% endif %}">All</a>
+                    {% comment %} {% for category in categories %}
+                        <a href="{% url 'medical_news:list' %}?category={{ category }}" 
+                           class="category-btn {% if selected_category == category %}active{% endif %}">
+                            {{ category|title }}
+                        </a>
+                    {% endfor %} {% endcomment %}
+                </div>
+            </div>
+
+            <!-- News Grid -->
+            <div class="row">
+                {% for article in articles %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card news-card">
+                            {% if article.is_trending %}
+                                <div class="trending-badge">
+                                    <i class="fas fa-fire me-1"></i>Trending
+                                </div>
+                            {% endif %}
+                            
+                            {% if article.url_to_image %}
+                                <img src="{{ article.url_to_image }}" alt="{{ article.title }}" class="news-image">
+                            {% else %}
+                                <div class="news-image bg-light d-flex align-items-center justify-content-center">
+                                    <i class="fas fa-newspaper text-muted" style="font-size: 3rem;"></i>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="card-body">
+                                <div class="news-category">{{ article.category|default:"General" }}</div>
+                                <div class="news-meta">
+                                    <i class="fas fa-calendar me-1"></i>{{ article.time_since_published }}
+                                    <span class="mx-2">•</span>
+                                    <i class="fas fa-eye me-1"></i>{{ article.view_count }} views
+                                    <span class="mx-2">•</span>
+                                    <i class="fas fa-building me-1"></i>{{ article.source_name }}
+                                </div>
+                                <h5 class="news-title">{{ article.title }}</h5>
+                                <p class="news-description">{{ article.short_description }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ article.get_absolute_url }}" class="btn btn-outline-primary btn-sm">
+                                        Read More <i class="fas fa-arrow-right ms-1"></i>
+                                    </a>
+                                    <a href="{{ article.url }}" target="_blank" class="btn btn-sm btn-secondary">
+                                        <i class="fas fa-external-link-alt"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="fas fa-newspaper text-muted mb-3" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted">No articles found</h4>
+                            <p class="text-muted">Try adjusting your search or browse different categories.</p>
+                            <a href="{% url 'medical_news:list' %}" class="btn btn-primary">View All News</a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+                <div class="pagination-wrapper">
+                    <nav aria-label="News pagination">
+                        <ul class="pagination">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">
+                                        <i class="fas fa-angle-double-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">
+                                        <i class="fas fa-angle-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">
+                                        <i class="fas fa-angle-right"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Fetch Latest News -->
+            <div class="sidebar-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-sync-alt text-primary me-2"></i>Update News
+                </h5>
+                <p class="text-muted mb-3">Get the latest medical news from our sources.</p>
+                <button id="fetchNewsBtn" class="btn btn-primary w-100">
+                    <i class="fas fa-download me-2"></i>Fetch Latest News
+                </button>
+            </div>
+
+            <!-- Trending Articles -->
+            {% if trending_articles %}
+                <div class="sidebar-card">
+                    <h5 class="mb-3">
+                        <i class="fas fa-fire text-warning me-2"></i>Trending Now
+                    </h5>
+                    {% for article in trending_articles %}
+                        <a href="{{ article.get_absolute_url }}" class="trending-item">
+                            <div class="trending-number">{{ forloop.counter }}</div>
+                            <div>
+                                <h6 class="mb-1">{{ article.title|truncatechars:60 }}</h6>
+                                <small class="text-muted">{{ article.view_count }} views</small>
+                            </div>
+                        </a>
+                    {% endfor %}
+                    <a href="{% url 'medical_news:trending' %}" class="btn btn-outline-primary btn-sm w-100 mt-2">
+                        View All Trending
+                    </a>
+                </div>
+            {% endif %}
+
+            <!-- Quick Stats -->
+            <div class="sidebar-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-chart-bar text-info me-2"></i>Quick Stats
+                </h5>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <div class="stat-number">{{ page_obj.paginator.count }}</div>
+                        <div class="stat-label">Total Articles</div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-number">{{ categories|length }}</div>
+                        <div class="stat-label">Categories</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('fetchNewsBtn').addEventListener('click', function() {
+    const btn = this;
+    const originalText = btn.innerHTML;
+    
+    // Show loading state
+    btn.innerHTML = '<span class="spinner me-2"></span>Fetching...';
+    btn.disabled = true;
+    
+    fetch('{% url "medical_news:fetch_latest" %}', {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Reset button
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        
+        // Show success message
+        showAlert('Latest news fetched successfully! Refresh the page to see new articles.', 'success');
+        
+        // Auto refresh after 2 seconds
+        setTimeout(() => {
+            window.location.reload();
+        }, 2000);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        showAlert('Error fetching news. Please try again.', 'danger');
+    });
+});
+
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.querySelector('.container').insertAdjacentElement('afterbegin', alertDiv);
+    setTimeout(() => alertDiv.remove(), 5000);
+}
+</script>
+{% endblock %}

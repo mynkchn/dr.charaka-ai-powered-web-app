@@ -31,6 +31,7 @@ urlpatterns = [
     path('community/', include('community.urls')),
     # path('scanner/', include('prescription.urls', namespace='prescription_scanner')),
     path('drug/',include('drug_interaction.urls')),
+    path('news/',include('medical_news.urls')),
 
     
 ]
