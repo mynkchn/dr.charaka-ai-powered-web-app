@@ -103,13 +103,27 @@
     }
 
     @keyframes float {
-        0%, 100% { transform: translateY(0px); }
-        50% { transform: translateY(-15px); }
+
+        0%,
+        100% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
     }
 
     @keyframes pulse {
-        0%, 100% { box-shadow: var(--shadow-xl); }
-        50% { box-shadow: 0 0 40px rgba(0, 122, 255, 0.4); }
+
+        0%,
+        100% {
+            box-shadow: var(--shadow-xl);
+        }
+
+        50% {
+            box-shadow: 0 0 40px rgba(0, 122, 255, 0.4);
+        }
     }
 
     /* Dashboard Features Section for Logged In Users */
@@ -429,23 +443,23 @@
         .hero-title {
             font-size: 2.5rem;
         }
-        
+
         .hero-visual {
             width: 300px;
             height: 300px;
         }
-        
+
         .central-ai-hub {
             width: 80px;
             height: 80px;
             font-size: 2rem;
         }
-        
+
         .floating-card {
             padding: 1rem;
             font-size: 0.8rem;
         }
-        
+
         .step-arrow {
             display: none;
         }
@@ -472,23 +486,25 @@
                     <span style="color: var(--primary);">Intelligence</span>
                 </h1>
                 <p class="hero-subtitle">
-                    Dr. Charaka combines advanced machine learning models with medical expertise to provide accurate diagnoses, intelligent analysis, and comprehensive patient care solutions for healthcare professionals.
+                    Dr. Charaka combines advanced machine learning models with medical expertise to provide accurate
+                    diagnoses, intelligent analysis, and comprehensive patient care solutions for healthcare
+                    professionals.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'llm:chat_interface' %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-tachometer-alt me-2"></i>
-                            Go to Charaka AI
-                        </a>
+                    <a href="{% url 'llm:chat' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-tachometer-alt me-2"></i>
+                        Go to Charaka AI
+                    </a>
                     {% else %}
-                        <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
-                            <i class="fas fa-user-plus me-2"></i>
-                            Get Started
-                        </a>
-                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg">
-                            <i class="fas fa-sign-in-alt me-2"></i>
-                            Login
-                        </a>
+                    <a href="{% url 'accounts:signup' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Get Started
+                    </a>
+                    <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Login
+                    </a>
                     {% endif %}
                 </div>
             </div>
@@ -531,7 +547,7 @@
             <h2>Welcome, <span class="user-name">{{ user.get_full_name }}!</span></h2>
             <p>Your AI-powered healthcare dashboard</p>
         </div>
-        
+
         <div class="row g-4">
             <div class="col-lg-3 col-md-6">
                 <div class="dashboard-card">
@@ -539,14 +555,15 @@
                         <i class="fas fa-search-plus"></i>
                     </div>
                     <h5 class="dashboard-title">Disease Predictor</h5>
-                    <p class="dashboard-description">Use our AI-powered disease predictor to get instant insights about your symptoms.</p>
-                    <a href="{% url "predictor:prediction" %}" class="dashboard-btn">
+                    <p class="dashboard-description">Use our AI-powered disease predictor to get instant insights about
+                        your symptoms.</p>
+                    <a href="{% url 'predictor:prediction' %}" class="dashboard-btn">
                         <i class="fas fa-play"></i>
                         Let's Predict
                     </a>
                 </div>
             </div>
-            
+
             <div class="col-lg-3 col-md-6">
                 <div class="dashboard-card">
                     <div class="dashboard-icon" style="background: linear-gradient(135deg, #6366f1, #8b5cf6);">
@@ -561,7 +578,7 @@
                     </a>
                 </div>
             </div>
-            
+
             <div class="col-lg-3 col-md-6">
                 <div class="dashboard-card">
                     <div class="dashboard-icon" style="background: linear-gradient(135deg, #f59e0b, #ef4444);">
@@ -569,7 +586,7 @@
                     </div>
                     <h5 class="dashboard-title">Dr. Charaka AI Reports</h5>
                     <p class="dashboard-description">View your personalized health reports and recommendations.</p>
-                    <a href="{% url "predictor:reports_view" %}" class="dashboard-btn">
+                    <a href="{% url 'predictor:reports_view' %}" class="dashboard-btn">
                         <i class="fas fa-chart-line"></i>
                         View Reports
                     </a>
@@ -582,8 +599,9 @@
                         <i class="fas fa-robot"></i>
                     </div>
                     <h5 class="dashboard-title">AI Health Assistant</h5>
-                    <p class="dashboard-description">Chat with Dr. Charaka AI for instant health advice and information.</p>
-                    <a href="{% url 'llm:chat_interface' %}" class="dashboard-btn">
+                    <p class="dashboard-description">Chat with Dr. Charaka AI for instant health advice and information.
+                    </p>
+                    <a href="{% url 'llm:chat' %}" class="dashboard-btn">
                         <i class="fas fa-comments"></i>
                         Start Chat
                     </a>
@@ -609,7 +627,8 @@
                     </div>
                     <h3 class="feature-title">LLM Medical Assistant</h3>
                     <p class="feature-description">
-                        Advanced language model trained on medical literature provides intelligent responses to complex medical queries and patient consultations.
+                        Advanced language model trained on medical literature provides intelligent responses to complex
+                        medical queries and patient consultations.
                     </p>
                 </div>
             </div>
@@ -620,7 +639,8 @@
                     </div>
                     <h3 class="feature-title">ML Disease Prediction</h3>
                     <p class="feature-description">
-                        Multiple classical machine learning models analyze symptoms and patient data to predict diseases with high accuracy and confidence scores.
+                        Multiple classical machine learning models analyze symptoms and patient data to predict diseases
+                        with high accuracy and confidence scores.
                     </p>
                 </div>
             </div>
@@ -631,7 +651,8 @@
                     </div>
                     <h3 class="feature-title">Smart Report Generation</h3>
                     <p class="feature-description">
-                        Automatically generate comprehensive medical reports and send them directly to patients with detailed analysis and recommendations.
+                        Automatically generate comprehensive medical reports and send them directly to patients with
+                        detailed analysis and recommendations.
                     </p>
                 </div>
             </div>
@@ -651,7 +672,8 @@
                 <div class="step-card">
                     <div class="step-number">1</div>
                     <h4 class="mb-3">Patient Input</h4>
-                    <p class="text-muted">Enter patient symptoms, medical history, and relevant clinical data into the system.</p>
+                    <p class="text-muted">Enter patient symptoms, medical history, and relevant clinical data into the
+                        system.</p>
                     <div class="step-arrow d-none d-lg-block">
                         <i class="fas fa-arrow-right"></i>
                     </div>
@@ -661,7 +683,8 @@
                 <div class="step-card">
                     <div class="step-number">2</div>
                     <h4 class="mb-3">AI Analysis</h4>
-                    <p class="text-muted">Our LLM and ML models process the data using advanced algorithms and medical knowledge.</p>
+                    <p class="text-muted">Our LLM and ML models process the data using advanced algorithms and medical
+                        knowledge.</p>
                     <div class="step-arrow d-none d-lg-block">
                         <i class="fas fa-arrow-right"></i>
                     </div>
@@ -671,7 +694,8 @@
                 <div class="step-card">
                     <div class="step-number">3</div>
                     <h4 class="mb-3">Smart Predictions</h4>
-                    <p class="text-muted">Get accurate disease predictions with confidence scores and differential diagnoses.</p>
+                    <p class="text-muted">Get accurate disease predictions with confidence scores and differential
+                        diagnoses.</p>
                     <div class="step-arrow d-none d-lg-block">
                         <i class="fas fa-arrow-right"></i>
                     </div>
@@ -681,7 +705,8 @@
                 <div class="step-card">
                     <div class="step-number">4</div>
                     <h4 class="mb-3">Report & Share</h4>
-                    <p class="text-muted">Generate comprehensive reports and send them directly to patients for better care.</p>
+                    <p class="text-muted">Generate comprehensive reports and send them directly to patients for better
+                        care.</p>
                 </div>
             </div>
         </div>
@@ -695,7 +720,8 @@
             <div class="col-lg-6">
                 <h2 class="display-6 fw-bold mb-4">Advanced Medical Capabilities</h2>
                 <p class="lead text-muted mb-4">
-                    Dr. Charaka leverages cutting-edge AI technology to provide comprehensive medical analysis and support.
+                    Dr. Charaka leverages cutting-edge AI technology to provide comprehensive medical analysis and
+                    support.
                 </p>
                 <div class="capability-item">
                     <div class="capability-icon">
@@ -721,7 +747,8 @@
                     </div>
                     <div>
                         <h5 class="mb-1">Patient Risk Assessment</h5>
-                        <p class="text-muted mb-0">Intelligent risk stratification and preventive care recommendations</p>
+                        <p class="text-muted mb-0">Intelligent risk stratification and preventive care recommendations
+                        </p>
                     </div>
                 </div>
                 <div class="capability-item">
@@ -768,68 +795,72 @@
 
 <!-- CTA Section -->
 
-        {% if user.is_authenticated %}
-          <!-- CTA Section -->
+{% if user.is_authenticated %}
+<!-- CTA Section -->
 <section class="cta-section">
     <div class="container">
         <h2 class="cta-title">Get connected </h2>
         <p class="cta-description">
-            Join thousands of healthcare professionals who trust Dr. Charaka for accurate diagnoses, intelligent analysis, and better patient outcomes.
+            Join thousands of healthcare professionals who trust Dr. Charaka for accurate diagnoses, intelligent
+            analysis, and better patient outcomes.
         </p>
-            <a href="{% url 'community_home' %}" class="btn btn-lg" style="background: var(--white); color: var(--primary); font-weight: 600;">
-                <i class="fas fa-tachometer-alt me-2"></i>
-                Access Community
-            </a>
+        <a href="{% url 'community_home' %}" class="btn btn-lg"
+            style="background: var(--white); color: var(--primary); font-weight: 600;">
+            <i class="fas fa-tachometer-alt me-2"></i>
+            Access Community
+        </a>
         {% else %}
         <!-- CTA Section -->
-<section class="cta-section">
-    <div class="container">
-        <h2 class="cta-title">Ready to Transform Your Medical Practice?</h2>
-        <p class="cta-description">
-            Join thousands of healthcare professionals who trust Dr. Charaka for accurate diagnoses, intelligent analysis, and better patient outcomes.
-        </p>
-            <a href="{% url 'accounts:signup' %}" class="btn btn-lg" style="background: var(--white); color: var(--primary); font-weight: 600;">
-                <i class="fas fa-user-plus me-2"></i>
-                Start Free Trial
-            </a>
-        {% endif %}
-    </div>
-</section>
-{% endblock %}
+        <section class="cta-section">
+            <div class="container">
+                <h2 class="cta-title">Ready to Transform Your Medical Practice?</h2>
+                <p class="cta-description">
+                    Join thousands of healthcare professionals who trust Dr. Charaka for accurate diagnoses, intelligent
+                    analysis, and better patient outcomes.
+                </p>
+                <a href="{% url 'accounts:signup' %}" class="btn btn-lg"
+                    style="background: var(--white); color: var(--primary); font-weight: 600;">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Start Free Trial
+                </a>
+                {% endif %}
+            </div>
+        </section>
+        {% endblock %}
 
-{% block extra_js %}
-<script>
-    // Add smooth scrolling for anchor links
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            document.querySelector(this.getAttribute('href')).scrollIntoView({
-                behavior: 'smooth'
+        {% block extra_js %}
+        <script>
+            // Add smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
             });
-        });
-    });
 
-    // Add animation on scroll
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
+            // Add animation on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    }, observerOptions);
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, observerOptions);
 
-    // Observe elements for animation
-    document.querySelectorAll('.feature-card, .step-card, .capability-item, .dashboard-card').forEach(el => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'all 0.6s ease';
-        observer.observe(el);
-    });
-</script>
-{% endblock %}
+            // Observe elements for animation
+            document.querySelectorAll('.feature-card, .step-card, .capability-item, .dashboard-card').forEach(el => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(20px)';
+                el.style.transition = 'all 0.6s ease';
+                observer.observe(el);
+            });
+        </script>
+        {% endblock %}

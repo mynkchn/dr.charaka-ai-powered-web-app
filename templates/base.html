@@ -1,19 +1,20 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dr. Charaka{% endblock %}</title>
     {% block extra_head %}{% endblock %}
-    
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <!-- Inter Font -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <style>
         :root {
             /* Samsung/Apple Color Palette */
@@ -24,7 +25,7 @@
             --warning: #FF9500;
             --danger: #FF3B30;
             --info: #5AC8FA;
-            
+
             /* Neutral Colors */
             --white: #FFFFFF;
             --gray-50: #F9FAFB;
@@ -37,14 +38,14 @@
             --gray-700: #374151;
             --gray-800: #1F2937;
             --gray-900: #111827;
-            
+
             /* Shadows */
             --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
             --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
             --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
             --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
             --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
-            
+
             /* Border Radius */
             --radius-sm: 4px;
             --radius: 8px;
@@ -311,7 +312,16 @@
             background-color: var(--gray-900);
             color: var(--gray-300);
             padding: 3rem 0 2rem;
-            {% comment %} margin-top: 4rem; {% endcomment %}
+
+                {
+                % comment %
+            }
+
+            margin-top: 4rem;
+
+                {
+                % endcomment %
+            }
         }
 
         .footer h5 {
@@ -356,9 +366,13 @@
             transform: translateY(-1px);
         }
 
-        {% comment %} /* Chat Interface */
+            {
+            % comment %
+        }
+
+        /* Chat Interface */
         .chat-container {
-            background: var(--white); 
+            background: var(--white);
             border: 1px solid var(--gray-200);
             border-radius: var(--radius-md);
             height: 500px;
@@ -387,7 +401,11 @@
             color: var(--gray-900);
             margin-right: auto;
             border-bottom-left-radius: var(--radius-sm);
-        } {% endcomment %}
+        }
+
+            {
+            % endcomment %
+        }
 
         /* Feature Cards */
         .feature-card {
@@ -443,20 +461,20 @@
             .navbar-brand {
                 font-size: 1.25rem;
             }
-            
+
             .card {
                 margin-bottom: 1rem;
             }
-            
+
             .btn {
                 font-size: 0.8125rem;
                 padding: 0.5rem 1rem;
             }
-            
+
             .chat-message {
                 max-width: 90%;
             }
-            
+
             .feature-card {
                 padding: 1.5rem;
             }
@@ -497,8 +515,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* Utilities */
@@ -534,9 +557,10 @@
             box-shadow: var(--shadow-lg) !important;
         }
     </style>
-    
+
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top">
@@ -558,40 +582,40 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:home' %}">Home</a>
                     </li>
-                    {% endif %} 
+                    {% endif %}
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'community_home' %}">Community</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'medical_news:list' %}">News</a>
-                        </li>
-                        <li class="nav-item">
-                        <a class="nav-link" href="{% url 'core:about' %}">About</a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'community_home' %}">Community</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'medical_news:list' %}">News</a>
+                    </li>
+                    <!-- <li class="nav-item">
+                        <a class="nav-link" href="{% url 'core:about' %}">About</a>
+                    </li> -->
                     {% else %}
-                          <li class="nav-item">
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:about' %}">About</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'core:contact' %}">Contact</a>
                     </li>
                     {% endif %}
-            
+
                     {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:logout' %}">Logout</a>
+                    </li>
                     {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'accounts:signup' %}">Sign Up</a>
-                        </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'accounts:signup' %}">Sign Up</a>
+                    </li>
                     {% endif %}
                 </ul>
             </div>
@@ -601,14 +625,14 @@
     <!-- Main Content -->
     <main class="main-content">
         {% comment %} {% if messages %}
-            <div class="container mt-4">
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                {% endfor %}
+        <div class="container mt-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+            {% endfor %}
+        </div>
         {% endif %} {% endcomment %}
 
         {% block content %}{% endblock %}
@@ -620,7 +644,8 @@
             <div class="row">
                 <div class="col-md-4 mb-4">
                     <h5>Dr. Charaka</h5>
-                    <p>Advanced healthcare solutions powered by AI technology for medical professionals and patients.</p>
+                    <p>Advanced healthcare solutions powered by AI technology for medical professionals and patients.
+                    </p>
                 </div>
                 <div class="col-md-4 mb-4">
                     <h5>Quick Links</h5>
@@ -649,14 +674,15 @@
 
     <!-- Bootstrap JS -->
     <script src="{% static 'js/main.js' %}"></script>
-     
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    {% comment %} <script>
+
+    {% comment %}
+    <script>
         // Utility Functions
         function showAlert(message, type = 'info') {
             const alertDiv = document.createElement('div');
-            alertDiv.className = alert alert-${type} alert-dismissible fade show;
+            alertDiv.className = alert alert - ${ type } alert - dismissible fade show;
             alertDiv.innerHTML = `
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -722,7 +748,7 @@
             // Add loading states to buttons
             const buttons = document.querySelectorAll('button[type="submit"], .btn-primary');
             buttons.forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     if (this.form && this.form.checkValidity()) {
                         this.innerHTML = '<span class="spinner me-2"></span>' + this.textContent;
                         this.disabled = true;
@@ -731,7 +757,8 @@
             });
         });
     </script> {% endcomment %}
-    
+
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>

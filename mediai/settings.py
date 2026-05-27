@@ -172,12 +172,13 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'data.whisper.1@gmail.com'
-EMAIL_HOST_PASSWORD = 'wgsb jeur xemh ddmu'
-DEFAULT_FROM_EMAIL = 'Dr. Charaka <data.whisper.1@gmail.com>'
+EMAIL_HOST_USER = 'mynkchnn@gmail.com'
+EMAIL_HOST_PASSWORD = 'nsyd kcst yzdc yvdq'
+DEFAULT_FROM_EMAIL = 'mynkchnn@gmail.com'
+EMAIL_TIMEOUT = 20
 
 # Gemini settings
-GEMINI_API_KEY = config('GEMINI_API_KEY', default='AIzaSyDBniUa6ja9-EG6hCWvdkVAYtmEPVCSqfA')
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='AIzaSyCpOGLipK_ODaD8so9X2pKeULyrfnX1AFU')
 
 # # Twilio settings
 # TWILIO_ACCOUNT_SID = config('TWILIO_ACCOUNT_SID', default='')
